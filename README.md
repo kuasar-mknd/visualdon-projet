@@ -9,7 +9,7 @@ Ce jeu de données fournit un aperçu détaillé des émissions mondiales de CO2
 ### Auteur :
 [![Auteur](https://img.shields.io/badge/Auteur-Global%20Carbon%20Project-blue)](https://www.globalcarbonproject.org/)
 # Description
-Les données sont au format CSV et sont disponibles dans le dossier dataset.
+Les données sont au format CSV et sont disponibles dans le dossier [dataset](dataset).
 
 | Nom de la colonne  | Description                                                                                    |
 |--------------------|------------------------------------------------------------------------------------------------|
