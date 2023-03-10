@@ -7,7 +7,7 @@ Ce jeu de données fournit un aperçu détaillé des émissions mondiales de CO2
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7215364.svg)](https://doi.org/10.5281/zenodo.7215364)
 
 ### Auteur :
-[![Test](https://img.shields.io/badge/author-Global%20Carbon%20Project-blue)](https://www.globalcarbonproject.org/)
+[![Auteur](https://img.shields.io/badge/Auteur-Global%20Carbon%20Project-blue)](https://www.globalcarbonproject.org/)
 # Description
 Les données sont au format CSV et sont disponibles dans le dossier dataset.
 
