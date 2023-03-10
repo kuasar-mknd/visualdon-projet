@@ -28,9 +28,9 @@ Les données sont au format CSV et sont disponibles dans le dossier dataset.
 
 ### Le dataset contient 2 fichiers CSV:
 
-GCB2022v27_MtCO2_flat.csv : contient les données sur les émissions de CO2
+[GCB2022v27_MtCO2_flat.csv](dataset/GCB2022v27_MtCO2_flat.csv) : contient les données sur les émissions de CO2
 
-GCB2022v27_percapita_flat.csv : contient les données sur les émissions de CO2 par habitant
+[GCB2022v27_percapita_flat.csv](dataset/GCB2022v27_MtCO2_flat.csv) : contient les données sur les émissions de CO2 par habitant
 
 # But
 Le but de ce projet est de créer une application web qui permet de visualiser les données de manière interactive.
