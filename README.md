@@ -1,7 +1,7 @@
 # VisualDon - Projet HEIG-VD
 ## Évolution des émissions de CO2 dans le monde de 2001 à 2022
 # Contexte
-Ce jeu de données fournit un aperçu détaillé des émissions mondiales de CO2 au niveau des pays, permettant une meilleure compréhension de la contribution de chaque pays à l'impact humain cumulatif sur le climat mondial. Il contient des informations sur les émissions totales ainsi que sur celles provenant du charbon, du pétrole, du gaz, de la production de ciment et des torchères, et d'autres sources.
+Ce jeu de données fournit un aperçu détaillé des émissions mondiales de CO2 au niveau des pays, permettant une meilleure compréhension de la contribution de chaque pays et de l'impact humain sur le climat. Il contient des informations sur les émissions totales ainsi que sur celles provenant du charbon, du pétrole, du gaz, de la production de ciment et des torchères ainsi que d'autres sources.
 
 ### Source: 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7215364.svg)](https://doi.org/10.5281/zenodo.7215364)
