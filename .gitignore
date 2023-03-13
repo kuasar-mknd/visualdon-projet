@@ -1,4 +1,7 @@
 .idea
+.parcel-cache
+.DS_Store
+dist
 
 # Logs
 logs
