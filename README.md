@@ -44,6 +44,9 @@ Cette étude présente un nouvel ensemble de données synthétiques sur les émi
 
 # Wireframes
 ![Wireframe](/wireframes/Wireframe1.png)
+
 ![Wireframe](/wireframes/Wireframe2.png)
+
 ![Wireframe](/wireframes/Wireframe3.png)
+
 ![Wireframe](/wireframes/Wireframe4.png)
