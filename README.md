@@ -41,3 +41,9 @@ Cela permettra également de mettre en évidence les pays qui ont le plus d'émi
 [![DOI](https://zenodo.org/badge/DOI/10.5194/essd-13-5213-2021.svg)](http://doi.org/10.5194/essd-13-5213-2021)
 
 Cette étude présente un nouvel ensemble de données synthétiques sur les émissions anthropiques de gaz à effet de serre (GES) pour la période allant de 1970 à 2019, qui compilent des informations fiables sur les émissions de CO2, de CH4, de N2O et des gaz fluorés (F-gaz). Les résultats montrent une croissance continue des émissions de GES dans tous les secteurs et groupes de gaz, sans réduction significative observée dans aucun secteur mondial. Les auteurs soulignent l'importance de développer des estimations d'émissions de GES indépendantes, robustes et en temps réel pour suivre les progrès de la politique climatique.
+
+# Wireframes
+![Wireframe](/wireframes/Wireframe1.png)
+![Wireframe](/wireframes/Wireframe2.png)
+![Wireframe](/wireframes/Wireframe3.png)
+![Wireframe](/wireframes/Wireframe4.png)
