@@ -59,17 +59,4 @@ d3.json("https://raw.githubusercontent.com/kuasar-mknd/visualdon-projet/feature/
         svg.selectAll("path").attr("d", path);
     }));
 
-    svg.selectAll("path")
-        .on("click", function(event, d) {
-            // Récupérer les coordonnées géographiques du pays
-            var centroid = path.centroid(d);
-            var coords = projection.invert(centroid);
-            // Ajuster la projection pour zoomer sur le pays
-            var newScale = Math.max(1, 5 * Math.sqrt(path.area(d)) / Math.PI);
-            projection.scale(newScale * 1000);
-            projection.translate([width / 2, height / 2]);
-            // Mettre à jour le chemin pour refléter la nouvelle projection
-            svg.selectAll("path").attr("d", path);
-        });
-
 });
