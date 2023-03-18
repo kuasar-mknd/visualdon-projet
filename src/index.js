@@ -4,20 +4,20 @@ import {zoom} from 'd3-zoom';
 
 
 // définir les dimensions de la carte
-var width = 960;
-var height = 600;
+const width = 960;
+const height = 600;
 
 // créer une projection pour la carte
-var projection = d3.geoOrthographic()
+const projection = d3.geoOrthographic()
     .scale(250)
     .translate([width / 2, height / 2]);
 
 // créer un chemin pour les frontières des pays
-var path = d3.geoPath()
+const path = d3.geoPath()
     .projection(projection);
 
 // créer un élément SVG pour la carte
-var svg = d3.select("#map-container").append("svg")
+const svg = d3.select("#map-container").append("svg")
     .attr("width", width)
     .attr("height", height);
 
@@ -27,7 +27,7 @@ var svg = d3.select("#map-container").append("svg")
 d3.json("https://raw.githubusercontent.com/kuasar-mknd/visualdon-projet/feature/globe-3d/src/data/countries-land-10km.geo.json").then(function (world) {
 
     // créer un groupe pour les frontières des pays
-    var countries = svg.append("g")
+    const countries = svg.append("g")
         .attr("class", "countries");
 
     // ajouter les frontières des pays au groupe
@@ -43,9 +43,9 @@ d3.json("https://raw.githubusercontent.com/kuasar-mknd/visualdon-projet/feature/
 
     // ajouter une interaction pour faire tourner la carte
     svg.call(d3.drag().on("drag", function (event) {
-        var rotate = projection.rotate();
+        const rotate = projection.rotate();
         // Calculer un facteur de vitesse en fonction de l'échelle actuelle de la projection
-        var speedFactor = 1 + projection.scale() / 100;
+        const speedFactor = 1 + projection.scale() / 100;
         // Appliquer la rotation en utilisant le facteur de vitesse
         projection.rotate([rotate[0] + event.dx / speedFactor, rotate[1] - event.dy / speedFactor]);
         svg.selectAll("path").attr("d", path);
