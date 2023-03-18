@@ -17,6 +17,9 @@
     "parcel": "^2.8.3"
   },
   "dependencies": {
+    "@geo-maps/countries-land-1m": "^0.6.0",
+    "@geo-maps/countries-land-50m": "^0.6.0",
+    "@geo-maps/countries-land-5m": "^0.6.0",
     "d3": "^7.8.2",
     "normalize.css": "^8.0.1"
   }
