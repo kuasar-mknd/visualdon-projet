@@ -4,6 +4,7 @@ import * as d3 from "d3";
 const width = 960;
 const height = 600;
 let selectedCountry = null;
+let selectedYear = "2021"; // Initialiser la variable pour stocker l'année sélectionnée
 
 
 // créer une projection pour la carte
@@ -38,8 +39,14 @@ Promise.all([
 ]).then(function (values) {
     // extraire les données à partir des valeurs résolues
     const co2Emissions = values[0];
-    console.log(co2Emissions)
+    //console.log(co2Emissions)
     const world = values[1];
+
+    // Création de la timeline
+    const years = co2Emissions.map(e => e.Year);
+    const minYear = Math.min(...years);
+    const maxYear = Math.max(...years);
+    createYearInput(minYear, maxYear);
 
     // créer un groupe pour les frontières des pays
     const countries = svg.append("g")
@@ -55,9 +62,13 @@ Promise.all([
         .attr("fill", function (d) {
             const emissionData = co2Emissions.find(e => e["ISO 3166-1 alpha-3"] === d.properties.A3 && e.Year === "2021");
             if (emissionData) {
-                console.log(colorScale(emissionData.Total));
-                return colorScale(emissionData.Total);
-            } else {
+                //console.log(emissionData.Total)
+                if (emissionData.Total === "0") {
+                    return "lightgray"; // Si les données d'émissions sont égales à 0, le pays sera transparent
+                } else {
+                    return colorScale(emissionData.Total);
+                }}
+                else {
                 return "lightgray";
             }
         })
@@ -85,11 +96,11 @@ Promise.all([
 
             // Obtenir les limites du pays sélectionné
             const bounds = getBounds(d.geometry, projection);
-            console.log(bounds);
+            //console.log(bounds);
 
             // Obtenir l'échelle optimale pour le pays sélectionné
             const optimalScale = getOptimalScale(bounds, width, height);
-            console.log(optimalScale);
+            //console.log(optimalScale);
 
             // Ajuster l'échelle de la projection pour zoomer sur le pays
             projection.scale(optimalScale * 100);
@@ -113,13 +124,70 @@ Promise.all([
 
     // ajouter une interaction pour zoomer sur la carte
     svg.on("wheel", handleWheel);
+
+    // Gestionnaire d'événements pour le changement de catégorie d'émissions
+    d3.select("#emission-category").on("change", function() {
+        const selectedCategory = this.value;
+
+        // Mettre à jour la couleur des pays en fonction des émissions de CO2
+        svg.selectAll(".country")
+            .attr("fill", function(d) {
+                const emissionData = co2Emissions.find(
+                    (e) => e["ISO 3166-1 alpha-3"] === d.properties.A3 && e.Year === "2021"
+                );
+                if (emissionData) {
+                    //console.log(emissionData.Total)
+                    if (emissionData.Total === "0") {
+                        return "lightgray"; // Si les données d'émissions sont égales à 0, le pays sera transparent
+                    } else {
+                        return colorScale(emissionData.Total);
+                    }}
+                else {
+                    return "lightgray";
+                }
+            });
+    });
+
+    // Gestionnaire d'événements pour le changement d'année
+    d3.select("#year-input").on("input", function () {
+        selectedYear = this.value;
+        d3.select("#selected-year").text(selectedYear);
+
+        // Mettre à jour la couleur des pays en fonction des émissions de CO2
+        svg.selectAll(".country")
+            .attr("fill", function (d) {
+                const emissionData = co2Emissions.find(
+                    (e) => e["ISO 3166-1 alpha-3"] === d.properties.A3 && e.Year === selectedYear
+                );
+                if (emissionData) {
+                    //console.log(emissionData.Total)
+                    if (emissionData.Total === "0") {
+                        return "lightgray"; // Si les données d'émissions sont égales à 0, le pays sera transparent
+                    } else {
+                        return colorScale(emissionData.Total);
+                    }}
+                else {
+                    return "lightgray";
+                }
+            });
+
+        // Mettre à jour le graphique si un pays est sélectionné
+        if (selectedCountry) {
+            updateChart(selectedCountry.properties.A3, co2Emissions);
+        }
+    });
+
+    d3.select("#animate-btn").on("click", function () {
+        animateYears(minYear, maxYear);
+    });
+
 });
 
 
 // Étape 4: Créer une fonction pour mettre à jour le graphique
 function updateChart(countryCode, co2Emissions) {
     // Trouver les données d'émission pour le pays et l'année sélectionnés
-    const emissionData = co2Emissions.find(e => e["ISO 3166-1 alpha-3"] === countryCode && e.Year === "2012");
+    const emissionData = co2Emissions.find(e => e["ISO 3166-1 alpha-3"] === countryCode && e.Year === selectedYear);
 
     if (emissionData) {
         // Mettre à jour le graphique avec les données du pays
@@ -187,7 +255,7 @@ function updateChart(countryCode, co2Emissions) {
             .attr("y", d => yScale(d.value))
             .attr("height", d => chartHeight - chartPadding.bottom - yScale(d.value));
     } else {
-            console.log("Pas de données pour ce pays");
+            //console.log("Pas de données pour ce pays");
             // Masquer la fenêtre modale
             d3.select("#chart-modal").style("display", "none");
 
@@ -219,18 +287,6 @@ function getBounds(geometry, projection) {
     ];
 }
 
-function zoomed(event) {
-    const currentScale = projection.scale();
-    const newScale = currentScale * event.transform.k;
-    const scaleLimit = 250;
-
-    // Limiter le zoom maximum et minimum
-    if (newScale > scaleLimit * 0.5 && newScale < scaleLimit * 10) {
-        projection.scale(newScale);
-        svg.selectAll("path").attr("d", path);
-    }
-}
-
 // Fonction pour gérer l'événement de la molette de la souris
 function handleWheel(event) {
     event.preventDefault();
@@ -246,6 +302,37 @@ function handleWheel(event) {
     }
 }
 
+function createYearInput(minYear, maxYear) {
+    d3.select("#timeline-container")
+        .append("div")
+        .html(`
+      <label for="year-input">Année:</label>
+      <input type="range" id="year-input" min="${minYear}" max="${maxYear}" step="1" value="${maxYear}" />
+      <span id="selected-year">${maxYear}</span>
+    `);
+}
+
+function animateYears(minYear, maxYear) {
+
+    const intervalDuration = 20; // Durée en ms entre les mises à jour des années
+    const yearInput = document.getElementById("year-input");
+
+    const intervalId = setInterval(() => {
+        //console.log(minYear, maxYear);
+        if (minYear <= maxYear) {
+            //console.log("Année : ", minYear);
+            // Mettre à jour la valeur de l'input et déclencher l'événement 'change'
+            yearInput.value = minYear;
+            yearInput.dispatchEvent(new Event("input"));
+
+            minYear++;
+        } else {
+            clearInterval(intervalId);
+        }
+    }, intervalDuration);
+}
+
+
 // Gestionnaire d'événements click pour le document entier
 document.addEventListener("click", function (event) {
     if (event.target.tagName !== "path") {
@@ -259,3 +346,5 @@ document.addEventListener("click", function (event) {
         d3.select("#chart-modal").style("display", "none");
     }
 });
+
+
