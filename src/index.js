@@ -3,6 +3,8 @@ import * as d3 from "d3";
 // définir les dimensions de la carte
 const width = 960;
 const height = 600;
+let selectedCountry = null;
+
 
 // créer une projection pour la carte
 const projection = d3.geoOrthographic()
@@ -60,6 +62,21 @@ Promise.all([
             }
         })
         .on("click", function (event, d) {
+            event.stopPropagation();
+
+            // Modifier l'opacité des autres pays
+            svg.selectAll("path")
+                .attr("opacity", function (pathD) {
+                    return pathD === d ? 1 : 0.2;
+                });
+
+            if (selectedCountry && selectedCountry === d) {
+                return; // Ne fait rien si le pays sélectionné est déjà centré
+            }
+
+            // Mise à jour du pays sélectionné
+            selectedCountry = d;
+
             // Obtenir le centre du pays sélectionné
             const center = getCountryCenter(d, projection);
 
@@ -68,9 +85,11 @@ Promise.all([
 
             // Obtenir les limites du pays sélectionné
             const bounds = getBounds(d.geometry, projection);
+            console.log(bounds);
 
             // Obtenir l'échelle optimale pour le pays sélectionné
             const optimalScale = getOptimalScale(bounds, width, height);
+            console.log(optimalScale);
 
             // Ajuster l'échelle de la projection pour zoomer sur le pays
             projection.scale(optimalScale * 100);
@@ -93,11 +112,7 @@ Promise.all([
     }));
 
     // ajouter une interaction pour zoomer sur la carte
-    svg.call(d3.zoom().on("zoom", function (event) {
-        projection.scale(projection.scale() * event.transform.k);
-        console.log(projection.scale());
-        svg.selectAll("path").attr("d", path);
-    }));
+    svg.on("wheel", handleWheel);
 });
 
 
@@ -121,6 +136,13 @@ function updateChart(countryCode, co2Emissions) {
         const chartWidth = 500;
         const chartHeight = 300;
         const chartPadding = {top: 20, right: 20, bottom: 50, left: 50};
+
+        // Afficher la fenêtre modale
+        d3.select("#chart-modal").style("display", "block");
+
+        // Supprimer le graphique précédent
+        d3.select("#chart-container").selectAll("svg").remove();
+
 
         const chartSvg = d3.select("#chart-container").append("svg")
             .attr("width", chartWidth)
@@ -161,11 +183,14 @@ function updateChart(countryCode, co2Emissions) {
 
         // Étape 9: Ajouter des transitions
         bars.transition()
-            .duration(500)
+            .duration(5000)
             .attr("y", d => yScale(d.value))
             .attr("height", d => chartHeight - chartPadding.bottom - yScale(d.value));
     } else {
-        console.log("Pas de données pour ce pays");
+            console.log("Pas de données pour ce pays");
+            // Masquer la fenêtre modale
+            d3.select("#chart-modal").style("display", "none");
+
     }
 }
 
@@ -194,3 +219,43 @@ function getBounds(geometry, projection) {
     ];
 }
 
+function zoomed(event) {
+    const currentScale = projection.scale();
+    const newScale = currentScale * event.transform.k;
+    const scaleLimit = 250;
+
+    // Limiter le zoom maximum et minimum
+    if (newScale > scaleLimit * 0.5 && newScale < scaleLimit * 10) {
+        projection.scale(newScale);
+        svg.selectAll("path").attr("d", path);
+    }
+}
+
+// Fonction pour gérer l'événement de la molette de la souris
+function handleWheel(event) {
+    event.preventDefault();
+    const zoomFactor = event.deltaY < 0 ? 1.1 : 0.9;
+    const currentScale = projection.scale();
+    const newScale = currentScale * zoomFactor;
+    const scaleLimit = 250;
+
+    // Limiter le zoom maximum et minimum
+    if (newScale > scaleLimit * 0.5 && newScale < scaleLimit * 10) {
+        projection.scale(newScale);
+        svg.selectAll("path").attr("d", path);
+    }
+}
+
+// Gestionnaire d'événements click pour le document entier
+document.addEventListener("click", function (event) {
+    if (event.target.tagName !== "path") {
+        // Réinitialiser le pays sélectionné
+        selectedCountry = null;
+
+        // Réinitialiser l'opacité de tous les pays
+        svg.selectAll("path").attr("opacity", 1);
+
+        // Masquer la fenêtre modale
+        d3.select("#chart-modal").style("display", "none");
+    }
+});

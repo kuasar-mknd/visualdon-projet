@@ -3,12 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 <!-- map container -->
 <div id="map-container"></div>
-<!-- chart container -->
-<div id="chart-container"></div>
+
+<!-- Fenêtre modale pour le graphique -->
+<div id="chart-modal" class="modal">
+    <div class="modal-content" id="chart-container"></div>
+</div>
+
 
 <script src="../src/index.js" type="module" defer></script>
 <!--<canvas width="4000" height="4000" id="canvas">Fallback content goes here.</canvas>
