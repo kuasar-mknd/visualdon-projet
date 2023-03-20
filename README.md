@@ -1,5 +1,6 @@
 # VisualDon - Projet HEIG-VD
 ## Évolution des émissions de CO2 dans le monde de 2001 à 2022
+État du déploiement : [![Netlify Status](https://api.netlify.com/api/v1/badges/e5ca3c8a-15bb-420d-8885-4c1f7e6f877a/deploy-status)](https://app.netlify.com/sites/visualdon-kuasar/deploys)
 # Contexte
 Ce jeu de données fournit un aperçu détaillé des émissions mondiales de CO2 au niveau des pays, permettant une meilleure compréhension de la contribution de chaque pays et de l'impact humain sur le climat. Il contient des informations sur les émissions totales ainsi que sur celles provenant du charbon, du pétrole, du gaz, de la production de ciment et des torchères ainsi que d'autres sources.
 
