@@ -3,8 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+<!-- Menu déroulant pour choisir la catégorie d'émissions -->
+<div>
+    <label for="emission-category">Catégorie d'émissions:</label>
+    <select id="emission-category">
+        <option value="Total">Total</option>
+        <option value="Coal">Charbon</option>
+        <option value="Oil">Pétrole</option>
+        <option value="Gas">Gaz</option>
+        <option value="Cement">Ciment</option>
+        <option value="Flaring">Flaring</option>
+        <option value="Other">Autres</option>
+    </select>
+</div>
+
+<!-- Timeline pour choisir l'année d'affichage des émissions -->
+<div id="timeline-container"></div>
+<button id="animate-btn">Jouer l'animation</button>
+
+
+<!-- map container -->
+<div id="map-container"></div>
+
+<!-- Fenêtre modale pour le graphique -->
+<div id="chart-modal" class="modal">
+    <div class="modal-content" id="chart-container"></div>
+</div>
+
+
+<script src="index.js" type="module" defer></script>
+<!--<canvas width="4000" height="4000" id="canvas">Fallback content goes here.</canvas>
+<script type="module" src="globe3d.js"></script>-->
 </body>
 </html>

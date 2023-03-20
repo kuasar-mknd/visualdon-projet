@@ -3,21 +3,33 @@
   "version": "0.0.1",
   "description": "",
   "private": true,
-  "source": "src/index.html",
+  "main": "src/index.js",
   "scripts": {
-    "start": "parcel",
-    "build": "parcel build"
+    "build": "webpack --mode production",
+    "start": "webpack-dev-server --mode=development"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@parcel/packager-raw-url": "^2.8.3",
-    "@parcel/transformer-webmanifest": "^2.8.3",
-    "parcel": "^2.8.3"
+    "babel-loader": "^9.1.2",
+    "babel-preset-env": "^1.7.0",
+    "css-loader": "^6.7.3",
+    "csv-loader": "^3.0.3",
+    "html-webpack-plugin": "^5.5.0",
+    "mini-css-extract-plugin": "^2.7.5",
+    "webpack": "^5.70.0",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.7.4"
   },
   "dependencies": {
+    "@geo-maps/countries-land-1m": "^0.6.0",
+    "@geo-maps/countries-land-50m": "^0.6.0",
+    "@geo-maps/countries-land-5m": "^0.6.0",
     "d3": "^7.8.2",
-    "normalize.css": "^8.0.1"
+    "d3-zoom": "^3.0.0",
+    "normalize.css": "^8.0.1",
+    "topojson-client": "^3.1.0",
+    "versor": "^0.2.0"
   }
 }
