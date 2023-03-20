@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import "./style.css";
 
 // définir les dimensions de la carte
 const width = 960;
