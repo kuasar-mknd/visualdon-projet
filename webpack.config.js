@@ -1,29 +1,32 @@
-const path = require('path');const HtmlWebpackPlugin = require('html-webpack-plugin');
-
-const HtmlWebpackPluginConfig = new HtmlWebpackPlugin({
-    template: './public/index.html',
-    filename: 'index.html',
-    inject: 'body'
-})
+const path = require('path');
+const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-    name: 'browser',
-    mode: 'development',
     entry: './src/index.js',
     output: {
-        path: path.resolve('dist'),
-        filename: 'index_bundle.js'
+        // move bundle.js to a folder instead the root
+        path: path.resolve('./build'),
+        filename: 'bundle.js'
     },
     module: {
         rules: [
-            { test: /\.js$/, loader: 'babel-loader', exclude: /node_modules/ },
-            {test: /\.csv$/, loader: 'csv-loader', options: {
-                    dynamicTyping: true,
-                    header: true,
-                    skipEmptyLines: true
-                }
+            {
+                test: /\.js$/,
+                include: path.resolve('./index.js'),
+                loader: 'babel-loader',
+                exclude: /node_modules/,
             }
         ]
     },
-    plugins: [HtmlWebpackPluginConfig]
+    plugins: [
+        // New plugin
+        new HtmlWebpackPlugin({
+            // injects bundle.js to our new index.html
+            inject: true,
+            // copys the content of the existing index.html to the new /build index.html
+            template:  path.resolve('./src/index.html'),
+        }),
+
+    ]
 }

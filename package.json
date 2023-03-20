@@ -5,18 +5,14 @@
   "private": true,
   "main": "src/index.js",
   "scripts": {
-    "build": "babel src -d public",
+    "build": "webpack -p",
     "start": "webpack-dev-server"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@babel/cli": "^7.17.6",
-    "@babel/core": "^7.17.5",
-    "@babel/preset-env": "^7.16.11",
-    "babel-core": "^6.26.3",
-    "babel-loader": "^8.2.3",
+    "babel-loader": "^9.1.2",
     "babel-preset-env": "^1.7.0",
     "csv-loader": "^3.0.3",
     "html-webpack-plugin": "^5.5.0",
