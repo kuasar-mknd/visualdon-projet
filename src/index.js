@@ -134,7 +134,7 @@ Promise.all([
         svg.selectAll(".country")
             .attr("fill", function(d) {
                 const emissionData = co2Emissions.find(
-                    (e) => e["ISO 3166-1 alpha-3"] === d.properties.A3 && e.Year === "2021"
+                    (e) => e["ISO 3166-1 alpha-3"] === d.properties.A3 && e.Year === "2021" && e.Category === selectedCategory
                 );
                 if (emissionData) {
                     //console.log(emissionData.Total)
