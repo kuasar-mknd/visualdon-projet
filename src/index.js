@@ -297,7 +297,7 @@ function handleWheel(event) {
     const scaleLimit = 250;
 
     // Limiter le zoom maximum et minimum
-    if (newScale > scaleLimit * 0.5 && newScale < scaleLimit * 10) {
+    if (newScale > scaleLimit * 0.5 && newScale < scaleLimit * 50) {
         projection.scale(newScale);
         svg.selectAll("path").attr("d", path);
     }
