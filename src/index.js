@@ -4,13 +4,15 @@ import "./style.css";
 // définir les dimensions de la carte
 const width = 960;
 const height = 600;
+const scale = 250;
 let selectedCountry = null;
 let selectedYear = "2021"; // Initialiser la variable pour stocker l'année sélectionnée
+let selectedCategory = "Total"; // Initialiser la variable pour stocker la catégorie d'émissions sélectionnée
 
 
 // créer une projection pour la carte
 const projection = d3.geoOrthographic()
-    .scale(250)
+    .scale(scale)
     .translate([width / 2, height / 2])
     .clipAngle(90);
 
@@ -64,10 +66,10 @@ Promise.all([
             const emissionData = co2Emissions.find(e => e["ISO 3166-1 alpha-3"] === d.properties.A3 && e.Year === "2021");
             if (emissionData) {
                 //console.log(emissionData.Total)
-                if (emissionData.Total === "0") {
+                if (emissionData[selectedCategory] === "0" || emissionData[selectedCategory] === "") {
                     return "lightgray"; // Si les données d'émissions sont égales à 0, le pays sera transparent
                 } else {
-                    return colorScale(emissionData.Total);
+                    return colorScale(emissionData[selectedCategory]);
                 }}
                 else {
                 return "lightgray";
@@ -94,6 +96,7 @@ Promise.all([
 
             // Appliquer la rotation à la projection pour centrer le pays
             projection.rotate(center);
+            projection.scale(scale);
 
             // Obtenir les limites du pays sélectionné
             const bounds = getBounds(d.geometry, projection);
@@ -128,20 +131,20 @@ Promise.all([
 
     // Gestionnaire d'événements pour le changement de catégorie d'émissions
     d3.select("#emission-category").on("change", function() {
-        const selectedCategory = this.value;
+        selectedCategory = this.value;
 
         // Mettre à jour la couleur des pays en fonction des émissions de CO2
         svg.selectAll(".country")
             .attr("fill", function(d) {
                 const emissionData = co2Emissions.find(
-                    (e) => e["ISO 3166-1 alpha-3"] === d.properties.A3 && e.Year === "2021" && e.Category === selectedCategory
+                    (e) => e["ISO 3166-1 alpha-3"] === d.properties.A3 && e.Year === "2021"
                 );
                 if (emissionData) {
                     //console.log(emissionData.Total)
-                    if (emissionData.Total === "0") {
+                    if (emissionData[selectedCategory] === "0" || emissionData[selectedCategory] === "") {
                         return "lightgray"; // Si les données d'émissions sont égales à 0, le pays sera transparent
                     } else {
-                        return colorScale(emissionData.Total);
+                        return colorScale(emissionData[selectedCategory]);
                     }}
                 else {
                     return "lightgray";
@@ -161,11 +164,12 @@ Promise.all([
                     (e) => e["ISO 3166-1 alpha-3"] === d.properties.A3 && e.Year === selectedYear
                 );
                 if (emissionData) {
-                    //console.log(emissionData.Total)
-                    if (emissionData.Total === "0") {
+                    if (emissionData[selectedCategory] === "0" || emissionData[selectedCategory] === "") {
+                        //console.log(emissionData[selectedCategory])
                         return "lightgray"; // Si les données d'émissions sont égales à 0, le pays sera transparent
                     } else {
-                        return colorScale(emissionData.Total);
+                        //console.log("test", emissionData[selectedCategory])
+                        return colorScale(emissionData[selectedCategory]);
                     }}
                 else {
                     return "lightgray";
@@ -281,7 +285,7 @@ function getBounds(geometry, projection) {
     const bounds = d3.geoBounds(geometry),
         topLeft = projection(bounds[0]),
         bottomRight = projection(bounds[1]);
-
+    //console.log(bounds);
     return [
         [topLeft[0], bottomRight[1]],
         [bottomRight[0], topLeft[1]]
