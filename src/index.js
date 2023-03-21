@@ -14,7 +14,7 @@ let selectedCategory = "Total"; // Initialiser la variable pour stocker la caté
 const projection = d3.geoOrthographic()
     .scale(scale)
     .translate([width / 2, height / 2])
-    .clipAngle(90);
+    .clipAngle(90)
 
 // créer un chemin pour les frontières des pays
 const path = d3.geoPath()
@@ -38,6 +38,7 @@ colorScale = d3.scaleLog().base(10).clamp(true).domain([Math.max(1, 0), 10000]).
 // charger les données CSV et GeoJSON en même temps
 Promise.all([
     d3.csv("https://raw.githubusercontent.com/kuasar-mknd/visualdon-projet/main/dataset/GCB2022v27_MtCO2_flat.csv"),
+    //d3.json("https://raw.githubusercontent.com/kuasar-mknd/visualdon-projet/main/src/data/countries-50m.json")
     d3.json("https://raw.githubusercontent.com/kuasar-mknd/visualdon-projet/feature/globe-3d/src/data/countries-land-10km.geo.json")
 ]).then(function (values) {
     // extraire les données à partir des valeurs résolues
