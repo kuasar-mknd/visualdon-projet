@@ -1,3 +1,16 @@
+body {
+    font-family: Poppins, Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #333;
+    background: rgba(2,0,36,1);
+}
+
+/*svg {
+    background: rgb(166,166,166);
+    background: radial-gradient(circle, rgba(166,166,166,1) 0%, rgba(2,0,36,1) 50%);
+}*/
+
 .modal {
     display: none;
     position: fixed;
@@ -18,4 +31,11 @@
     padding: 20px;
     border-radius: 4px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#header-nav {
+    background: rgb(212, 207, 207);
+    padding: 10px;
+    margin: 10px;
+    border-radius: 10px;
 }
