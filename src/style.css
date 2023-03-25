@@ -6,7 +6,7 @@ body {
     background: rgba(2,0,36,1);
 }
 
-svg {
+#map {
     background: rgb(166,166,166);
     background: radial-gradient(circle, rgba(166,166,166,1) 0%, rgba(2,0,36,1) 50%);
 }

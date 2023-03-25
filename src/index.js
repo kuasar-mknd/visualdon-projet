@@ -26,7 +26,9 @@ const path = d3.geoPath()
 const svg = d3.select("#map-container").append("svg")
     .attr("width", width)
     .attr("height", height)
-    .attr("vector-effect", "non-scaling-stroke");
+    .attr("vector-effect", "non-scaling-stroke")
+    .attr("id", "map")
+
 
 
 // Étape 2: Créer une échelle de couleur pour les émissions de CO2
@@ -101,11 +103,15 @@ Promise.all([
             // Ajuster l'échelle de la projection pour zoomer sur le pays
             projection.scale(optimalScale * 100);
 
+            // Mettre à jour le pourcentage du radial-gradient
+            const percentage = getGradientPercentage(optimalScale * 100);
+            svg.style("background", `radial-gradient(circle, rgba(166,166,166,1) 0%, rgba(2,0,36,1) ${percentage}%)`);
+
             // Mettre à jour le chemin pour refléter la nouvelle projection
             svg.selectAll("path").attr("d", path);
 
             // Afficher le graphique des émissions de CO2 pour le pays sélectionné
-            updateChart(d.properties.A3, co2Emissions);
+            updateChart(d.properties.A3, co2Emissions, true);
         });
 
     // Mettre à jour la couleur des pays en fonction des émissions de CO2
@@ -230,79 +236,114 @@ function updateColorCountry(co2Emissions) {
  * @param co2Emissions Données d'émissions de CO2
  */
 function updateChart(countryCode, co2Emissions) {
-    // Trouver les données d'émission pour le pays et l'année sélectionnés
-    const emissionData = co2Emissions.find(e => e["ISO 3166-1 alpha-3"] === countryCode && e.Year === selectedYear);
+    const emissionData = co2Emissions.filter(e => e["ISO 3166-1 alpha-3"] === countryCode);
+    const colorMapping = {
+        'Coal': '#1f77b4',
+        'Oil': '#ff7f0e',
+        'Gas': '#2ca02c',
+        'Cement': '#d62728',
+        'Flaring': '#9467bd',
+        'Other': '#8c564b'
+    };
 
-    if (emissionData) {
-        // Mettre à jour le graphique avec les données du pays
-        const data = [
-            {sector: "Coal", value: +emissionData.Coal},
-            {sector: "Oil", value: +emissionData.Oil},
-            {sector: "Gas", value: +emissionData.Gas},
-            {sector: "Cement", value: +emissionData.Cement},
-            {sector: "Flaring", value: +emissionData.Flaring},
-            {sector: "Other", value: +emissionData.Other},
-        ];
+    const chartWidth = 800;
+    const chartPadding = {top: 50, right: 50, bottom: 50, left: 50}
+    const chartHeight = 700;
 
-        // Étape 6: Créer un élément SVG pour le graphique
-        const chartWidth = 500;
-        const chartHeight = 300;
-        const chartPadding = {top: 20, right: 20, bottom: 50, left: 50};
+    const yScaleSplit = d3.scalePoint()
+        .domain(Object.keys(colorMapping).filter(sector => sector !== "Year" && sector !== "ISO 3166-1 alpha-3"))
+        .range([chartPadding.top, chartHeight - chartPadding.bottom]);
 
-        // Afficher la fenêtre modale
+
+    if (emissionData.length > 0) {
         d3.select("#chart-modal").style("display", "block");
-
-        // Supprimer le graphique précédent
         d3.select("#chart-container").selectAll("svg").remove();
 
+        let data = [];
+        emissionData.forEach(yearData => {
+            const year = +yearData.Year;
+            for (let sector of Object.keys(colorMapping)) {
+                if (sector !== 'Year' && sector !== 'ISO 3166-1 alpha-3') {
+                    data.push({
+                        year: year,
+                        sector: sector,
+                        value: +yearData[sector],
+                        color: colorMapping[sector]
+                    });
+                }
+            }
+        });
 
         const chartSvg = d3.select("#chart-container").append("svg")
             .attr("width", chartWidth)
             .attr("height", chartHeight);
 
-        // Étape 7: Créer des axes pour le graphique
-        const xScale = d3.scaleBand()
-            .domain(data.map(d => d.sector))
-            .range([chartPadding.left, chartWidth - chartPadding.right])
-            .padding(0.1);
+        const xScale = d3.scaleLinear()
+            .domain(d3.extent(data, d => d.year))
+            .range([chartPadding.left, chartWidth - chartPadding.right]);
 
         const yScale = d3.scaleLinear()
             .domain([0, d3.max(data, d => d.value)])
             .range([chartHeight - chartPadding.bottom, chartPadding.top]);
 
-        const xAxis = d3.axisBottom(xScale);
+        const maxSize = chartHeight / 50;
+
+        const sizeScale = d3.scaleSqrt()
+            .domain([0, d3.max(data, d => d.value)])
+            .range([0, maxSize]);
+
+        const bubbles = chartSvg.selectAll(".bubble")
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("class", "bubble")
+            .attr("cx", d => xScale(d.year))
+            .attr("cy", d => yScale(d.value))
+            .attr("r", d => sizeScale(d.value))
+            .attr("fill", d => d.color);
+
+        const xAxis = d3.axisBottom(xScale).tickFormat(d3.format("d"));
         const yAxis = d3.axisLeft(yScale);
 
         chartSvg.append("g")
             .attr("transform", `translate(0, ${chartHeight - chartPadding.bottom})`)
             .call(xAxis);
 
-        chartSvg.append("g")
-            .attr("transform", `translate(${chartPadding.left}, 0)`)
-            .call(yAxis);
+        chartSvg.append("text")
+            .attr("transform", `translate(${chartWidth / 2}, ${chartHeight})`)
+            .attr("dy", "-0.5em")
+            .style("text-anchor", "middle")
+            .text("Année");
 
-        // Créer des barres pour le graphique
-        const bars = chartSvg.selectAll(".bar")
-            .data(data)
-            .enter()
-            .append("rect")
-            .attr("class", "bar")
-            .attr("x", d => xScale(d.sector))
-            .attr("y", d => yScale(d.value))
-            .attr("width", xScale.bandwidth())
-            .attr("height", d => chartHeight - chartPadding.bottom - yScale(d.value))
-            .attr("fill", "steelblue");
+        const centerY = (chartHeight - chartPadding.top - chartPadding.bottom) / 2 + chartPadding.top;
 
-        // Étape 9: Ajouter des transitions
-        bars.transition()
-            .duration(5000)
-            .attr("y", d => yScale(d.value))
-            .attr("height", d => chartHeight - chartPadding.bottom - yScale(d.value));
-    } else {
-            //console.log("Pas de données pour ce pays");
-            // Masquer la fenêtre modale
-            d3.select("#chart-modal").style("display", "none");
+        const simulation = d3.forceSimulation(data)
+            .force("x", d3.forceX(d => xScale(d.year)).strength(1))
+            .force("y", d3.forceY(centerY).strength(0.05)) // modifiez la force y ici
+            .force("collide", d3.forceCollide(d => sizeScale(d.value) + 1).strength(0.8))
+            .on("tick", () => {
+                bubbles
+                    .attr("cx", d => d.x)
+                    .attr("cy", d => d.y);
+            });
 
+        // Gestionnaire d'événements pour la checkbox
+        d3.select("#split-emissions").on("change", function() {
+            const checked = d3.select(this).property("checked");
+            updateSplit(checked);
+        });
+
+        function updateSplit(split) {
+            const sectorOrder = Object.keys(colorMapping).filter(sector => sector !== "Year" && sector !== "ISO 3166-1 alpha-3");
+
+            if (split) {
+                simulation.force("y", d3.forceY(d => yScaleSplit(d.sector)).strength(0.1));
+            } else {
+                simulation.force("y", d3.forceY(centerY).strength(0.05));
+            }
+
+            simulation.alpha(1).restart();
+        }
     }
 }
 
@@ -378,7 +419,7 @@ function handleWheel(event) {
  */
 function getGradientPercentage(scale) {
     // Modifier ces valeurs en fonction de vos préférences
-    const minScale = 10 * 0.5;
+    const minScale = 1;
     const maxScale = 10 * 50;
 
     const percentage = ((scale - minScale) / (maxScale - minScale)) * 100;
@@ -438,4 +479,7 @@ document.addEventListener("click", function (event) {
         // Masquer la fenêtre modale
         d3.select("#chart-modal").style("display", "none");
     }
+});
+document.getElementById("chart-container").addEventListener("click", function (event) {
+    event.stopPropagation();
 });
