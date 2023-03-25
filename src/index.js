@@ -41,7 +41,7 @@ colorScale = d3.scaleLog().base(10).clamp(true).domain([Math.max(1, 0), 10000]).
 Promise.all([
     //d3.csv("./data/GCB2022v27_MtCO2_flat.csv"),
     //d3.json("./data/countries-coastline-10km.geo.json")
-    d3.csv("https://raw.githubusercontent.com/kuasar-mknd/visualdon-projet/main/dataset/GCB2022v27_MtCO2_flat.csv"),
+    d3.csv("https://raw.githubusercontent.com/kuasar-mknd/visualdon-projet/develop/src/data/GCB2022v27_MtCO2_flat-clean.csv"),
     d3.json("https://raw.githubusercontent.com/kuasar-mknd/visualdon-projet/develop/src/data/countries-coastline-10km.geo.json")
 ]).then(function (values) {
     // extraire les données à partir des valeurs résolues
@@ -200,14 +200,20 @@ function updateColorCountry(co2Emissions) {
                 const emissionData = co2Emissions.find(
                     (e) => e["ISO 3166-1 alpha-3"] === d.properties.A3 && e.Year === selectedYear
                 );
+
+                if (!emissionData) {
+                    // S'il n'y a pas de données d'émission pour l'année, définissez la couleur sur "lightgray"
+                    d3.select(this).attr("fill", "lightgray");
+                    return;
+                }
+
                 // Si les données d'émission ont changé, mettez à jour la couleur du pays
                 if (
                     !prevEmissionData[d.properties.A3] ||
                     prevEmissionData[d.properties.A3][selectedCategory] !== emissionData[selectedCategory]
                 ) {
-                    // Mettre à jour les données d'émission précédentes
-                    prevEmissionData[d.properties.A3] = emissionData;
-
+                        // Mettre à jour les données d'émission précédentes
+                        prevEmissionData[d.properties.A3] = emissionData;
                     // Mettre à jour la couleur du pays en fonction des données d'émission
                     d3.select(this)
                         .attr("fill", function () {
@@ -244,7 +250,7 @@ function updateChart(countryCode, co2Emissions) {
     };
 
     const chartWidth = 800;
-    const chartPadding = {top: 50, right: 50, bottom: 50, left: 50}
+    const chartPadding = {top: 50, right: 70, bottom: 50, left: 50}
     const chartHeight = 700;
 
     const yScaleSplit = d3.scalePoint()
@@ -277,7 +283,7 @@ function updateChart(countryCode, co2Emissions) {
 
         const xScale = d3.scaleLinear()
             .domain(d3.extent(data, d => d.year))
-            .range([chartPadding.left, chartWidth - chartPadding.right]);
+            .range([chartPadding.left, chartWidth - chartPadding.right - 50]);
 
         const yScale = d3.scaleLinear()
             .domain([0, d3.max(data, d => d.value)])
@@ -314,6 +320,30 @@ function updateChart(countryCode, co2Emissions) {
 
         const centerY = (chartHeight - chartPadding.top - chartPadding.bottom) / 2 + chartPadding.top;
 
+        // Ajout des légendes des couleurs
+        const colorLegendGroup = chartSvg.append("g")
+            .attr("transform", `translate(${chartWidth - chartPadding.right}, ${chartPadding.top})`);
+
+        let colorLegendY = 0;
+        for (const [sector, color] of Object.entries(colorMapping)) {
+            if (sector !== "Year" && sector !== "ISO 3166-1 alpha-3") {
+                colorLegendGroup.append("circle")
+                    .attr("cx", 0)
+                    .attr("cy", colorLegendY)
+                    .attr("r", 6)
+                    .attr("fill", color);
+
+                colorLegendGroup.append("text")
+                    .attr("x", 10)
+                    .attr("y", colorLegendY + 4)
+                    .text(sector)
+                    .style("font-size", "12px");
+
+                colorLegendY += 20;
+            }
+        }
+
+
         const simulation = d3.forceSimulation(data)
             .force("x", d3.forceX(d => xScale(d.year)).strength(1))
             .force("y", d3.forceY(centerY).strength(0.05)) // modifiez la force y ici
@@ -339,8 +369,29 @@ function updateChart(countryCode, co2Emissions) {
 
             if (split) {
                 simulation.force("y", d3.forceY(d => yScaleSplit(d.sector)).strength(0.1));
+
+                colorLegendGroup.selectAll("circle")
+                    .transition()
+                    .duration(1000)
+                    .attr("cy", (d, i) => yScaleSplit(sectorOrder[i]) - chartPadding.top);
+
+                colorLegendGroup.selectAll("text")
+                    .transition()
+                    .duration(1000)
+                    .attr("y", (d, i) => yScaleSplit(sectorOrder[i]) - chartPadding.top + 4);
+
             } else {
                 simulation.force("y", d3.forceY(centerY).strength(0.05));
+
+                colorLegendGroup.selectAll("circle")
+                    .transition()
+                    .duration(1000)
+                    .attr("cy", (d, i) => i * 20);
+
+                colorLegendGroup.selectAll("text")
+                    .transition()
+                    .duration(1000)
+                    .attr("y", (d, i) => i * 20 + 4);
             }
 
             simulation.alpha(1).restart();
