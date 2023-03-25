@@ -126,9 +126,10 @@ Promise.all([
 
     // Gestionnaire d'événements pour le changement de catégorie d'émissions
     d3.select("#emission-category").on("change", function() {
-        console.log(this.value);
+        prevEmissionData = {};
+        //console.log(this.value);
         selectedCategory = this.value;
-        console.log(selectedCategory);
+        //console.log(selectedCategory);
         updateColorCountry(co2Emissions);
     });
 
@@ -363,8 +364,27 @@ function handleWheel(event) {
         projection.scale(newScale);
         console.log(projection.scale());
         svg.selectAll("path").attr("d", path);
+
+        // Mettre à jour le pourcentage du radial-gradient
+        const percentage = getGradientPercentage(newScale);
+        svg.style("background", `radial-gradient(circle, rgba(166,166,166,1) 0%, rgba(2,0,36,1) ${percentage}%)`);
     }
 }
+
+/**
+ * Calculer le pourcentage du radial-gradient du svg
+ * @param scale
+ * @returns {number}
+ */
+function getGradientPercentage(scale) {
+    // Modifier ces valeurs en fonction de vos préférences
+    const minScale = 10 * 0.5;
+    const maxScale = 10 * 50;
+
+    const percentage = ((scale - minScale) / (maxScale - minScale)) * 100;
+    return Math.min(Math.max(percentage, 0), 100);
+}
+
 
 /**
  * Permet de créer le sélecteur d'année
