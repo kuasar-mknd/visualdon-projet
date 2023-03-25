@@ -108,7 +108,7 @@ Promise.all([
             svg.selectAll("path").attr("d", path);
 
             // Afficher le graphique des émissions de CO2 pour le pays sélectionné
-            updateChart(d.properties.A3, co2Emissions, true);
+            updateCountryChart(d.properties.A3, co2Emissions, true);
         });
 
     // Mettre à jour la couleur des pays en fonction des émissions de CO2
@@ -183,7 +183,7 @@ function updateCO2Data(yea, co2Emissions) {
 
     // Mettre à jour le graphique si un pays est sélectionné
     if (selectedCountry) {
-        updateChart(selectedCountry.properties.A3, co2Emissions);
+        updateCountryChart(selectedCountry.properties.A3, co2Emissions);
     }
 }
 
@@ -238,7 +238,7 @@ function updateColorCountry(co2Emissions) {
  * @param countryCode Code du pays sélectionné
  * @param co2Emissions Données d'émissions de CO2
  */
-function updateChart(countryCode, co2Emissions) {
+function updateCountryChart(countryCode, co2Emissions) {
     const emissionData = co2Emissions.filter(e => e["ISO 3166-1 alpha-3"] === countryCode);
     const colorMapping = {
         'Coal': '#1f77b4',
