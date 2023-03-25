@@ -9,6 +9,7 @@ let selectedCountry = null;
 let selectedYear = "2021"; // Initialiser la variable pour stocker l'année sélectionnée
 let selectedCategory = "Total"; // Initialiser la variable pour stocker la catégorie d'émissions sélectionnée
 let prevEmissionData = {};
+let animationInterval;
 
 
 // créer une projection pour la carte
@@ -125,7 +126,9 @@ Promise.all([
 
     // Gestionnaire d'événements pour le changement de catégorie d'émissions
     d3.select("#emission-category").on("change", function() {
+        console.log(this.value);
         selectedCategory = this.value;
+        console.log(selectedCategory);
         updateColorCountry(co2Emissions);
     });
 
@@ -135,12 +138,21 @@ Promise.all([
         requestUpdateCO2Data(selectedYear, co2Emissions);
     });
 
-    d3.select("#animate-btn").on("click", function () {
-        animateYears(minYear, maxYear);
+    // Gestionnaire d'événements pour le bouton de lecture
+    d3.select("#play-pause-btn").on("click", function () {
+        const button = d3.select(this);
+        const currentState = button.attr("data-state");
+
+        if (currentState === "play") {
+            button.attr("data-state", "pause");
+            button.text("Pause");
+            animateYears(minYear, maxYear, co2Emissions);
+        } else {
+            button.attr("data-state", "play");
+            button.text("Play");
+            clearInterval(animationInterval);
+        }
     });
-
-
-
 });
 
 /**
@@ -158,6 +170,11 @@ function requestUpdateCO2Data(year, co2Emissions) {
  * @param co2Emissions Les données d'émissions de CO2
  */
 function updateCO2Data(yea, co2Emissions) {
+    // Mettre à jour l'année sélectionnée
+    selectedYear = yea;
+    // Mettre à jour l'input id = "year-input"
+    d3.select("#year-input").property("value", selectedYear);
+
     updateColorCountry(co2Emissions);
 
     // Mettre à jour le graphique si un pays est sélectionné
@@ -179,7 +196,6 @@ function updateColorCountry(co2Emissions) {
                 const emissionData = co2Emissions.find(
                     (e) => e["ISO 3166-1 alpha-3"] === d.properties.A3 && e.Year === selectedYear
                 );
-
                 // Si les données d'émission ont changé, mettez à jour la couleur du pays
                 if (
                     !prevEmissionData[d.properties.A3] ||
@@ -196,8 +212,10 @@ function updateColorCountry(co2Emissions) {
                                 emissionData[selectedCategory] !== "0" &&
                                 emissionData[selectedCategory] !== ""
                             ) {
+                                console.log(colorScale(emissionData[selectedCategory]));
                                 return colorScale(emissionData[selectedCategory]);
                             } else {
+                                console.log("lightgray");
                                 return "lightgray";
                             }
                         });
@@ -343,6 +361,7 @@ function handleWheel(event) {
     // Limiter le zoom maximum et minimum
     if (newScale > scaleLimit * 0.5 && newScale < scaleLimit * 50) {
         projection.scale(newScale);
+        console.log(projection.scale());
         svg.selectAll("path").attr("d", path);
     }
 }
@@ -366,20 +385,26 @@ function createYearInput(minYear, maxYear) {
  * Permet d'animer le sélecteur d'année
  * @param minYear Année minimale
  * @param maxYear Année maximale
+ * @param co2Emissions
  */
-function animateYears(minYear, maxYear) {
-    const yearInput = document.getElementById("year-input");
-    function updateYear() {
-        if (minYear <= maxYear) {
-            yearInput.value = minYear;
-            yearInput.dispatchEvent(new Event("input"));
-            minYear++;
-            requestAnimationFrame(updateYear);
-        }
-    }
+function animateYears(minYear, maxYear, co2Emissions) {
+    clearInterval(animationInterval);
 
-    requestAnimationFrame(updateYear);
+    animationInterval = setInterval(function () {
+        const yearInput = d3.select("#year-input").node();
+        const currentYear = +yearInput.value;
+
+        if (currentYear < maxYear) {
+            //console.log("currentYear", currentYear);
+            yearInput.value = currentYear + 1;
+            requestUpdateCO2Data(yearInput.value, co2Emissions);
+        } else {
+            clearInterval(animationInterval);
+            d3.select("#play-pause-btn").attr("data-state", "play").text("Play");
+        }
+    }, 10);
 }
+
 
 // Gestionnaire d'événements click pour le document entier
 document.addEventListener("click", function (event) {
@@ -394,5 +419,3 @@ document.addEventListener("click", function (event) {
         d3.select("#chart-modal").style("display", "none");
     }
 });
-
-
