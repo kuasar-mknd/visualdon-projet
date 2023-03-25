@@ -29,9 +29,6 @@ const svg = d3.select("#map-container").append("svg")
     .attr("vector-effect", "non-scaling-stroke")
     .attr("id", "map")
 
-
-
-// Étape 2: Créer une échelle de couleur pour les émissions de CO2
 // Créer une échelle de couleur du bleu au rouge
 let colorScale = d3.scaleSequential(d3.interpolateRgb("blue", "red"))
     .domain([0, 10000]);
@@ -219,10 +216,10 @@ function updateColorCountry(co2Emissions) {
                                 emissionData[selectedCategory] !== "0" &&
                                 emissionData[selectedCategory] !== ""
                             ) {
-                                console.log(colorScale(emissionData[selectedCategory]));
+                                //console.log(colorScale(emissionData[selectedCategory]));
                                 return colorScale(emissionData[selectedCategory]);
                             } else {
-                                console.log("lightgray");
+                                //console.log("lightgray");
                                 return "lightgray";
                             }
                         });
@@ -252,7 +249,7 @@ function updateChart(countryCode, co2Emissions) {
 
     const yScaleSplit = d3.scalePoint()
         .domain(Object.keys(colorMapping).filter(sector => sector !== "Year" && sector !== "ISO 3166-1 alpha-3"))
-        .range([chartPadding.top, chartHeight - chartPadding.bottom]);
+        .range([chartPadding.top + 50, chartHeight - chartPadding.bottom-50]);
 
 
     if (emissionData.length > 0) {
@@ -333,6 +330,10 @@ function updateChart(countryCode, co2Emissions) {
             updateSplit(checked);
         });
 
+        /**
+         * Mettre à jour le graphique en fonction de la checkbox
+         * @param split Booléen indiquant si la checkbox est cochée
+         */
         function updateSplit(split) {
             const sectorOrder = Object.keys(colorMapping).filter(sector => sector !== "Year" && sector !== "ISO 3166-1 alpha-3");
 
@@ -403,7 +404,7 @@ function handleWheel(event) {
     // Limiter le zoom maximum et minimum
     if (newScale > scaleLimit * 0.5 && newScale < scaleLimit * 50) {
         projection.scale(newScale);
-        console.log(projection.scale());
+        //console.log(projection.scale());
         svg.selectAll("path").attr("d", path);
 
         // Mettre à jour le pourcentage du radial-gradient
