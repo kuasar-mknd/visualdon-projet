@@ -527,37 +527,14 @@ function animateYears(minYear, maxYear, co2Emissions) {
  * @returns {Promise<void>}
  */
 async function graphTop10Country() {
-    console.log("test")
     const yearSlider = d3.select("#year-slider");
     const topCountries = 10;
     const waitMs = 200;
-    const data = await d3.csv("https://raw.githubusercontent.com/kuasar-mknd/visualdon-projet/main/dataset/GCB2022v27_percapita_flat.csv")
-
-    function processData(data) {
-        let result = {};
-
-        data.forEach(d => {
-            const countryCode = d["ISO 3166-1 alpha-3"];
-            const year = d.Year;
-            const totalEmissions = parseFloat(d.Total);
-
-            if (!result[countryCode]) {
-                result[countryCode] = {Country: d.Country, values: []};
-            }
-            result[countryCode].values.push({year, totalEmissions});
-        });
-
-        return Object.values(result);
-    }
-
-    const co2Data = processData(data);
-    const startYear = d3.min(data, d => parseInt(d.Year));
-    yearSlider.property("min", startYear);
-
-
+    const data = await d3.csv("https://raw.githubusercontent.com/kuasar-mknd/visualdon-projet/develop/src/data/GCB2022v27_percapita_flat-clean.csv")
     const margin = {top: 20, right: 20, bottom: 20, left: 100};
     const width = 800 - margin.left - margin.right;
     const height = 600 - margin.top - margin.bottom;
+    const startYear = d3.min(data, d => parseInt(d.Year));
 
     const x = d3.scaleLinear().range([0, width]);
     const y = d3.scaleBand().range([0, height]).padding(0.1);
@@ -570,6 +547,8 @@ async function graphTop10Country() {
 
     const xAxis = d3.axisBottom(x);
     const yAxis = d3.axisLeft(y);
+
+    yearSlider.property("min", startYear);
 
     function update(year) {
         // Filtrer les données pour l'année en cours
