@@ -33,6 +33,10 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+#chart{
+    background: rgb(255, 255, 255);
+}
+
 #header-nav {
     background: rgb(212, 207, 207);
     padding: 10px;

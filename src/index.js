@@ -44,6 +44,9 @@ Promise.all([
     d3.csv("https://raw.githubusercontent.com/kuasar-mknd/visualdon-projet/develop/src/data/GCB2022v27_MtCO2_flat-clean.csv"),
     d3.json("https://raw.githubusercontent.com/kuasar-mknd/visualdon-projet/develop/src/data/countries-coastline-10km.geo.json")
 ]).then(function (values) {
+
+    graphTop10Country();
+
     // extraire les données à partir des valeurs résolues
     const co2Emissions = values[0];
     //console.log(co2Emissions)
@@ -192,45 +195,45 @@ function updateCO2Data(yea, co2Emissions) {
  * @param co2Emissions Les données d'émissions de CO2
  */
 function updateColorCountry(co2Emissions) {
-        d3.select("#selected-year").text(selectedYear);
+    d3.select("#selected-year").text(selectedYear);
 
-        // Mettre à jour la couleur des pays en fonction des émissions de CO2
-        svg.selectAll(".country")
-            .each(function (d) {
-                const emissionData = co2Emissions.find(
-                    (e) => e["ISO 3166-1 alpha-3"] === d.properties.A3 && e.Year === selectedYear
-                );
+    // Mettre à jour la couleur des pays en fonction des émissions de CO2
+    svg.selectAll(".country")
+        .each(function (d) {
+            const emissionData = co2Emissions.find(
+                (e) => e["ISO 3166-1 alpha-3"] === d.properties.A3 && e.Year === selectedYear
+            );
 
-                if (!emissionData) {
-                    // S'il n'y a pas de données d'émission pour l'année, définissez la couleur sur "lightgray"
-                    d3.select(this).attr("fill", "lightgray");
-                    return;
-                }
+            if (!emissionData) {
+                // S'il n'y a pas de données d'émission pour l'année, définissez la couleur sur "lightgray"
+                d3.select(this).attr("fill", "lightgray");
+                return;
+            }
 
-                // Si les données d'émission ont changé, mettez à jour la couleur du pays
-                if (
-                    !prevEmissionData[d.properties.A3] ||
-                    prevEmissionData[d.properties.A3][selectedCategory] !== emissionData[selectedCategory]
-                ) {
-                        // Mettre à jour les données d'émission précédentes
-                        prevEmissionData[d.properties.A3] = emissionData;
-                    // Mettre à jour la couleur du pays en fonction des données d'émission
-                    d3.select(this)
-                        .attr("fill", function () {
-                            if (
-                                emissionData &&
-                                emissionData[selectedCategory] !== "0" &&
-                                emissionData[selectedCategory] !== ""
-                            ) {
-                                //console.log(colorScale(emissionData[selectedCategory]));
-                                return colorScale(emissionData[selectedCategory]);
-                            } else {
-                                //console.log("lightgray");
-                                return "lightgray";
-                            }
-                        });
-                }
-            });
+            // Si les données d'émission ont changé, mettez à jour la couleur du pays
+            if (
+                !prevEmissionData[d.properties.A3] ||
+                prevEmissionData[d.properties.A3][selectedCategory] !== emissionData[selectedCategory]
+            ) {
+                // Mettre à jour les données d'émission précédentes
+                prevEmissionData[d.properties.A3] = emissionData;
+                // Mettre à jour la couleur du pays en fonction des données d'émission
+                d3.select(this)
+                    .attr("fill", function () {
+                        if (
+                            emissionData &&
+                            emissionData[selectedCategory] !== "0" &&
+                            emissionData[selectedCategory] !== ""
+                        ) {
+                            //console.log(colorScale(emissionData[selectedCategory]));
+                            return colorScale(emissionData[selectedCategory]);
+                        } else {
+                            //console.log("lightgray");
+                            return "lightgray";
+                        }
+                    });
+            }
+        });
 }
 
 /**
@@ -353,6 +356,7 @@ function updateCountryChart(countryCode, co2Emissions) {
                     .attr("cx", d => d.x)
                     .attr("cy", d => d.y);
             });
+        d3.select("#split-emissions").property("checked", false);
 
         // Gestionnaire d'événements pour la checkbox
         d3.select("#split-emissions").on("change", function() {
@@ -368,16 +372,16 @@ function updateCountryChart(countryCode, co2Emissions) {
             const sectorOrder = Object.keys(colorMapping).filter(sector => sector !== "Year" && sector !== "ISO 3166-1 alpha-3");
 
             if (split) {
-                simulation.force("y", d3.forceY(d => yScaleSplit(d.sector)).strength(0.1));
+                simulation.force("y", d3.forceY(d => yScaleSplit(d.sector)).strength(0.2));
 
                 colorLegendGroup.selectAll("circle")
                     .transition()
-                    .duration(1000)
+                    .duration(500)
                     .attr("cy", (d, i) => yScaleSplit(sectorOrder[i]) - chartPadding.top);
 
                 colorLegendGroup.selectAll("text")
                     .transition()
-                    .duration(1000)
+                    .duration(500)
                     .attr("y", (d, i) => yScaleSplit(sectorOrder[i]) - chartPadding.top + 4);
 
             } else {
@@ -517,6 +521,127 @@ function animateYears(minYear, maxYear, co2Emissions) {
         }
     }, 10);
 }
+
+/**
+ * Création du graph des émissions de CO2 par habitant
+ * @returns {Promise<void>}
+ */
+async function graphTop10Country() {
+    const yearSlider = d3.select("#year-slider");
+    const topCountries = 10;
+    const waitMs = 200;
+    const data = await d3.csv("https://raw.githubusercontent.com/kuasar-mknd/visualdon-projet/develop/src/data/GCB2022v27_percapita_flat-clean.csv")
+    const margin = {top: 20, right: 20, bottom: 20, left: 100};
+    const width = 800 - margin.left - margin.right;
+    const height = 600 - margin.top - margin.bottom;
+    const startYear = d3.min(data, d => parseInt(d.Year));
+
+    const x = d3.scaleLinear().range([0, width]);
+    const y = d3.scaleBand().range([0, height]).padding(0.1);
+
+    const svg = d3.select("#chart").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    const xAxis = d3.axisBottom(x);
+    const yAxis = d3.axisLeft(y);
+
+    yearSlider.property("min", startYear);
+
+    function update(year) {
+        // Filtrer les données pour l'année en cours
+        const yearData = data.filter((d) => d.Year === year.toString());
+
+        // Trier les données par émissions totales décroissantes et ne conserver que les 10 premières
+        const topData = yearData.sort((a, b) => b.Total - a.Total).slice(0, 10);
+
+        // Mettre à jour le domaine de l'échelle x avec la valeur maximale des émissions pour l'année en cours
+        x.domain([0, d3.max(topData, d => parseFloat(d.Total))]);
+        y.domain(topData.map(d => d.Country));
+
+        // 3. Créez les barres
+        const bars = svg.selectAll(".bar")
+            .data(topData, d => d.Country);
+
+        // Ajouter les nouvelles barres
+        bars.enter().append("rect")
+            .attr("class", "bar")
+            .attr("y", d => y(d.Country))
+            .attr("height", y.bandwidth())
+            .attr("x", 0)
+            .attr("width", d => x(d.Total));
+
+        // Mettre à jour les barres existantes
+        bars.transition()
+            .duration(waitMs)
+            .attr("y", d => y(d.Country))
+            .attr("height", y.bandwidth())
+            .attr("x", 0)
+            .attr("width", d => x(d.Total));
+
+        // Supprimer les barres inutilisées
+        bars.exit()
+            .transition()
+            .duration(waitMs)
+            .attr("width", 0)
+            .remove();
+
+        svg.selectAll(".x-axis").remove();
+        svg.selectAll(".y-axis").remove();
+
+        svg.append("g")
+            .attr("class", "x-axis")
+            .attr("transform", `translate(0,${height})`)
+            .call(xAxis);
+
+        svg.append("g")
+            .attr("class", "y-axis")
+            .call(yAxis);
+
+        // Mettre à jour l'année en cours dans l'élément HTML
+        d3.select("#current-year").text(`Année : ${year}`);
+
+        // Mettre à jour la position du slider
+        yearSlider.property("value", year);
+    }
+
+    const endYear = 2021; // Mettez à jour avec la dernière année disponible dans vos données
+
+    let currentYear = endYear;
+    update(currentYear);
+
+    const playPauseButton = d3.select("#play-pause-button-2");
+    let playing = false;
+    let interval;
+
+    playPauseButton.on("click", function () {
+        playing = !playing;
+        if (playing) {
+            playPauseButton.text("Pause");
+
+            interval = setInterval(() => {
+                currentYear++;
+                if (currentYear > endYear) {
+                    currentYear = startYear;
+                }
+                update(currentYear);
+                yearSlider.property("value", currentYear);
+            }, waitMs);
+        } else {
+            playPauseButton.text("Play");
+            clearInterval(interval);
+        }
+    });
+
+    yearSlider.on("input", function () {
+        currentYear = parseInt(this.value);
+        update(currentYear);
+    });
+
+}
+
 
 
 // Gestionnaire d'événements click pour le document entier
