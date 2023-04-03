@@ -4,6 +4,8 @@
 
 
 body {
+    /*center height with tailwind*/
+    @apply flex items-center justify-center h-screen;
     font-family: Poppins, Arial, Helvetica, sans-serif;
     font-size: 14px;
     line-height: 1.5;
@@ -61,7 +63,7 @@ h1 {
 
 #description {
     text-align: justify;
-    margin-right: 15em;
+    margin-right: 5em;
     width: 50%;
     opacity: 0;
     transition: opacity 2s;
@@ -75,10 +77,14 @@ h1 {
 }
 
 #map-container {
-    width: 50%;
+    width: 55%;
     opacity: 0;
     transition: opacity 2s;
     transition-delay: 0s;
+}
+
+#map-container svg {
+    
 }
 
 #timeline-map{
