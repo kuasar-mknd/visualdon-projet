@@ -1,14 +1,21 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+
 body {
     font-family: Poppins, Arial, Helvetica, sans-serif;
     font-size: 14px;
     line-height: 1.5;
-    color: #333;
+    color: #ffffff;
     background: rgba(2,0,36,1);
 }
 
-#map {
-    background: rgb(166,166,166);
-    background: radial-gradient(circle, rgba(166,166,166,1) 0%, rgba(2,0,36,1) 50%);
+h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-align: center;
 }
 
 .modal {
@@ -42,4 +49,58 @@ body {
     padding: 10px;
     margin: 10px;
     border-radius: 10px;
+}
+
+/* Ajout du CSS pour la section intro */
+#intro-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px;
+}
+
+#description {
+    text-align: justify;
+    margin-right: 15em;
+    width: 50%;
+    opacity: 0;
+    transition: opacity 2s;
+}
+
+#description p {
+}
+
+#description br {
+    margin-bottom: 2rem;
+}
+
+#map-container {
+    width: 50%;
+    opacity: 0;
+    transition: opacity 2s;
+    transition-delay: 0s;
+}
+
+#timeline-map{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#project-description {
+    width: 45%;
+}
+
+#globe-container {
+    width: 45%;
+}
+
+#intro-container,
+#second-chart-container {
+    transition: opacity 0.5s ease;
+}
+
+#second-chart-container {
+    display: flex;
+    opacity: 1;
 }
