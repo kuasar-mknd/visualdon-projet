@@ -23,12 +23,20 @@
     "webpack-dev-server": "^4.13.2"
   },
   "dependencies": {
+    "@emotion/react": "^11.10.6",
+    "@emotion/styled": "^11.10.6",
     "@geo-maps/countries-land-1m": "^0.6.0",
     "@geo-maps/countries-land-50m": "^0.6.0",
     "@geo-maps/countries-land-5m": "^0.6.0",
     "d3": "^7.8.4",
+    "@mui/material": "^5.11.15",
+    "autoprefixer": "^10.4.14",
     "d3-zoom": "^3.0.0",
+    "locomotive-scroll": "^4.1.4",
     "normalize.css": "^8.0.1",
+    "postcss": "^8.4.21",
+    "postcss-loader": "^7.1.0",
+    "tailwindcss": "^3.3.1",
     "topojson-client": "^3.1.0",
     "versor": "^0.2.0"
   }
