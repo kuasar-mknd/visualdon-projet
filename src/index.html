@@ -11,7 +11,7 @@
 <body>
 <h1 class="text-5xl font-bold mb-4 text-center">Plongée dans l'histoire des émissions de CO2</h1>
 <!-- Conteneur pour la description et le globe 3D -->
-<div id="intro-container">
+<div id="intro-container" style="">
 
     <div id="intro-section">
         <div id="description">
@@ -60,9 +60,11 @@
                 </div>
 
                 <!-- Timeline pour choisir l'année d'affichage des émissions -->
-                <div id="timeline-container"></div>
-                <button data-state="play" id="play-pause-btn" class="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-md shadow-md transition-colors duration-300 ease-in-out">Play</button>
+
+                <button data-state="play" id="play-pause-btn" class="play">Play</button>
             </div>
+            <div id="globe-container"></div>
+            <div id="timeline-container"></div>
         </div>
     </div>
 </div>
@@ -79,7 +81,7 @@
 </div>
 <div id="second-chart-container" style="display: none">
     <div id="chart">
-        <button data-state="play" id="play-pause-button-2">Play 2</button>
+        <button data-state="play" id="play-pause-button-2" class="play">Play 2</button>
         <div style="text-align: center; margin-bottom: 20px;">
             <input id="year-slider" max="2021" min="1950" type="range" value="1950"/>
             <div id="current-year" style="font-size: 24px;"></div>

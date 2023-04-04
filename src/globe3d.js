@@ -1,7 +1,8 @@
 import * as d3 from "d3";
 
 // définir les dimensions de la carte
-const width = 960;
+//get width from container
+const width = document.getElementById("map-container").clientWidth;
 const height = 600;
 const scale = 250;
 let selectedCountry = null;
@@ -22,7 +23,7 @@ const path = d3.geoPath()
     .projection(projection);
 
 // créer un élément SVG pour la carte
-const svg = d3.select("#map-container").append("svg")
+const svg = d3.select("#globe-container").append("svg")
     .attr("width", width)
     .attr("height", height)
     .attr("vector-effect", "non-scaling-stroke")

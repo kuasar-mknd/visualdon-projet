@@ -6,6 +6,9 @@ module.exports = {
       transitionDuration: {
         '2000': '2000ms',
       },
+      colors: {
+        'regal-blue': '#020024FF',
+      },
     },
   },
   variants: {
