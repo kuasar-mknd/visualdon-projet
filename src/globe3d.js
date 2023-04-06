@@ -306,7 +306,8 @@ function updateCountryChart(countryCode, co2Emissions) {
             .attr("transform", `translate(${chartWidth / 2}, ${chartHeight})`)
             .attr("dy", "-0.5em")
             .style("text-anchor", "middle")
-            .text("Année");
+            .attr("fill", "white")
+            .text("Années");
 
         const centerY = (chartHeight - chartPadding.top - chartPadding.bottom) / 2 + chartPadding.top;
 
@@ -327,6 +328,7 @@ function updateCountryChart(countryCode, co2Emissions) {
                     .attr("x", 10)
                     .attr("y", colorLegendY + 4)
                     .text(sector)
+                    .attr("fill", "white")
                     .style("font-size", "12px");
 
                 colorLegendY += 20;
@@ -473,7 +475,7 @@ function createYearInput(minYear, maxYear) {
         .append("div")
         .html(`
       <label for="year-input">Année:</label>
-      <input type="range" id="year-input" min="${minYear}" max="${maxYear}" step="1" value="${maxYear}" class="w-full h-2 bg-gray-400 rounded-lg overflow-hidden appearance-none focus:outline-none"/>
+      <input type="range" id="year-input" min="${minYear}" max="${maxYear}" step="1" value="${maxYear}"/>
       <span id="selected-year">${maxYear}</span>
     `);
 }

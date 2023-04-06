@@ -60,8 +60,7 @@ function updateAxes(svg, x, y) {
  */
 function processData(data, year) {
     const yearData = data.filter((d) => d.Year === year.toString());
-    const topData = yearData.sort((a, b) => b.Total - a.Total).slice(0, topCountries);
-    return topData;
+    return yearData.sort((a, b) => b.Total - a.Total).slice(0, topCountries);
 }
 
 /**
