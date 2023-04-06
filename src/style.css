@@ -27,6 +27,10 @@ h1 {
     /*fix size*/
 }
 
+h2 {
+    text-align: left;
+}
+
 .modal {
     display: none;
     position: fixed;
@@ -91,6 +95,7 @@ text{
 }
 
 #map-container {
+    min-width: 45rem;
     margin: 1rem;
     opacity: 0;
     transition: opacity 2s;
