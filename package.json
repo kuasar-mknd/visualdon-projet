@@ -34,7 +34,7 @@
     "d3-zoom": "^3.0.0",
     "locomotive-scroll": "^4.1.4",
     "normalize.css": "^8.0.1",
-    "postcss": "^8.4.21",
+    "postcss": "^8.4.22",
     "postcss-loader": "^7.2.4",
     "tailwindcss": "^3.3.1",
     "topojson-client": "^3.1.0",
