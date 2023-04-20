@@ -7,6 +7,7 @@ const waitMs = 200;
 const margin = { top: 20, right: 20, bottom: 20, left: 200 };
 const width = document.getElementById("intro-section").clientWidth - margin.left - margin.right;
 const height = 600 - margin.top - margin.bottom;
+const emissionCategorySelector = d3.select("#emission-category2");
 
 /**
  * Create the SVG element and append it to the chart div
@@ -76,12 +77,14 @@ function updateAxes(svg, x, y) {
  * Process the data to get the top countries for a given year
  * @param data The data
  * @param year The year
+ * @param category
  * @returns {*} The top countries
  */
-function processData(data, year) {
+function processData(data, year, category) {
     const yearData = data.filter((d) => d.Year === year.toString());
-    return yearData.sort((a, b) => b.Total - a.Total).slice(0, topCountries);
+    return yearData.sort((a, b) => parseFloat(b[category]) - parseFloat(a[category])).slice(0, topCountries);
 }
+
 
 /**
  * Update the bars
@@ -139,7 +142,9 @@ async function graphTop10Country() {
     update(currentYear);
 
     function update(year) {
-        const topData = processData(data, year);
+        const selectedCategory = emissionCategorySelector.property("value");
+        console.log(selectedCategory);
+        const topData = processData(data, year, selectedCategory);
 
         x.domain([0, d3.max(topData, d => parseFloat(d.Total))]);
         y.domain(topData.map(d => d.Country));
@@ -174,7 +179,13 @@ async function graphTop10Country() {
         currentYear = parseInt(this.value);
         update(currentYear);
     });
+
+    emissionCategorySelector.on("change", function () {
+        console.log("change")
+        update(currentYear);
+    });
 }
+
 
 export { graphTop10Country };
 

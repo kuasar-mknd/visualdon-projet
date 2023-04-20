@@ -77,6 +77,19 @@
 <div id="second-chart-container" style="visibility: hidden; display: none; opacity: 0">
     <div id="chart">
         <div id="chart-header">
+            <div>
+                <label for="emission-category2">Catégorie d'émissions:</label>
+                <select id="emission-category2" class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+                    <option selected="selected" value="Total">Total</option>
+                    <option value="Coal">Charbon</option>
+                    <option value="Oil">Pétrole</option>
+                    <option value="Gas">Gaz</option>
+                    <option value="Cement">Ciment</option>
+                    <option value="Flaring">Flaring</option>
+                    <option value="Other">Autres</option>
+                </select>
+            </div>
+            <h2 id="chart-title">Émissions de CO2 par habitants</h2>
             <button data-state="play" id="play-pause-button-2" class="play">Voyager dans le temps</button>
 
         </div>
