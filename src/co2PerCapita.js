@@ -5,7 +5,7 @@ const playPauseButton = d3.select("#play-pause-button-2");
 const topCountries = 15;
 const waitMs = 200;
 const margin = { top: 20, right: 20, bottom: 20, left: 100 };
-const width = 800 - margin.left - margin.right;
+const width = document.getElementById("intro-section").clientWidth - margin.left - margin.right;
 const height = 600 - margin.top - margin.bottom;
 
 /**
@@ -13,11 +13,31 @@ const height = 600 - margin.top - margin.bottom;
  * @returns {*} The SVG element
  */
 function createSvg() {
-    return d3.select("#chart").append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform", `translate(${margin.left},${margin.top})`);
+        const svg = d3.select("#chart").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        const gradient = svg.append("defs")
+            .append("linearGradient")
+            .attr("id", "gradient")
+            .attr("x1", "0%")
+            .attr("y1", "0%")
+            .attr("x2", "100%")
+            .attr("y2", "0%");
+
+        gradient.append("stop")
+            .attr("offset", "0%")
+            .attr("stop-color", "#020024")
+            .attr("stop-opacity", 1);
+
+        gradient.append("stop")
+            .attr("offset", "100%")
+            .attr("stop-color", "#4b6cb7")
+            .attr("stop-opacity", 1);
+
+        return svg;
 }
 
 /**
@@ -79,7 +99,8 @@ function updateBars(svg, x, y, topData) {
         .attr("y", d => y(d.Country))
         .attr("height", y.bandwidth())
         .attr("x", 0)
-        .attr("width", d => x(d.Total));
+        .attr("width", d => x(d.Total))
+        .attr("fill", "url(#gradient)"); // Ajoutez cette ligne pour utiliser le dégradé
 
     bars.transition()
         .duration(waitMs)
@@ -94,6 +115,7 @@ function updateBars(svg, x, y, topData) {
         .attr("width", 0)
         .remove();
 }
+
 
 /**
  * Create the graph
