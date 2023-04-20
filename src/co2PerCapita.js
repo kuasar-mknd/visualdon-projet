@@ -93,7 +93,7 @@ function processData(data, year, category) {
  * @param y The y scale
  * @param topData The top countries
  */
-function updateBars(svg, x, y, topData) {
+function updateBars(svg, x, y, topData, category) {
     const bars = svg.selectAll(".bar")
         .data(topData, d => d.Country);
 
@@ -102,15 +102,15 @@ function updateBars(svg, x, y, topData) {
         .attr("y", d => y(d.Country))
         .attr("height", y.bandwidth())
         .attr("x", 0)
-        .attr("width", d => x(d.Total))
-        .attr("fill", "url(#gradient)"); // Ajoutez cette ligne pour utiliser le dégradé
+        .attr("width", d => x(parseFloat(d[category])))
+        .attr("fill", "url(#gradient)");
 
     bars.transition()
         .duration(waitMs)
         .attr("y", d => y(d.Country))
         .attr("height", y.bandwidth())
         .attr("x", 0)
-        .attr("width", d => x(d.Total));
+        .attr("width", d => x(parseFloat(d[category])));
 
     bars.exit()
         .transition()
@@ -146,10 +146,10 @@ async function graphTop10Country() {
         console.log(selectedCategory);
         const topData = processData(data, year, selectedCategory);
 
-        x.domain([0, d3.max(topData, d => parseFloat(d.Total))]);
+        x.domain([0, d3.max(topData, d => parseFloat(d[selectedCategory]))]);
         y.domain(topData.map(d => d.Country));
 
-        updateBars(svg, x, y, topData);
+        updateBars(svg, x, y, topData, selectedCategory);
         updateAxes(svg, x, y);
 
         d3.select("#current-year").text(`Année : ${year}`);
