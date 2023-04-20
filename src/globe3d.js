@@ -233,6 +233,7 @@ function updateColorCountry(co2Emissions) {
  */
 function updateCountryChart(countryCode, co2Emissions) {
     const emissionData = co2Emissions.filter(e => e["ISO 3166-1 alpha-3"] === countryCode);
+    const countryName = emissionData[0].Country;
     const colorMapping = {
         'Coal': '#1f77b4',
         'Oil': '#ff7f0e',
@@ -270,6 +271,14 @@ function updateCountryChart(countryCode, co2Emissions) {
         const chartSvg = d3.select("#chart-container").append("svg")
             .attr("width", chartWidth)
             .attr("height", chartHeight);
+
+        chartSvg.append("text")
+            .attr("x", chartWidth / 2)
+            .attr("y", chartPadding.top)
+            .attr("text-anchor", "middle")
+            .attr("fill", "white")
+            .style("font-size", "24px")
+            .text(countryName);
 
         const xScale = d3.scaleLinear()
             .domain(d3.extent(data, d => d.year))
@@ -388,8 +397,26 @@ function updateCountryChart(countryCode, co2Emissions) {
             }
 
             simulation.alpha(1).restart();
+
         }
+
+        const tooltip = d3.select("#tooltip");
+
+        bubbles.on("mouseover", (event, d) => {
+            tooltip.style("visibility", "visible")
+                .html(`Année: ${d.year}<br>Secteur: ${d.sector}<br>Émissions (MtCO2): ${d.value.toFixed(2)}`);
+        })
+            .on("mousemove", (event) => {
+                tooltip.style("top", (event.pageY - 10) + "px")
+                    .style("left", (event.pageX + 10) + "px");
+            })
+            .on("mouseout", () => {
+                tooltip.style("visibility", "hidden");
+            });
+
     }
+
+
 }
 
 /**

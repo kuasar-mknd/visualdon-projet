@@ -2,7 +2,7 @@ import * as d3 from "d3";
 
 const yearSlider = d3.select("#year-input2");
 const playPauseButton = d3.select("#play-pause-button-2");
-const topCountries = 15;
+const topCountries =15;
 const waitMs = 200;
 const margin = { top: 20, right: 50, bottom: 20, left: 200 };
 const width = document.getElementById("intro-section").clientWidth - margin.left - margin.right;

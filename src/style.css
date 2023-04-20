@@ -139,10 +139,10 @@ text{
 }
 
 #timeline-perCapita {
-    width: 100%;
+    display: block;
+    width: 65%;
     text-align: center;
-    margin-top: 3rem;
-    margin-bottom: 20px;
+    margin: 3rem auto 20px;
 }
 
 
