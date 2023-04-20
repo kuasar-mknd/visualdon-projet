@@ -16,11 +16,13 @@
     "babel-preset-env": "^1.7.0",
     "css-loader": "^6.7.3",
     "csv-loader": "^3.0.3",
-    "html-webpack-plugin": "^5.5.0",
+    "html-webpack-plugin": "^5.5.1",
     "mini-css-extract-plugin": "^2.7.5",
-    "webpack": "^5.77.0",
+ dependabot/npm_and_yarn/webpack-5.80.0
+    "webpack": "^5.80.0",
+    main
     "webpack-cli": "^5.0.1",
-    "webpack-dev-server": "^4.13.2"
+    "webpack-dev-server": "^4.13.3"
   },
   "dependencies": {
     "@emotion/react": "^11.10.6",
@@ -29,13 +31,13 @@
     "@geo-maps/countries-land-50m": "^0.6.0",
     "@geo-maps/countries-land-5m": "^0.6.0",
     "d3": "^7.8.4",
-    "@mui/material": "^5.11.15",
+    "@mui/material": "^5.12.1",
     "autoprefixer": "^10.4.14",
     "d3-zoom": "^3.0.0",
     "locomotive-scroll": "^4.1.4",
     "normalize.css": "^8.0.1",
-    "postcss": "^8.4.21",
-    "postcss-loader": "^7.1.0",
+    "postcss": "^8.4.22",
+    "postcss-loader": "^7.2.4",
     "tailwindcss": "^3.3.1",
     "topojson-client": "^3.1.0",
     "versor": "^0.2.0"
