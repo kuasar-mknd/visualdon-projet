@@ -498,8 +498,10 @@ function animateYears(minYear, maxYear, co2Emissions) {
             yearInput.value = currentYear + 1;
             requestUpdateCO2Data(yearInput.value, co2Emissions);
         } else {
-            clearInterval(animationInterval);
-            d3.select("#play-pause-btn").attr("data-state", "play").text("Voyager dans le temps");
+            yearInput.value = minYear;
+            requestUpdateCO2Data(yearInput.value, co2Emissions);
+            //clearInterval(animationInterval);
+            //d3.select("#play-pause-btn").attr("data-state", "play").text("Voyager dans le temps");
         }
     }, 10);
 }
