@@ -4,7 +4,7 @@ const yearSlider = d3.select("#year-input2");
 const playPauseButton = d3.select("#play-pause-button-2");
 const topCountries = 15;
 const waitMs = 200;
-const margin = { top: 20, right: 20, bottom: 20, left: 200 };
+const margin = { top: 20, right: 50, bottom: 20, left: 200 };
 const width = document.getElementById("intro-section").clientWidth - margin.left - margin.right;
 const height = 600 - margin.top - margin.bottom;
 const emissionCategorySelector = d3.select("#emission-category2");
@@ -97,6 +97,9 @@ function updateBars(svg, x, y, topData, category) {
     const bars = svg.selectAll(".bar")
         .data(topData, d => d.Country);
 
+    const barValueLabels = svg.selectAll(".bar-value")
+        .data(topData, d => d.Country);
+
     bars.enter().append("rect")
         .attr("class", "bar")
         .attr("y", d => y(d.Country))
@@ -104,6 +107,13 @@ function updateBars(svg, x, y, topData, category) {
         .attr("x", 0)
         .attr("width", d => x(parseFloat(d[category])))
         .attr("fill", "url(#gradient)");
+
+    bars.enter().append("text") // Ajoutez cette partie pour créer les étiquettes de texte
+        .attr("class", "bar-value")
+        .attr("y", d => y(d.Country) + y.bandwidth() / 2 + 4) // Position verticale centrée sur la barre
+        .attr("x", d => x(parseFloat(d[category])) + 5) // Position horizontale juste après la barre
+        .attr("fill", "white")
+        .text(d => parseFloat(d[category]).toFixed(2)); // Affichez la valeur de la barre avec 2 décimales
 
     bars.transition()
         .duration(waitMs)
@@ -116,6 +126,20 @@ function updateBars(svg, x, y, topData, category) {
         .transition()
         .duration(waitMs)
         .attr("width", 0)
+        .remove();
+
+    barValueLabels.enter().append("text")
+
+    barValueLabels.transition() // Ajoutez cette partie pour mettre à jour les étiquettes de texte
+        .duration(waitMs)
+        .attr("y", d => y(d.Country) + y.bandwidth() / 2 + 4)
+        .attr("x", d => x(parseFloat(d[category])) + 5)
+        .text(d => parseFloat(d[category]).toFixed(2));
+
+    barValueLabels.exit()
+        .transition()
+        .duration(waitMs)
+        .attr("x", 0)
         .remove();
 }
 
