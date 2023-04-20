@@ -1,10 +1,10 @@
 import * as d3 from "d3";
 
-const yearSlider = d3.select("#year-slider");
+const yearSlider = d3.select("#year-input2");
 const playPauseButton = d3.select("#play-pause-button-2");
 const topCountries = 15;
 const waitMs = 200;
-const margin = { top: 20, right: 20, bottom: 20, left: 100 };
+const margin = { top: 20, right: 20, bottom: 20, left: 200 };
 const width = document.getElementById("intro-section").clientWidth - margin.left - margin.right;
 const height = 600 - margin.top - margin.bottom;
 
@@ -165,7 +165,7 @@ async function graphTop10Country() {
                 yearSlider.property("value", currentYear);
             }, waitMs);
         } else {
-            playPauseButton.text("Play");
+            playPauseButton.text("Voyager dans le temps");
             clearInterval(interval);
         }
     });

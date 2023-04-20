@@ -475,7 +475,7 @@ function createYearInput(minYear, maxYear) {
         .append("div")
         .html(`
       <label for="year-input">Année:</label>
-      <input type="range" id="year-input" min="${minYear}" max="${maxYear}" step="1" value="${maxYear}"/>
+      <input type="range" class="year-slider" id="year-input" min="${minYear}" max="${maxYear}" step="1" value="${maxYear}"/>
       <span id="selected-year">${maxYear}</span>
     `);
 }

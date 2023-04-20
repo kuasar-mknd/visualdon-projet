@@ -131,6 +131,21 @@ text{
     opacity: 1;
 }
 
-#year-input {
+#chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 1rem;
+}
+
+#timeline-perCapita {
+    width: 100%;
+    text-align: center;
+    margin-top: 3rem;
+    margin-bottom: 20px;
+}
+
+
+.year-slider {
    @apply w-full h-2 bg-gray-400 rounded-lg overflow-hidden appearance-none focus:outline-none;
 }
