@@ -10,10 +10,10 @@ body {
     font-size: 14px;
     line-height: 1.5;
     color: #ffffff;
-    background: rgba(2,0,36,1);
+    background: rgba(2, 0, 36, 1);
 }
 
-.play{
+.play {
     @apply px-4 py-2 bg-fuchsia-900 hover:bg-fuchsia-800 text-white rounded-md shadow-md transition-colors duration-300 ease-in-out;
     height: 3rem;
     width: 15rem;
@@ -42,7 +42,7 @@ h2 {
     background-color: rgba(0, 0, 0, 0.5);
 }
 
-text{
+text {
     color: white;
 }
 
@@ -57,11 +57,11 @@ text{
     box-shadow: 0 0 20px 5px rgba(22, 0, 36, 0.9);
 }
 
-#chart{
+#chart {
     background: rgb(2, 0, 36);
 }
 
-#intro-container{
+#intro-container {
     max-width: 1400px;
 }
 
@@ -95,14 +95,14 @@ text{
     transition-delay: 0s;
 }
 
-#timeline-map{
+#timeline-map {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
     margin: 1rem;
 }
 
-#timeline-container{
+#timeline-container {
     padding: 1rem 5rem 2rem;
 }
 
@@ -136,5 +136,5 @@ text{
 
 
 .year-slider {
-   @apply w-full h-2 bg-gray-400 rounded-lg overflow-hidden appearance-none focus:outline-none;
+    @apply w-full h-2 bg-gray-400 rounded-lg overflow-hidden appearance-none focus:outline-none;
 }

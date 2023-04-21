@@ -2,9 +2,9 @@ import * as d3 from "d3";
 
 const yearSlider = d3.select("#year-input2");
 const playPauseButton = d3.select("#play-pause-button-2");
-const topCountries =15;
+const topCountries = 15;
 const waitMs = 200;
-const margin = { top: 20, right: 50, bottom: 20, left: 200 };
+const margin = {top: 20, right: 50, bottom: 20, left: 200};
 const width = document.getElementById("intro-section").clientWidth - margin.left - margin.right;
 const height = 600 - margin.top - margin.bottom;
 const emissionCategorySelector = d3.select("#emission-category2");
@@ -14,31 +14,31 @@ const emissionCategorySelector = d3.select("#emission-category2");
  * @returns {*} The SVG element
  */
 function createSvg() {
-        const svg = d3.select("#chart").append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-            .append("g")
-            .attr("transform", `translate(${margin.left},${margin.top})`);
+    const svg = d3.select("#chart").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
 
-        const gradient = svg.append("defs")
-            .append("linearGradient")
-            .attr("id", "gradient")
-            .attr("x1", "0%")
-            .attr("y1", "0%")
-            .attr("x2", "100%")
-            .attr("y2", "0%");
+    const gradient = svg.append("defs")
+        .append("linearGradient")
+        .attr("id", "gradient")
+        .attr("x1", "0%")
+        .attr("y1", "0%")
+        .attr("x2", "100%")
+        .attr("y2", "0%");
 
-        gradient.append("stop")
-            .attr("offset", "0%")
-            .attr("stop-color", "#020024")
-            .attr("stop-opacity", 1);
+    gradient.append("stop")
+        .attr("offset", "0%")
+        .attr("stop-color", "#020024")
+        .attr("stop-opacity", 1);
 
-        gradient.append("stop")
-            .attr("offset", "100%")
-            .attr("stop-color", "#4b6cb7")
-            .attr("stop-opacity", 1);
+    gradient.append("stop")
+        .attr("offset", "100%")
+        .attr("stop-color", "#4b6cb7")
+        .attr("stop-opacity", 1);
 
-        return svg;
+    return svg;
 }
 
 /**
@@ -212,5 +212,5 @@ async function graphTop10Country() {
 }
 
 
-export { graphTop10Country };
+export {graphTop10Country};
 

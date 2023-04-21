@@ -16,7 +16,8 @@
     <div id="intro-section">
         <div id="description">
 
-            <h2 class="text-2xl font-bold mb-4">Comprendre notre impact sur le climat grâce aux données du Global Carbon Project</h2>
+            <h2 class="text-2xl font-bold mb-4">Comprendre notre impact sur le climat grâce aux données du Global Carbon
+                Project</h2>
             <p>Depuis la révolution industrielle, l'humanité a connu un essor sans précédent, entraînant une
                 augmentation massive de la consommation d'énergie et des émissions de gaz à effet de serre. Parmi ces
                 gaz, le dioxyde de carbone (CO2) est le principal responsable du réchauffement climatique. Afin de mieux
@@ -43,7 +44,8 @@
             <div id="timeline-map">
                 <div>
                     <label for="emission-category">Catégorie d'émissions:</label>
-                    <select id="emission-category" class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+                    <select class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                            id="emission-category">
                         <option selected="selected" value="Total">Total</option>
                         <option value="Coal">Charbon</option>
                         <option value="Oil">Pétrole</option>
@@ -56,7 +58,7 @@
 
                 <!-- Timeline pour choisir l'année d'affichage des émissions -->
 
-                <button data-state="play" id="play-pause-btn" class="play">Voyager dans le temps</button>
+                <button class="play" data-state="play" id="play-pause-btn">Voyager dans le temps</button>
             </div>
             <div id="globe-container"></div>
             <div id="timeline-container"></div>
@@ -74,13 +76,15 @@
         </div>
     </div>
 </div>
-<div id="tooltip" style="position: absolute; visibility: hidden; background-color: black; padding: 5px; border: 1px solid black; z-index: 1000;"></div>
+<div id="tooltip"
+     style="position: absolute; visibility: hidden; background-color: black; padding: 5px; border: 1px solid black; z-index: 1000;"></div>
 <div id="second-chart-container" style="visibility: hidden; display: none; opacity: 0">
     <div id="chart">
         <div id="chart-header">
             <div>
                 <label for="emission-category2">Catégorie d'émissions:</label>
-                <select id="emission-category2" class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+                <select class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                        id="emission-category2">
                     <option selected="selected" value="Total">Total</option>
                     <option value="Coal">Charbon</option>
                     <option value="Oil">Pétrole</option>
@@ -91,12 +95,13 @@
                 </select>
             </div>
             <h2 id="chart-title">Émissions de CO2 par habitants</h2>
-            <button data-state="play" id="play-pause-button-2" class="play">Voyager dans le temps</button>
+            <button class="play" data-state="play" id="play-pause-button-2">Voyager dans le temps</button>
 
         </div>
     </div>
-    <div style="" id="timeline-perCapita">
-        <label for="year-input2"></label><input class="year-slider" id="year-input2" max="2021" min="1950" type="range" value="1950"/>
+    <div id="timeline-perCapita" style="">
+        <label for="year-input2"></label><input class="year-slider" id="year-input2" max="2021" min="1950" type="range"
+                                                value="1950"/>
         <div id="current-year" style="font-size: 24px;"></div>
     </div>
 </div>
