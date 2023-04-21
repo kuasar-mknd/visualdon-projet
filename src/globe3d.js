@@ -81,7 +81,7 @@ async function globe3d() {
                 selectedCountry = d;
 
                 // Obtenir le centre du pays sélectionné
-                const center = getCountryCenter(d, projection);
+                const center = getCountryCenter(d);
 
                 // Appliquer la rotation à la projection pour centrer le pays
                 projection.rotate(center);
@@ -305,7 +305,7 @@ function updateCountryChart(countryCode, co2Emissions) {
             .attr("fill", d => d.color);
 
         const xAxis = d3.axisBottom(xScale).tickFormat(d3.format("d"));
-        const yAxis = d3.axisLeft(yScale);
+        d3.axisLeft(yScale);
 
         chartSvg.append("g")
             .attr("transform", `translate(0, ${chartHeight - chartPadding.bottom})`)

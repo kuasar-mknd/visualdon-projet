@@ -1,4 +1,3 @@
-import * as d3 from "d3";
 import "./style.css";
 
 import {graphTop10Country} from "./co2PerCapita.js";

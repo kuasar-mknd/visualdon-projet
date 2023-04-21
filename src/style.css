@@ -61,13 +61,6 @@ text{
     background: rgb(2, 0, 36);
 }
 
-#header-nav {
-    background: rgb(212, 207, 207);
-    padding: 10px;
-    margin: 10px;
-    border-radius: 10px;
-}
-
 #intro-container{
     max-width: 1400px;
 }
@@ -111,10 +104,6 @@ text{
 
 #timeline-container{
     padding: 1rem 5rem 2rem;
-}
-
-#project-description {
-    width: 45%;
 }
 
 #globe-container {

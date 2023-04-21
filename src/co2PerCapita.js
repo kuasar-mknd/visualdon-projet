@@ -92,6 +92,7 @@ function processData(data, year, category) {
  * @param x The x scale
  * @param y The y scale
  * @param topData The top countries
+ * @param category The category
  */
 function updateBars(svg, x, y, topData, category) {
     const bars = svg.selectAll(".bar")
