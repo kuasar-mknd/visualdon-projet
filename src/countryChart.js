@@ -252,10 +252,10 @@ function updateCountryChart(countryCode, co2Emissions) {
                 throw new Error(`Erreur lors de la récupération des données du pays : ${response.status}`);
             }
             const countryData = await response.json();
-            console.log(countryData)
+            //console.log(countryData)
             // Utiliser le nom traduit du pays si disponible, sinon utiliser le nom original
             const translatedName = countryData[0].translations.fra.common || countryName;
-            console.log(translatedName)
+            //console.log(translatedName)
             // Mettre à jour le nom du pays dans le graphique
             d3.select("#country-name").text(translatedName);
         } catch (error) {
@@ -264,7 +264,7 @@ function updateCountryChart(countryCode, co2Emissions) {
         }
     }
 
-    // Appeler la fonction asynchrone pour effectuer la traduction en arrière-plan
+    // Appel la fonction asynchrone pour effectuer la traduction en arrière-plan
     fetchAndTranslateCountryName();
 }
 

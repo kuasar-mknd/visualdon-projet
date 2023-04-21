@@ -77,12 +77,12 @@ function updateAxes(svg, x, y) {
  * Process the data to get the top countries for a given year
  * @param data The data
  * @param year The year
- * @param category
- * @param translations
+ * @param category The category
+ * @param translations The translations
  * @returns {*} The top countries
  */
 function processData(data, year, category, translations) {
-    console.log(translations)
+    //console.log(translations)
     const yearData = data.filter((d) => d.Year === year.toString());
     const sortedData = yearData.sort((a, b) => parseFloat(b[category]) - parseFloat(a[category])).slice(0, topCountries);
 
@@ -151,6 +151,11 @@ function updateBars(svg, x, y, topData, category) {
         .remove();
 }
 
+/**
+ * Get country translations
+ * @param countryCode The country code
+ * @returns {Promise<*>} The country translation
+ */
 async function getCountryTranslation(countryCode) {
     try {
         const response = await fetch(`https://restcountries.com/v3.1/alpha/${countryCode}`);
@@ -161,8 +166,6 @@ async function getCountryTranslation(countryCode) {
         return countryCode;
     }
 }
-
-
 
 /**
  * Create the graph
@@ -195,9 +198,9 @@ async function graphTop10Country() {
 
     function update(year) {
         const selectedCategory = emissionCategorySelector.property("value");
-        console.log(selectedCategory);
+        //console.log(selectedCategory);
         const topData = processData(data, year, selectedCategory, translations);
-        console.log(topData);
+        //console.log(topData);
 
         x.domain([0, d3.max(topData, d => parseFloat(d[selectedCategory]))]);
         y.domain(topData.map(d => d.Country));
@@ -234,7 +237,7 @@ async function graphTop10Country() {
     });
 
     emissionCategorySelector.on("change", function () {
-        console.log("change")
+        //console.log("change")
         update(currentYear);
     });
 }
