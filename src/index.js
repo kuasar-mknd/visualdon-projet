@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     description.style.opacity = 1;
                     globeContainer.style.opacity = 1;
                 }, 500);
-            }, 1000);
+            }, 500);
 
         }
     });
