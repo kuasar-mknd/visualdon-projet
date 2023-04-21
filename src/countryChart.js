@@ -18,7 +18,7 @@ const chartHeight = 700;
  * @param chartWidth The width of the chart
  * @param chartHeight The height of the chart
  * @param chartPadding The padding of the chart
- * @returns {{sizeScale: ScalePower<number, number, never>, xScale: ScaleLinear<number, number, never>, yScaleSplit: ScalePoint<string>, yScale: ScaleLinear<number, number, never>}} The scales
+ * @returns The scales
  */
 function createScales(data, chartWidth, chartHeight, chartPadding) {
     const xScale = d3.scaleLinear()
@@ -55,6 +55,7 @@ function createSvg(chartWidth, chartHeight, countryName) {
         .attr("height", chartHeight);
 
     chartSvg.append("text")
+        .attr("id", "country-name")
         .attr("x", chartWidth / 2)
         .attr("y", chartPadding.top)
         .attr("text-anchor", "middle")
@@ -153,12 +154,12 @@ function createColorLegend(chartSvg, chartWidth, chartPadding, colorMapping) {
  * @param chartHeight The height of the chart
  * @param chartPadding The padding of the chart
  * @param bubbles The bubbles
- * @returns {Simulation<SimulationNodeDatum, undefined>} The simulation
+ * @returns The simulation
  */
 function createSimulation(data, xScale, yScaleSplit, sizeScale, chartHeight, chartPadding, bubbles) {
     const centerY = (chartHeight - chartPadding.top - chartPadding.bottom) / 2 + chartPadding.top;
 
-    const simulation = d3.forceSimulation(data)
+    return d3.forceSimulation(data)
         .force("x", d3.forceX(d => xScale(d.year)).strength(1))
         .force("y", d3.forceY(centerY).strength(0.05))
         .force("collide", d3.forceCollide(d => sizeScale(d.value) + 1).strength(0.8))
@@ -167,8 +168,6 @@ function createSimulation(data, xScale, yScaleSplit, sizeScale, chartHeight, cha
                 .attr("cx", d => d.x)
                 .attr("cy", d => d.y);
         });
-
-    return simulation;
 }
 
 /**
@@ -242,6 +241,34 @@ function updateCountryChart(countryCode, co2Emissions) {
     const emissionData = co2Emissions.filter(e => e["ISO 3166-1 alpha-3"] === countryCode);
     const countryName = emissionData[0].Country;
 
+    // Créer et mettre à jour le graphique avec le nom original du pays
+    createAndUpdateChart(countryName, emissionData);
+
+    // Faire une requête à l'API pour obtenir les informations sur le pays
+    async function fetchAndTranslateCountryName() {
+        try {
+            const response = await fetch(`https://restcountries.com/v3.1/alpha/${countryCode}`);
+            if (!response.ok) {
+                throw new Error(`Erreur lors de la récupération des données du pays : ${response.status}`);
+            }
+            const countryData = await response.json();
+            console.log(countryData)
+            // Utiliser le nom traduit du pays si disponible, sinon utiliser le nom original
+            const translatedName = countryData[0].translations.fra.common || countryName;
+            console.log(translatedName)
+            // Mettre à jour le nom du pays dans le graphique
+            d3.select("#country-name").text(translatedName);
+        } catch (error) {
+            console.error("Erreur lors de la récupération des données du pays :", error);
+            // Ne rien faire en cas d'échec de la requête, car le nom original du pays est déjà utilisé
+        }
+    }
+
+    // Appeler la fonction asynchrone pour effectuer la traduction en arrière-plan
+    fetchAndTranslateCountryName();
+}
+
+function createAndUpdateChart(countryName, emissionData) {
     if (emissionData.length > 0) {
         d3.select("#chart-modal").style("display", "block");
         d3.select("#chart-container").selectAll("svg").remove();
