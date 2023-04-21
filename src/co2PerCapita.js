@@ -78,12 +78,19 @@ function updateAxes(svg, x, y) {
  * @param data The data
  * @param year The year
  * @param category
+ * @param translations
  * @returns {*} The top countries
  */
-function processData(data, year, category) {
+function processData(data, year, category, translations) {
+    console.log(translations)
     const yearData = data.filter((d) => d.Year === year.toString());
-    return yearData.sort((a, b) => parseFloat(b[category]) - parseFloat(a[category])).slice(0, topCountries);
+    const sortedData = yearData.sort((a, b) => parseFloat(b[category]) - parseFloat(a[category])).slice(0, topCountries);
+
+    return sortedData.map((d) => {
+        return { ...d, Country: translations[d["ISO 3166-1 alpha-3"]] || d.Country };
+    });
 }
+
 
 
 /**
@@ -144,6 +151,18 @@ function updateBars(svg, x, y, topData, category) {
         .remove();
 }
 
+async function getCountryTranslation(countryCode) {
+    try {
+        const response = await fetch(`https://restcountries.com/v3.1/alpha/${countryCode}`);
+        const countryData = await response.json();
+        return countryData[0].translations.fra.common;
+    } catch (error) {
+        console.error(`Erreur lors de la récupération de la traduction pour ${countryCode}:`, error);
+        return countryCode;
+    }
+}
+
+
 
 /**
  * Create the graph
@@ -151,6 +170,14 @@ function updateBars(svg, x, y, topData, category) {
  */
 async function graphTop10Country() {
     const data = await d3.csv("https://raw.githubusercontent.com/kuasar-mknd/visualdon-projet/develop/src/data/GCB2022v27_percapita_flat-clean.csv");
+
+    const uniqueCountryCodes = new Set(data.map((d) => d['ISO 3166-1 alpha-3']));
+    const translations = {};
+    const countryCodePromises = Array.from(uniqueCountryCodes).map(async (countryCode) => {
+        translations[countryCode] = await getCountryTranslation(countryCode);
+    });
+
+    await Promise.all(countryCodePromises);
 
     const endYear = d3.max(data, d => parseInt(d.Year));
     const startYear = d3.min(data, d => parseInt(d.Year));
@@ -169,7 +196,8 @@ async function graphTop10Country() {
     function update(year) {
         const selectedCategory = emissionCategorySelector.property("value");
         console.log(selectedCategory);
-        const topData = processData(data, year, selectedCategory);
+        const topData = processData(data, year, selectedCategory, translations);
+        console.log(topData);
 
         x.domain([0, d3.max(topData, d => parseFloat(d[selectedCategory]))]);
         y.domain(topData.map(d => d.Country));
