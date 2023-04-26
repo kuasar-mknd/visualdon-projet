@@ -10,6 +10,7 @@ let selectedCountry = null;
 let selectedYear = "2021"; // Initialiser la variable pour stocker l'année sélectionnée
 let selectedCategory = "Total"; // Initialiser la variable pour stocker la catégorie d'émissions sélectionnée
 let prevEmissionData = {};
+let countryElements
 let animationInterval;
 
 
@@ -109,6 +110,7 @@ async function globe3d() {
                 // Afficher le graphique des émissions de CO2 pour le pays sélectionné
                 updateCountryChart(d.properties.A3, co2Emissions, true);
             });
+        countryElements = svg.selectAll(".country");
 
         // Mettre à jour la couleur des pays en fonction des émissions de CO2
         updateColorCountry(co2Emissions);
@@ -198,33 +200,26 @@ function updateColorCountry(co2Emissions) {
     d3.select("#selected-year").text(selectedYear);
 
     // Mettre à jour la couleur des pays en fonction des émissions de CO2
-    svg.selectAll(".country")
-        .each(function (d) {
-            const emissionData = co2Emissions.find((e) => e["ISO 3166-1 alpha-3"] === d.properties.A3 && e.Year === selectedYear);
+    countryElements.each(function (d) {
+        const emissionData = co2Emissions.find((e) => e["ISO 3166-1 alpha-3"] === d.properties.A3 && e.Year === selectedYear);
 
-            if (!emissionData) {
-                // S'il n'y a pas de données d'émission pour l'année, définissez la couleur sur "lightgray"
-                d3.select(this).attr("fill", "lightgray");
-                return;
-            }
+        if (!emissionData) {
+            // S'il n'y a pas de données d'émission pour l'année, définissez la couleur sur "lightgray"
+            d3.select(this).attr("fill", "lightgray");
+            return;
+        }
 
-            // Si les données d'émission ont changé, mettez à jour la couleur du pays
-            if (!prevEmissionData[d.properties.A3] || prevEmissionData[d.properties.A3][selectedCategory] !== emissionData[selectedCategory]) {
-                // Mettre à jour les données d'émission précédentes
-                prevEmissionData[d.properties.A3] = emissionData;
-                // Mettre à jour la couleur du pays en fonction des données d'émission
-                d3.select(this)
-                    .attr("fill", function () {
-                        if (emissionData && emissionData[selectedCategory] !== "0" && emissionData[selectedCategory] !== "") {
-                            //console.log(colorScale(emissionData[selectedCategory]));
-                            return colorScale(emissionData[selectedCategory]);
-                        } else {
-                            //console.log("lightgray");
-                            return "lightgray";
-                        }
-                    });
-            }
-        });
+        // Si les données d'émission ont changé, mettez à jour la couleur du pays
+        if (!prevEmissionData[d.properties.A3] || prevEmissionData[d.properties.A3][selectedCategory] !== emissionData[selectedCategory]) {
+            // Mettre à jour les données d'émission précédentes
+            prevEmissionData[d.properties.A3] = emissionData;
+            // Mettre à jour la couleur du pays en fonction des données d'émission
+            const newColor = (emissionData && emissionData[selectedCategory] !== "0" && emissionData[selectedCategory] !== "")
+                ? colorScale(emissionData[selectedCategory])
+                : "lightgray";
+            d3.select(this).attr("fill", newColor);
+        }
+    });
 }
 
 /**
@@ -338,7 +333,7 @@ function animateYears(minYear, maxYear, co2Emissions) {
             //clearInterval(animationInterval);
             //d3.select("#play-pause-btn").attr("data-state", "play").text("Voyager dans le temps");
         }
-    }, 10);
+    }, 300);
 }
 
 // Gestionnaire d'événements click pour le document entier
