@@ -1,5 +1,5 @@
 # VisualDon - Projet HEIG-VD
-## Évolution des émissions de CO2 dans le monde de 2001 à 2022
+## Évolution des émissions de CO2 dans le monde de 1750 à 2021
 État du déploiement : [![Netlify Status](https://api.netlify.com/api/v1/badges/e5ca3c8a-15bb-420d-8885-4c1f7e6f877a/deploy-status)](https://visualdon-kuasar.netlify.app/)
 # Contexte
 Ce jeu de données fournit un aperçu détaillé des émissions mondiales de CO2 au niveau des pays, permettant une meilleure compréhension de la contribution de chaque pays et de l'impact humain sur le climat. Il contient des informations sur les émissions totales ainsi que sur celles provenant du charbon, du pétrole, du gaz, de la production de ciment et des torchères ainsi que d'autres sources.
@@ -41,7 +41,7 @@ Cela permettra également de mettre en évidence les pays qui ont le plus d'émi
 
 [![DOI](https://zenodo.org/badge/DOI/10.5194/essd-13-5213-2021.svg)](http://doi.org/10.5194/essd-13-5213-2021)
 
-Cette étude présente un nouvel ensemble de données synthétiques sur les émissions anthropiques de gaz à effet de serre (GES) pour la période allant de 1970 à 2019, qui compilent des informations fiables sur les émissions de CO2, de CH4, de N2O et des gaz fluorés (F-gaz). Les résultats montrent une croissance continue des émissions de GES dans tous les secteurs et groupes de gaz, sans réduction significative observée dans aucun secteur mondial. Les auteurs soulignent l'importance de développer des estimations d'émissions de GES indépendantes, robustes et en temps réel pour suivre les progrès de la politique climatique.
+Cette étude présente un nouvel ensemble de données synthétiques sur les émissions anthropiques de gaz à effet de serre (GES) pour la période allant de 1750 à 2021, qui compilent des informations fiables sur les émissions de CO2. Les résultats montrent une croissance continue des émissions de CO2 dans tous les secteurs, sans réduction significative observée dans aucun secteur mondial. Les auteurs soulignent l'importance de développer des estimations d'émissions de GES indépendantes, robustes et en temps réel pour suivre les progrès de la politique climatique.
 
 # Wireframes
 ![Wireframe1](https://user-images.githubusercontent.com/60432398/225912605-72723a33-2e76-4531-a0a4-b551e31d0658.png)
