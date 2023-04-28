@@ -14,7 +14,7 @@ body {
 }
 
 .play {
-    @apply px-4 py-2 bg-fuchsia-900 hover:bg-fuchsia-800 text-white rounded-md shadow-md transition-colors duration-300 ease-in-out;
+    @apply px-4 py-2 bg-blue-950 hover:bg-blue-900 text-white rounded-md shadow-md transition-colors duration-300 ease-in-out;
     height: 3rem;
     width: 15rem;
 }
@@ -173,11 +173,11 @@ text {
 }
 
 input:checked + .slider {
-    background-color: #86198f;
+    background-color: #183179;
 }
 
 input:focus + .slider {
-    box-shadow: 0 0 1px #86198f;
+    box-shadow: 0 0 1px #183179;
 }
 
 input:checked + .slider:before {
