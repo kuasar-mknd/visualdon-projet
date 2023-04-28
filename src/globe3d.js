@@ -302,7 +302,7 @@ function handleWheel(event) {
 function getGradientPercentage(scale) {
     // Modifier ces valeurs en fonction de vos préférences
     const minScale = 1;
-    const maxScale = 10 * 50;
+    const maxScale = 10 * 41;
 
     const percentage = ((scale - minScale) / (maxScale - minScale)) * 100;
     return Math.min(Math.max(percentage, 0), 100);
