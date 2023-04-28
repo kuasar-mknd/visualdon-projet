@@ -34,7 +34,7 @@ const svg = d3.select("#globe-container").append("svg")
     .attr("id", "map")
 
 // Créer une échelle de couleur du bleu au rouge
-let colorScale = d3.scaleSequential(d3.interpolateRgb("blue", "red"))
+let colorScale = d3.scaleSequential(d3.interpolateRgb("#fee0d2", "#de2d26"))
     .domain([0, 10000]);
 
 // Appliquer une transformation logarithmique à l'échelle de couleur
