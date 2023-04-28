@@ -117,6 +117,9 @@ async function globe3d() {
             })
             .on("mouseout", function () {
                 hideTooltip();
+            })
+            .on("mousemove", (event) => {
+                moveTooltip(event);
             });
 
         countryElements = svg.selectAll(".country");
@@ -369,13 +372,15 @@ async function showTooltip(event, d, co2Emissions) {
 
         if (!emissionData) return;
 
+        const formattedEmissions = parseFloat(emissionData[selectedCategory]).toFixed(2); // Formatte les émissions avec 2 chiffres après la virgule
+
         const tooltip = d3.select("#tooltip");
         tooltip.style("visibility", "visible")
             .style("left", (event.pageX + 10) + "px")
             .style("top", (event.pageY - 10) + "px")
             .html(`
           <strong>${translatedName}</strong><br/>
-          Émissions ${selectedCategory} : ${emissionData[selectedCategory]} MtCO2
+          Émissions ${selectedCategory} : ${formattedEmissions} MtCO2
         `);
     }, 100);
 }
@@ -383,6 +388,12 @@ async function showTooltip(event, d, co2Emissions) {
 function hideTooltip() {
     clearTimeout(tooltipTimeout);
     d3.select("#tooltip").style("visibility", "hidden");
+}
+
+function moveTooltip(event) {
+    d3.select("#tooltip")
+        .style("left", (event.pageX + 10) + "px")
+        .style("top", (event.pageY - 10) + "px");
 }
 
 
