@@ -11,6 +11,7 @@ const colorMapping = {
 const chartWidth = 800;
 const chartPadding = {top: 50, right: 70, bottom: 50, left: 50}
 const chartHeight = 700;
+let tooltipTimeout;
 
 /**
  * Create the scales
@@ -178,14 +179,18 @@ function setupTooltip(bubbles) {
     const tooltip = d3.select("#tooltip");
 
     bubbles.on("mouseover", (event, d) => {
+        clearTimeout(tooltipTimeout);
+        tooltipTimeout = setTimeout(() => {
         tooltip.style("visibility", "visible")
             .html(`Année: ${d.year}<br>Secteur: ${d.sector}<br>Émissions (MtCO2): ${d.value.toFixed(2)}`);
+        }, 50);
     })
         .on("mousemove", (event) => {
             tooltip.style("top", (event.pageY - 10) + "px")
                 .style("left", (event.pageX + 10) + "px");
         })
         .on("mouseout", () => {
+            clearTimeout(tooltipTimeout);
             tooltip.style("visibility", "hidden");
         });
 }

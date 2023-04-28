@@ -10,6 +10,8 @@ let selectedCountry = null;
 let selectedYear = "2021"; // Initialiser la variable pour stocker l'année sélectionnée
 let selectedCategory = "Total"; // Initialiser la variable pour stocker la catégorie d'émissions sélectionnée
 let prevEmissionData = {};
+const countryCache = {};
+let tooltipTimeout;
 let countryElements
 let animationInterval;
 
@@ -109,8 +111,16 @@ async function globe3d() {
 
                 // Afficher le graphique des émissions de CO2 pour le pays sélectionné
                 updateCountryChart(d.properties.A3, co2Emissions, true);
+            })
+            .on("mouseover", function (event, d) {
+                showTooltip(event, d.properties.A3, co2Emissions);
+            })
+            .on("mouseout", function () {
+                hideTooltip();
             });
+
         countryElements = svg.selectAll(".country");
+
 
         // Mettre à jour la couleur des pays en fonction des émissions de CO2
         updateColorCountry(co2Emissions);
@@ -335,6 +345,46 @@ function animateYears(minYear, maxYear, co2Emissions) {
         }
     }, 300);
 }
+
+async function showTooltip(event, d, co2Emissions) {
+    clearTimeout(tooltipTimeout);
+    tooltipTimeout = setTimeout(async () => {
+        const emissionData = co2Emissions.find((e) => e["ISO 3166-1 alpha-3"] === d && e.Year === selectedYear);
+
+        let countryData;
+
+        if (countryCache[d]) {
+            countryData = countryCache[d];
+        } else {
+            const response = await fetch(`https://restcountries.com/v3.1/alpha/${d}`);
+            if (!response.ok) {
+                throw new Error(`Erreur lors de la récupération des données du pays : ${response.status}`);
+            }
+            countryData = await response.json();
+            countryCache[d] = countryData; // Ajoutez les données dans le cache
+        }
+
+        // Utiliser le nom traduit du pays si disponible, sinon utiliser le nom original
+        const translatedName = countryData[0].translations.fra.common || countryData[0].name.common;
+
+        if (!emissionData) return;
+
+        const tooltip = d3.select("#tooltip");
+        tooltip.style("visibility", "visible")
+            .style("left", (event.pageX + 10) + "px")
+            .style("top", (event.pageY - 10) + "px")
+            .html(`
+          <strong>${translatedName}</strong><br/>
+          Émissions ${selectedCategory} : ${emissionData[selectedCategory]} MtCO2
+        `);
+    }, 100);
+}
+
+function hideTooltip() {
+    clearTimeout(tooltipTimeout);
+    d3.select("#tooltip").style("visibility", "hidden");
+}
+
 
 // Gestionnaire d'événements click pour le document entier
 document.addEventListener("click", function (event) {
