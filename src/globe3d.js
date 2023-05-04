@@ -35,10 +35,10 @@ const svg = d3.select("#globe-container").append("svg")
 
 // Créer une échelle de couleur du bleu au rouge
 let colorScale = d3.scaleSequential(d3.interpolateRgb("#fee0d2", "#de2d26"))
-    .domain([0, 10000]);
+    .domain([0, 11400]);
 
 // Appliquer une transformation logarithmique à l'échelle de couleur
-colorScale = d3.scaleLog().base(10).clamp(true).domain([Math.max(1, 0), 10000]).range([colorScale(0), colorScale(10000)]);
+colorScale = d3.scaleLog().base(10).clamp(true).domain([Math.max(1, 0), 11400]).range([colorScale(0), colorScale(11400)]);
 
 async function globe3d() {
     // charger les données CSV et GeoJSON en même temps
@@ -78,7 +78,7 @@ async function globe3d() {
                     });
 
                 if (selectedCountry && selectedCountry === d) {
-                    return; // Ne fait rien si le pays sélectionné est déjà centré
+                    return; // Ne fais rien si le pays sélectionné est déjà centré
                 }
 
                 // Mise à jour du pays sélectionné
@@ -372,7 +372,7 @@ async function showTooltip(event, d, co2Emissions) {
 
         if (!emissionData) return;
 
-        const formattedEmissions = parseFloat(emissionData[selectedCategory]).toFixed(2); // Formatte les émissions avec 2 chiffres après la virgule
+        const formattedEmissions = parseFloat(emissionData[selectedCategory]).toFixed(2); // Formate les émissions avec 2 chiffres après la virgule
 
         const tooltip = d3.select("#tooltip");
         tooltip.style("visibility", "visible")
