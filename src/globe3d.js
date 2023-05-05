@@ -196,6 +196,14 @@ async function globe3d() {
  */
 function requestUpdateCO2Data(year, co2Emissions, world) {
     requestAnimationFrame(() => updateCO2Data(year, co2Emissions, world));
+
+    // Mettre à jour le tooltip
+    const tooltip = d3.select("#tooltip");
+    const countryCode = tooltip.attr("data-country");
+    if (countryCode) {
+        updateTooltip(countryCode, year, co2Emissions);
+    }
+
 }
 
 /**
@@ -349,7 +357,7 @@ function createYearInput(minYear, maxYear) {
  * @param world
  */
 function animateYears(minYear, maxYear, co2Emissions, world) {
-    const delay = 50;
+    const delay = 100;
     function updateYear() {
         const yearInput = d3.select("#year-input").node();
         const currentYear = +yearInput.value;
@@ -380,8 +388,6 @@ function animateYears(minYear, maxYear, co2Emissions, world) {
 async function showTooltip(event, d, co2Emissions) {
     clearTimeout(tooltipTimeout);
     tooltipTimeout = setTimeout(async () => {
-        const emissionData = co2Emissions.find((e) => e["ISO 3166-1 alpha-3"] === d && e.Year === selectedYear);
-
         let countryData;
 
         if (countryCache[d]) {
@@ -395,23 +401,37 @@ async function showTooltip(event, d, co2Emissions) {
             countryCache[d] = countryData; // Ajoutez les données dans le cache
         }
 
-        // Utiliser le nom traduit du pays si disponible, sinon utiliser le nom original
-        const translatedName = countryData[0].translations.fra.common || countryData[0].name.common;
-
-        if (!emissionData) return;
-
-        const formattedEmissions = parseFloat(emissionData[selectedCategory]).toFixed(2); // Formate les émissions avec 2 chiffres après la virgule
+        updateTooltip(d, selectedYear, co2Emissions);
 
         const tooltip = d3.select("#tooltip");
         tooltip.style("visibility", "visible")
             .style("left", (event.pageX + 10) + "px")
             .style("top", (event.pageY - 10) + "px")
-            .html(`
-          <strong>${translatedName}</strong><br/>
-          Émissions ${selectedCategory} : ${formattedEmissions} MtCO2
-        `);
+            .attr("data-country", d)
     }, 100);
 }
+
+function updateTooltip(countryCode, year, co2Emissions) {
+    const emissionData = co2Emissions.find((e) => e["ISO 3166-1 alpha-3"] === countryCode && e.Year === year);
+
+    if (!emissionData) return;
+
+    const countryData = countryCache[countryCode];
+    if (!countryData) return;
+
+    // Utiliser le nom traduit du pays si disponible, sinon utiliser le nom original
+    const translatedName = countryData[0].translations.fra.common || countryData[0].name.common;
+
+    const formattedEmissions = parseFloat(emissionData[selectedCategory]).toFixed(2); // Formate les émissions avec 2 chiffres après la virgule
+
+    const tooltip = d3.select("#tooltip");
+    tooltip.html(`
+    <strong>${translatedName}</strong><br/>
+    Émissions ${selectedCategory} : ${formattedEmissions} MtCO2
+  `);
+}
+
+
 
 function hideTooltip() {
     clearTimeout(tooltipTimeout);
