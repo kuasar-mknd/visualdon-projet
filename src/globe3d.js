@@ -202,7 +202,7 @@ function autoRotate() {
         if (now - lastInteraction > autoRotationDelay) {
             console.log("rotating")
             const rotate = projection.rotate();
-            const speedFactor = 1 + projection.scale() / 1000;
+            const speedFactor = 0.5 + projection.scale() / 1000;
             projection.rotate([rotate[0] + 0.1 / speedFactor, rotate[1]]);
             svg.selectAll("path").attr("d", path);
         }
