@@ -247,6 +247,7 @@ function updateSplit(split, simulation, yScaleSplit, colorLegendGroup, colorMapp
 function updateCountryChart(countryCode, co2Emissions) {
 
     document.getElementById("auto-rotation-checkbox").checked = false;
+    document.getElementById("play-pause-btn").click();
 
     const emissionData = co2Emissions.filter(e => e["ISO 3166-1 alpha-3"] === countryCode);
     const countryName = emissionData[0].Country;
