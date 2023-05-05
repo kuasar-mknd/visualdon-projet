@@ -18,6 +18,9 @@ let animationInterval;
 let emissionDataByCountryYear;
 let animationActive = false;
 let animationFrameID;
+let lastInteraction;
+const autoRotationDelay = 500; // 5 secondes
+
 
 
 // créer une projection pour la carte
@@ -52,6 +55,7 @@ async function globe3d() {
         d3.json("./data/countries-coastline-10km.geo.json")
     ]).then(function (values) {
 
+        lastInteraction = Date.now();
         // extraire les données à partir des valeurs résolues
         const co2Emissions = values[0];
         emissionDataByCountryYear = co2Emissions.reduce((acc, curr) => {
@@ -143,6 +147,7 @@ async function globe3d() {
 
         // ajouter une interaction pour faire tourner la carte
         svg.call(d3.drag().on("drag", function (event) {
+            lastInteraction = Date.now();
             const rotate = projection.rotate();
             // Calculer un facteur de vitesse en fonction de l'échelle actuelle de la projection
             const speedFactor = 1 + projection.scale() / 100;
@@ -186,6 +191,23 @@ async function globe3d() {
             }
         });
     });
+    autoRotate();
+}
+
+function autoRotate() {
+    const now = Date.now();
+    const autoRotationCheckbox = document.getElementById('auto-rotation-checkbox');
+    if (autoRotationCheckbox && autoRotationCheckbox.checked) {
+        console.log("autorotate launched")
+        if (now - lastInteraction > autoRotationDelay) {
+            console.log("rotating")
+            const rotate = projection.rotate();
+            const speedFactor = 1 + projection.scale() / 1000;
+            projection.rotate([rotate[0] + 0.1 / speedFactor, rotate[1]]);
+            svg.selectAll("path").attr("d", path);
+        }
+    }
+        requestAnimationFrame(autoRotate);
 }
 
 /**
@@ -302,6 +324,7 @@ function getBounds(geometry, projection) {
  * @param event Événement
  */
 function handleWheel(event) {
+    lastInteraction = Date.now();
     event.preventDefault();
     const zoomFactor = event.deltaY < 0 ? 1.1 : 0.9;
     const currentScale = projection.scale();
