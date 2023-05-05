@@ -165,9 +165,11 @@ function createSimulation(data, xScale, yScaleSplit, sizeScale, chartHeight, cha
         .force("y", d3.forceY(centerY).strength(0.05))
         .force("collide", d3.forceCollide(d => sizeScale(d.value) + 1).strength(0.8))
         .on("tick", () => {
-            bubbles
-                .attr("cx", d => d.x)
-                .attr("cy", d => d.y);
+            requestAnimationFrame(() => {
+                bubbles
+                    .attr("cx", d => d.x)
+                    .attr("cy", d => d.y);
+            });
         });
 }
 
@@ -243,6 +245,9 @@ function updateSplit(split, simulation, yScaleSplit, colorLegendGroup, colorMapp
  * @param co2Emissions The co2 emissions
  */
 function updateCountryChart(countryCode, co2Emissions) {
+
+    document.getElementById("auto-rotation-checkbox").checked = false;
+
     const emissionData = co2Emissions.filter(e => e["ISO 3166-1 alpha-3"] === countryCode);
     const countryName = emissionData[0].Country;
 
