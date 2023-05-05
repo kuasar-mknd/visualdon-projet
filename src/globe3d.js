@@ -1,5 +1,6 @@
 import * as d3 from "d3";
 import updateCountryChart from "./countryChart";
+import dataCSV from "./data/GCB2022v27_MtCO2_flat-clean.csv";
 
 // définir les dimensions de la carte
 //get width from container
@@ -42,9 +43,11 @@ colorScale = d3.scaleLog().base(10).clamp(true).domain([Math.max(1, 0), 11400]).
 
 async function globe3d() {
     // charger les données CSV et GeoJSON en même temps
-    Promise.all([//d3.csv("./data/GCB2022v27_MtCO2_flat.csv"),
-        //d3.json("./data/countries-coastline-10km.geo.json")
-        d3.csv("https://raw.githubusercontent.com/kuasar-mknd/visualdon-projet/develop/src/data/GCB2022v27_MtCO2_flat-clean.csv"), d3.json("https://raw.githubusercontent.com/kuasar-mknd/visualdon-projet/develop/src/data/countries-coastline-10km.geo.json")]).then(function (values) {
+    // charger les données CSV et GeoJSON en même temps
+    Promise.all([
+        d3.csv("./data/GCB2022v27_MtCO2_flat-clean.csv"),
+        d3.json("./data/countries-coastline-10km.geo.json")
+    ]).then(function (values) {
 
         // extraire les données à partir des valeurs résolues
         const co2Emissions = values[0];
