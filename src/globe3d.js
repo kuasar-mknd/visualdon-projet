@@ -190,6 +190,18 @@ async function globe3d() {
                 animationActive = false;
             }
         });
+
+        d3.select("#scale-checkbox").on("change", function () {
+            const scale = this.checked ? "log" : "line";
+            prevEmissionData = {};
+            console.log(scale);
+            if(scale === "line") {
+                colorScale = d3.scaleSequential(d3.interpolateRgb("#fee0d2", "#de2d26")).domain([0, 11400]);
+            } else {
+                colorScale = d3.scaleLog().base(10).clamp(true).domain([Math.max(1, 0), 11400]).range([colorScale(0), colorScale(11400)]);
+            }
+            updateColorCountry(co2Emissions, world);
+        })
     });
     autoRotate();
 }
