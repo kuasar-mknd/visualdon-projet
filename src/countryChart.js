@@ -247,6 +247,8 @@ function updateSplit(split, simulation, yScaleSplit, colorLegendGroup, colorMapp
 function updateCountryChart(countryCode, co2Emissions) {
 
     document.getElementById("auto-rotation-checkbox").checked = false;
+    //check if the play/pause button text value is "Pause" and click it if it is
+    if (document.getElementById("play-pause-btn").innerText === "Pause")
     document.getElementById("play-pause-btn").click();
 
     const emissionData = co2Emissions.filter(e => e["ISO 3166-1 alpha-3"] === countryCode);

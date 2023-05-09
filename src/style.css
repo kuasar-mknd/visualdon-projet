@@ -204,3 +204,13 @@ input:checked + .slider:before {
 .year-slider {
     @apply w-full h-2 bg-gray-400 rounded-lg overflow-hidden appearance-none focus:outline-none;
 }
+
+.scaleGlobe {
+    position: absolute;
+    transform: translate(-370%, -100%);;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: flex-end;
+    gap: 10px;
+}
