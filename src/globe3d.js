@@ -1,6 +1,5 @@
 import * as d3 from "d3";
 import updateCountryChart from "./countryChart";
-import dataCSV from "./data/GCB2022v27_MtCO2_flat-clean.csv";
 
 // définir les dimensions de la carte
 //get width from container
@@ -14,12 +13,11 @@ let prevEmissionData = {};
 const countryCache = {};
 let tooltipTimeout;
 let countryElements;
-let animationInterval;
 let emissionDataByCountryYear;
 let animationActive = false;
 let animationFrameID;
 let lastInteraction;
-const autoRotationDelay = 500; // 5 secondes
+const autoRotationDelay = 500;
 
 
 
@@ -48,7 +46,6 @@ let colorScale = d3.scaleSequential(d3.interpolateRgb("#fee0d2", "#de2d26"))
 colorScale = d3.scaleLog().base(10).clamp(true).domain([Math.max(1, 0), 11400]).range([colorScale(0), colorScale(11400)]);
 
 async function globe3d() {
-    // charger les données CSV et GeoJSON en même temps
     // charger les données CSV et GeoJSON en même temps
     Promise.all([
         d3.csv("./data/GCB2022v27_MtCO2_flat-clean.csv"),
@@ -436,11 +433,18 @@ async function showTooltip(event, d, co2Emissions) {
 
 function updateTooltip(countryCode, year, co2Emissions) {
     const emissionData = co2Emissions.find((e) => e["ISO 3166-1 alpha-3"] === countryCode && e.Year === year);
-
-    if (!emissionData) return;
-
     const countryData = countryCache[countryCode];
+
+    if (!emissionData) {
+        const translatedNameNoneExistant = countryData[0].translations.fra.common || countryData[0].name.common;
+        const tooltip = d3.select("#tooltip");
+        tooltip.html(`<strong>${translatedNameNoneExistant}</strong><br/>`)
+        return;
+    }
+
+
     if (!countryData) return;
+
 
     // Utiliser le nom traduit du pays si disponible, sinon utiliser le nom original
     const translatedName = countryData[0].translations.fra.common || countryData[0].name.common;
