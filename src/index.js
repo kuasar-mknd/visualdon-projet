@@ -46,6 +46,8 @@ document.addEventListener("DOMContentLoaded", () => {
     graphTop10Country(values[2]);
 
     perCapitaCheckbox.addEventListener("change", function() {
+        //reset animationFrame
+        window.cancelAnimationFrame(window.requestAnimationFrame);
         //clean div id timeline-container
         document.getElementById("timeline-container").innerHTML = "";
         document.getElementById("globe-container").innerHTML = "";

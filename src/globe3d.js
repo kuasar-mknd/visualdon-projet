@@ -16,6 +16,7 @@ let countryElements;
 let emissionDataByCountryYear;
 let animationActive = false;
 let animationFrameID;
+let animationFrameIDRotation;
 let lastInteraction;
 let svg;
 const autoRotationDelay = 500;
@@ -34,7 +35,13 @@ const path = d3.geoPath()
 
 // Créer une échelle de couleur du bleu au rouge
 let colorScale;
+
+
 async function globe3d(dataEmission, dataGeoJson, maxTotal) {
+    cancelAnimationFrame(animationFrameIDRotation);
+    animationActive = false;
+    animationFrameID = null;
+    lastInteraction = null;
     prevEmissionData = {};
     colorScale = null;
     svg = d3.select("#globe-container").append("svg")
@@ -190,6 +197,10 @@ async function globe3d(dataEmission, dataGeoJson, maxTotal) {
                 prevEmissionData = {}
                 colorScale = d3.scaleSequential(d3.interpolateRgb("#fee0d2", "#de2d26")).domain([0, maxTotal]);
             }
+            else{
+                prevEmissionData = {}
+                colorScale = d3.scaleLog().base(10).clamp(true).domain([Math.max(1, 0), maxTotal]).range([colorScale(0), colorScale(maxTotal)]);
+            }
             updateColorCountry(co2Emissions, world);
         })
     autoRotate();
@@ -208,7 +219,7 @@ function autoRotate() {
             svg.selectAll("path").attr("d", path);
         }
     }
-        requestAnimationFrame(autoRotate);
+    animationFrameIDRotation = requestAnimationFrame(autoRotate);
 }
 
 /**
