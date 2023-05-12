@@ -220,9 +220,9 @@ function autoRotate() {
     const now = Date.now();
     const autoRotationCheckbox = document.getElementById('auto-rotation-checkbox');
     if (autoRotationCheckbox && autoRotationCheckbox.checked) {
-        console.log("autorotate launched")
+        //console.log("autorotate launched")
         if (now - lastInteraction > autoRotationDelay) {
-            console.log("rotating")
+            //console.log("rotating")
             const rotate = projection.rotate();
             const speedFactor = 0.5 + projection.scale() / 1000;
             projection.rotate([rotate[0] + 0.1 / speedFactor, rotate[1]]);
