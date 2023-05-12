@@ -37,7 +37,7 @@ const path = d3.geoPath()
 let colorScale;
 
 
-async function globe3d(dataEmission, dataGeoJson, maxTotal) {
+async function globe3d(dataEmission, dataGeoJson) {
     cancelAnimationFrame(animationFrameIDRotation);
     animationActive = false;
     animationFrameID = null;
@@ -67,9 +67,19 @@ async function globe3d(dataEmission, dataGeoJson, maxTotal) {
         createYearInput(minYear, maxYear);
 
         //Get max value total for specific year
+        // Get an array of all Total emissions
+        const totalEmissions = co2Emissions.map((d) => parseFloat(d.Total)).filter((d) => !isNaN(d));
+
+        // Calculate the median and interquartile range (IQR)
+        const median = d3.median(totalEmissions);
+        const q1 = d3.quantile(totalEmissions, 0.25);
+        const q3 = d3.quantile(totalEmissions, 0.99);
+        const iqr = q3 - q1;
+
+        // Calculate the minimum and maximum values (excluding outliers)
+        const [minTotal, maxTotal] = d3.extent(totalEmissions.filter((d) => d >= q1 - 1.5 * iqr && d <= q3 + 1.5 * iqr));
         colorScale = d3.scaleSequential(d3.interpolateRgb("#fee0d2", "#de2d26")).domain([0, maxTotal]);
         colorScale = d3.scaleLog().base(10).clamp(true).domain([Math.max(1, 0), maxTotal]).range([colorScale(0), colorScale(maxTotal)]);
-        console.log(colorScale);
 
         // créer un groupe pour les frontières des pays
         const countries = svg.append("g")
