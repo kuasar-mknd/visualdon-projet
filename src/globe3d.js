@@ -17,6 +17,7 @@ let emissionDataByCountryYear;
 let animationActive = false;
 let animationFrameID;
 let lastInteraction;
+let svg;
 const autoRotationDelay = 500;
 
 
@@ -31,42 +32,37 @@ const projection = d3.geoOrthographic()
 const path = d3.geoPath()
     .projection(projection);
 
-// créer un élément SVG pour la carte
-const svg = d3.select("#globe-container").append("svg")
+// Créer une échelle de couleur du bleu au rouge
+let colorScale;
+async function globe3d(dataEmission, dataGeoJson, maxTotal) {
+    prevEmissionData = {};
+    colorScale = null;
+    svg = d3.select("#globe-container").append("svg")
     .attr("width", width)
     .attr("height", height)
     .attr("vector-effect", "non-scaling-stroke")
     .attr("id", "map")
 
-// Créer une échelle de couleur du bleu au rouge
-let colorScale = d3.scaleSequential(d3.interpolateRgb("#fee0d2", "#de2d26"))
-    .domain([0, 11400]);
-
-// Appliquer une transformation logarithmique à l'échelle de couleur
-colorScale = d3.scaleLog().base(10).clamp(true).domain([Math.max(1, 0), 11400]).range([colorScale(0), colorScale(11400)]);
-
-async function globe3d() {
-    // charger les données CSV et GeoJSON en même temps
-    Promise.all([
-        d3.csv("./data/GCB2022v27_MtCO2_flat-clean.csv"),
-        d3.json("./data/countries-coastline-10km.geo.json")
-    ]).then(function (values) {
-
         lastInteraction = Date.now();
         // extraire les données à partir des valeurs résolues
-        const co2Emissions = values[0];
+        const co2Emissions = dataEmission;
         emissionDataByCountryYear = co2Emissions.reduce((acc, curr) => {
             acc[`${curr['ISO 3166-1 alpha-3']}_${curr.Year}`] = curr;
             return acc;
         }, {});
         //console.log(co2Emissions)
-        const world = values[1];
+        const world = dataGeoJson;
 
         // Création de la timeline
         const years = co2Emissions.map(e => e.Year);
         const minYear = Math.min(...years);
         const maxYear = Math.max(...years);
         createYearInput(minYear, maxYear);
+
+        //Get max value total for specific year
+        colorScale = d3.scaleSequential(d3.interpolateRgb("#fee0d2", "#de2d26")).domain([0, maxTotal]);
+        colorScale = d3.scaleLog().base(10).clamp(true).domain([Math.max(1, 0), maxTotal]).range([colorScale(0), colorScale(maxTotal)]);
+        console.log(colorScale);
 
         // créer un groupe pour les frontières des pays
         const countries = svg.append("g")
@@ -187,7 +183,15 @@ async function globe3d() {
                 animationActive = false;
             }
         });
-    });
+
+        d3.select("#ladder-checkbox").on("change", function () {
+            const ladderCheckbox = document.getElementById('ladder-checkbox');
+            if (ladderCheckbox.checked) {
+                prevEmissionData = {}
+                colorScale = d3.scaleSequential(d3.interpolateRgb("#fee0d2", "#de2d26")).domain([0, maxTotal]);
+            }
+            updateColorCountry(co2Emissions, world);
+        })
     autoRotate();
 }
 
@@ -438,7 +442,7 @@ function updateTooltip(countryCode, year, co2Emissions) {
     if (!emissionData) {
         const translatedNameNoneExistant = countryData[0].translations.fra.common || countryData[0].name.common;
         const tooltip = d3.select("#tooltip");
-        tooltip.html(`<strong>${translatedNameNoneExistant}</strong><br/>`)
+        tooltip.html(`<strong>${translatedNameNoneExistant}</strong><br/>Pas de donnée disponible`);
         return;
     }
 
@@ -471,7 +475,6 @@ function moveTooltip(event) {
         .style("top", (event.pageY - 10) + "px");
 }
 
-
 // Gestionnaire d'événements click pour le document entier
 document.addEventListener("click", function (event) {
     if (event.target.tagName !== "path") {
@@ -485,5 +488,7 @@ document.addEventListener("click", function (event) {
         d3.select("#chart-modal").style("display", "none");
     }
 });
+
+
 
 export {globe3d};

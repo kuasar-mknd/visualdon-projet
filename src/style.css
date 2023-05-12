@@ -214,3 +214,40 @@ input:checked + .slider:before {
     justify-content: flex-end;
     gap: 10px;
 }
+
+.dropdown-btn {
+    @apply bg-blue-950 hover:bg-blue-900 text-white rounded-full shadow-md transition-colors duration-300 ease-in-out;
+    width: 50px;
+    height: 50px;
+    /*Align center verticl and horizontal*/;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+#dropdown-menu-settings {
+    display: flex;
+    justify-content: flex-end;
+    align-content: flex-end;
+    align-items: flex-end;
+    flex-direction: column;
+    gap: 10px;
+    position:relative;float:right;
+    margin: 1rem;
+}
+
+#dropdown-menu{
+    @apply bg-blue-950 p-5 text-white rounded-md shadow-md;
+    display: none;
+    justify-content: space-between;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.dropdown-menu-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}

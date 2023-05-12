@@ -171,8 +171,8 @@ async function getCountryTranslation(countryCode) {
  * Create the graph
  * @returns {Promise<void>} The graph
  */
-async function graphTop10Country() {
-    const data = await d3.csv("./data/GCB2022v27_percapita_flat-clean.csv");
+async function graphTop10Country(dataPerCapita) {
+    const data = dataPerCapita;
 
     const uniqueCountryCodes = new Set(data.map((d) => d['ISO 3166-1 alpha-3']));
     const translations = {};

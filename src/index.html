@@ -11,6 +11,7 @@
     <link href="https://fonts.googleapis.com" rel="preconnect">
     <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link href="style.css" rel="stylesheet">
 </head>
 <body>
@@ -72,6 +73,29 @@
 
                 <button class="play" data-state="play" id="play-pause-btn">Voyager dans le temps</button>
 
+            </div>
+            <div id="dropdown-menu-settings">
+                <button class="dropdown-btn" id="dropdown-btn"><span class="material-symbols-rounded">
+                    settings
+                    </span>
+                </button>
+                <!--Create menu with 2 toggle, 1 to change data type to perCapita and the other to change the ladder-->
+                <div class="dropdown-menu" id="dropdown-menu">
+                    <div class="dropdown-menu-item">
+                        Par habitant
+                        <label for="per-capita-checkbox" class="switch">
+                        <input id="per-capita-checkbox" name="per-capita-checkbox" type="checkbox">
+                        <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <div class="dropdown-menu-item">
+                        Échelle linéaire
+                        <label for="ladder-checkbox" class="switch">
+                        <input id="ladder-checkbox" name="ladder-checkbox" type="checkbox">
+                        <span class="slider round"></span>
+                    </label>
+                    </div>
+                </div>
             </div>
             <div id="globe-container"></div>
             <div id="timeline-container"></div>

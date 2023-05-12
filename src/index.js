@@ -1,8 +1,13 @@
 import "./style.css";
+import * as d3 from "d3";
 
 import {graphTop10Country} from "./co2PerCapita.js";
 import {globe3d} from "./globe3d";
 
+const dropdownBtn = document.getElementById("dropdown-btn");
+const dropdownMenu = document.getElementById("dropdown-menu");
+const perCapitaCheckbox = document.getElementById("per-capita-checkbox");
+let timeoutId;
 let startY;
 
 document.getElementById("chart-container").addEventListener("click", function (event) {
@@ -21,7 +26,13 @@ document.addEventListener("DOMContentLoaded", () => {
         event.stopPropagation();
     });
 
-    globe3d().then(() => {
+    Promise.all([
+        d3.csv("./data/GCB2022v27_MtCO2_flat-clean.csv"),
+        d3.json("./data/countries-coastline-10km.geo.json"),
+        d3.csv("./data/GCB2022v27_percapita_flat-clean.csv")
+    ]).then(function (values) {
+
+    globe3d(values[0], values[1], 11400).then(() => {
         console.log("Globe loaded");
         setTimeout(() => {
             description.style.opacity = 1;
@@ -32,7 +43,40 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 1500);
     });
 
-    graphTop10Country();
+    graphTop10Country(values[2]);
+
+    perCapitaCheckbox.addEventListener("change", function() {
+        //clean div id timeline-container
+        document.getElementById("timeline-container").innerHTML = "";
+        document.getElementById("globe-container").innerHTML = "";
+        
+        if (perCapitaCheckbox.checked) {
+        globe3d(values[2], values[1], 30)
+        } else {
+        globe3d(values[0], values[1], 11400)
+        }
+    });
+});
+
+
+
+    dropdownBtn.addEventListener("click", function() {
+        if (dropdownMenu.style.display === "none" || dropdownMenu.style.display === "") {
+          dropdownMenu.style.display = "flex";
+        } else {
+          dropdownMenu.style.display = "none";
+        }
+      });
+      
+      dropdownMenu.addEventListener("mouseleave", function() {
+        timeoutId = setTimeout(function() {
+          dropdownMenu.style.display = "none";
+        }, 3000);
+      });
+      
+      dropdownMenu.addEventListener("mouseenter", function() {
+        clearTimeout(timeoutId);
+      });
 
 
     function handleScroll(event, deltaY) {
