@@ -11,9 +11,9 @@ export function useData() {
 
   useEffect(() => {
     Promise.all([
-      d3.csv('/data/GCB2022v27_MtCO2_flat-clean.csv', d3.autoType),
+      d3.csv('/data/GCB_latest_MtCO2_flat-clean.csv', d3.autoType),
       d3.json('/data/countries-coastline-10km.geo.json'),
-      d3.csv('/data/GCB2022v27_percapita_flat-clean.csv', d3.autoType),
+      d3.csv('/data/GCB_latest_percapita_flat-clean.csv', d3.autoType),
     ]).then(([emissions, geoJson, perCapita]) => {
       console.log("Data loaded:", { emissions: emissions.length, geoJson: geoJson.features.length, perCapita: perCapita.length });
       setData({
