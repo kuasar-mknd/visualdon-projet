@@ -1,10 +1,39 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { useLanguage } from '../context/LanguageContext';
+import { fetchCountryDetails } from '../services/countryService';
 
 const TopCountriesChart = ({ data, year, category }) => {
   const svgRef = useRef(null);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const [translatedNames, setTranslatedNames] = useState({});
+
+  // Fetch translated country names when data, year, or language changes
+  useEffect(() => {
+    if (!data) return;
+
+    const yearData = data.filter(d => d.Year === year);
+    const topData = yearData
+      .sort((a, b) => parseFloat(b[category]) - parseFloat(a[category]))
+      .slice(0, 10);
+
+    // Fetch all translations
+    const fetchTranslations = async () => {
+      const translations = {};
+      await Promise.all(
+        topData.map(async (d) => {
+          const code = d["ISO 3166-1 alpha-3"];
+          const name = await fetchCountryDetails(code, language);
+          if (name) {
+            translations[code] = name;
+          }
+        })
+      );
+      setTranslatedNames(translations);
+    };
+
+    fetchTranslations();
+  }, [data, year, category, language]);
 
   useEffect(() => {
     if (!data || !svgRef.current) return;
@@ -107,7 +136,7 @@ const TopCountriesChart = ({ data, year, category }) => {
         .attr("fill", "#cbd5e1")
         .style("font-size", "13px")
         .style("font-weight", "500")
-        .text(d => d.Country);
+        .text(d => translatedNames[d["ISO 3166-1 alpha-3"]] || d.Country);
 
     enter.append("text")
         .attr("class", "value-label")
@@ -132,7 +161,7 @@ const TopCountriesChart = ({ data, year, category }) => {
         .attr("height", y.bandwidth());
 
     update.select(".country-label")
-        .text(d => d.Country); // Update text in case language changes
+        .text(d => translatedNames[d["ISO 3166-1 alpha-3"]] || d.Country); // Update with translated name
 
     update.select(".value-label")
         .transition(tTransition)
@@ -145,7 +174,7 @@ const TopCountriesChart = ({ data, year, category }) => {
             };
         });
 
-  }, [data, year, category, t]);
+  }, [data, year, category, t, translatedNames]);
 
   return <svg ref={svgRef} className="w-full h-full rounded-lg" />;
 };

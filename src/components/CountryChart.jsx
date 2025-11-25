@@ -52,7 +52,6 @@ const CountryChart = ({ countryCode, year, emissionsData }) => {
         .attr("height", height)
         .attr("fill", "#0f172a");
 
-    const countryName = emissionData[0].Country;
 
     if (viewMode === 'bubbles') {
       // ===== BUBBLE CHART MODE =====
