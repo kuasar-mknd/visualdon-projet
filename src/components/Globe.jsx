@@ -71,32 +71,52 @@ const Globe = ({ data, geoJson, year, category, onCountrySelect }) => {
 
     const svg = d3.select(svgRef.current);
     
-    // Drag behavior
+    // Zoom behavior - works with mouse wheel AND touch pinch
+    const zoom = d3.zoom()
+      .scaleExtent([1, 5]) // Relative scale extent
+      .filter((event) => {
+        // Allow zoom on wheel events (desktop)
+        if (event.type === 'wheel') return true;
+        // Allow zoom on touch events with 2+ fingers (mobile pinch)
+        if (event.type.startsWith('touch') && event.touches && event.touches.length >= 2) return true;
+        // Block zoom on single touch (to allow drag rotation)
+        return false;
+      })
+      .on("zoom", (event) => {
+         // Only update scale if it's a zoom event (not a drag)
+         if (event.sourceEvent && (event.sourceEvent.type === 'wheel' || 
+             (event.sourceEvent.touches && event.sourceEvent.touches.length >= 2))) {
+           setScale(event.transform.k * 250);
+         }
+      });
+    
+    // Drag behavior - works with mouse and single-finger touch
     const drag = d3.drag()
+      .filter((event) => {
+        // Allow drag on mouse events
+        if (event.type.startsWith('mouse')) return true;
+        // Allow drag on single-touch events
+        if (event.type.startsWith('touch') && (!event.touches || event.touches.length === 1)) return true;
+        return false;
+      })
       .on("drag", (event) => {
         setRotation(curr => {
             const sensitivity = 0.25;
             return [curr[0] + event.dx * sensitivity, curr[1] - event.dy * sensitivity];
         });
       });
-
-    // Zoom behavior
-    const zoom = d3.zoom()
-      .scaleExtent([1, 5]) // Relative scale extent
-      .on("zoom", (event) => {
-         setScale(event.transform.k * 250);
-      });
       
     // Initialize zoom transform to match current scale
     svg.call(zoom.transform, d3.zoomIdentity.scale(scale / 250));
 
+    // Apply behaviors
     svg.call(drag);
     svg.call(zoom);
     
     // Disable double click zoom to prevent conflict
     svg.on("dblclick.zoom", null);
 
-  }, [width, height]); 
+  }, [width, height]);  
 
 
   // Optimize data lookup
