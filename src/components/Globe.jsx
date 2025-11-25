@@ -11,7 +11,8 @@ const Globe = ({ data, geoJson, year, category, onCountrySelect }) => {
   const [rotation, setRotation] = useState([0, 0]);
   const [scale, setScale] = useState(250); // Initial scale
   const [hoveredCountryName, setHoveredCountryName] = useState(null);
-  const { language } = useLanguage();
+  const [hoveredCountryId, setHoveredCountryId] = useState(null);
+  const { language, t } = useLanguage();
 
   // Resize observer
   useEffect(() => {
@@ -110,14 +111,23 @@ const Globe = ({ data, geoJson, year, category, onCountrySelect }) => {
     return map;
   }, [data, year]);
 
+  // Derived hovered value
+  const hoveredValue = useMemo(() => {
+      if (!hoveredCountryId) return null;
+      const countryData = dataMap.get(hoveredCountryId);
+      return countryData ? parseFloat(countryData[category]) : null;
+  }, [hoveredCountryId, dataMap, category]);
+
   // Fetch country name on hover
   const handleMouseEnter = async (countryId) => {
+      setHoveredCountryId(countryId);
       const name = await fetchCountryDetails(countryId, language);
       setHoveredCountryName(name);
   };
 
   const handleMouseLeave = () => {
       setHoveredCountryName(null);
+      setHoveredCountryId(null);
   };
 
   const paths = useMemo(() => {
@@ -147,46 +157,102 @@ const Globe = ({ data, geoJson, year, category, onCountrySelect }) => {
             </path>
         );
     });
-  }, [geoJson, pathGenerator, dataMap, category, colorScale, onCountrySelect, language]); // Add language dependency
+  }, [geoJson, pathGenerator, dataMap, category, colorScale, onCountrySelect, language]);
 
   if (!data || !geoJson || !width) return <div ref={containerRef} className="w-full h-[600px] bg-slate-800" />;
 
   return (
     <div ref={containerRef} className="w-full h-[600px] relative bg-slate-800 overflow-hidden">
-       <svg ref={svgRef} width={width} height={height} style={{background: 'radial-gradient(circle at 30% 30%, #1e3a8a 0%, #0f172a 50%, #020617 100%)'}}>
+       <svg ref={svgRef} width={width} height={height} style={{background: 'radial-gradient(circle at 50% 50%, #0f172a 0%, #020617 100%)'}}>
+          <defs>
+            {/* Ocean Gradient - gives depth to the water */}
+            <radialGradient id="oceanGradient" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="#1e3a8a" stopOpacity="1" />
+                <stop offset="100%" stopColor="#0f172a" stopOpacity="1" />
+            </radialGradient>
+            
+            {/* Atmosphere Glow - outer glow */}
+            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="15" result="coloredBlur"/>
+                <feMerge>
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+            </filter>
+
+            {/* Sphere Shading - inner shadow to make it look round */}
+            <radialGradient id="sphereShadow" cx="50%" cy="50%" r="50%">
+                <stop offset="80%" stopColor="#000000" stopOpacity="0" />
+                <stop offset="100%" stopColor="#000000" stopOpacity="0.6" />
+            </radialGradient>
+          </defs>
+
           <g>
+            {/* 1. Ocean Sphere */}
+            <path 
+                d={pathGenerator({type: "Sphere"})} 
+                fill="url(#oceanGradient)" 
+                stroke="none"
+            />
+
+            {/* 2. Atmosphere / Glow Effect (behind the globe) */}
+            <circle cx={width/2} cy={height/2} r={projection.scale()} fill="#3b82f6" opacity="0.1" filter="url(#glow)" />
+
+            {/* 3. Landmasses */}
             {paths}
+
+            {/* 4. Shading Overlay (on top of land) */}
+            <path 
+                d={pathGenerator({type: "Sphere"})} 
+                fill="url(#sphereShadow)" 
+                style={{pointerEvents: 'none'}} 
+            />
           </g>
        </svg>
+       
        {/* Tooltip for hovered country */}
        {hoveredCountryName && (
-           <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-1 rounded pointer-events-none backdrop-blur-sm">
-               {hoveredCountryName}
+           <div className="absolute top-4 right-4 bg-slate-900/90 text-white px-4 py-3 rounded-xl border border-slate-700 shadow-2xl pointer-events-none backdrop-blur-md min-w-[200px]">
+               <div className="font-bold text-lg mb-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
+                   {hoveredCountryName}
+               </div>
+               {hoveredValue !== null ? (
+                   <div className="flex items-baseline gap-2">
+                       <span className="text-2xl font-mono font-bold text-white">{hoveredValue.toFixed(2)}</span>
+                       <span className="text-sm text-slate-400">
+                           {category === 'Per Capita' ? 'tCO₂/hab' : 'MtCO₂'}
+                       </span>
+                   </div>
+               ) : (
+                   <div className="text-sm text-slate-500 italic">{t('noData')}</div>
+               )}
            </div>
        )}
        
        {/* Color Legend */}
-       <div className="absolute bottom-4 left-4 bg-black/70 backdrop-blur-sm rounded-lg p-3 text-white text-xs">
-           <div className="font-semibold mb-2">Émissions CO₂</div>
-           <div className="flex items-center gap-2 mb-1">
-               <div className="w-4 h-4 rounded" style={{background: '#3b82f6'}}></div>
-               <span>Faibles</span>
-           </div>
-           <div className="flex items-center gap-2 mb-1">
-               <div className="w-4 h-4 rounded" style={{background: '#10b981'}}></div>
-               <span>Modérées</span>
-           </div>
-           <div className="flex items-center gap-2 mb-1">
-               <div className="w-4 h-4 rounded" style={{background: '#fbbf24'}}></div>
-               <span>Moyennes</span>
-           </div>
-           <div className="flex items-center gap-2 mb-1">
-               <div className="w-4 h-4 rounded" style={{background: '#ef4444'}}></div>
-               <span>Élevées</span>
-           </div>
-           <div className="flex items-center gap-2">
-               <div className="w-4 h-4 rounded bg-slate-600"></div>
-               <span>Pas de données</span>
+       <div className="absolute bottom-4 left-4 bg-slate-900/80 backdrop-blur-sm rounded-xl border border-slate-700 p-4 text-white text-xs shadow-xl">
+           <div className="font-semibold mb-3 text-sm text-slate-300">{t('emissionsLabel')}</div>
+           <div className="space-y-2">
+               <div className="flex items-center gap-3">
+                   <div className="w-3 h-3 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.5)]" style={{background: '#3b82f6'}}></div>
+                   <span className="text-slate-300">{t('legend.low')}</span>
+               </div>
+               <div className="flex items-center gap-3">
+                   <div className="w-3 h-3 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.5)]" style={{background: '#10b981'}}></div>
+                   <span className="text-slate-300">{t('legend.moderate')}</span>
+               </div>
+               <div className="flex items-center gap-3">
+                   <div className="w-3 h-3 rounded-full shadow-[0_0_8px_rgba(251,191,36,0.5)]" style={{background: '#fbbf24'}}></div>
+                   <span className="text-slate-300">{t('legend.medium')}</span>
+               </div>
+               <div className="flex items-center gap-3">
+                   <div className="w-3 h-3 rounded-full shadow-[0_0_8px_rgba(239,68,68,0.5)]" style={{background: '#ef4444'}}></div>
+                   <span className="text-slate-300">{t('legend.high')}</span>
+               </div>
+               <div className="flex items-center gap-3 pt-1 border-t border-slate-700 mt-1">
+                   <div className="w-3 h-3 rounded-full bg-slate-600"></div>
+                   <span className="text-slate-500">{t('noData')}</span>
+               </div>
            </div>
        </div>
     </div>

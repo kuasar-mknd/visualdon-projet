@@ -16,6 +16,15 @@ export const translations = {
     source: "Source: Global Carbon Budget",
     top10: "Top 10 Emitters",
     emissionsBySector: "Emissions by Sector",
+    close: "Close",
+    noData: "No data",
+    emissionsLabel: "CO2 Emissions",
+    legend: {
+      low: "Low",
+      moderate: "Moderate",
+      medium: "Medium",
+      high: "High"
+    },
     sectors: {
       Coal: "Coal",
       Oil: "Oil",
@@ -38,6 +47,15 @@ export const translations = {
     source: "Source: Global Carbon Budget",
     top10: "Top 10 Émetteurs",
     emissionsBySector: "Émissions par Secteur",
+    close: "Fermer",
+    noData: "Pas de données",
+    emissionsLabel: "Émissions CO₂",
+    legend: {
+      low: "Faibles",
+      moderate: "Modérées",
+      medium: "Moyennes",
+      high: "Élevées"
+    },
     sectors: {
       Coal: "Charbon",
       Oil: "Pétrole",

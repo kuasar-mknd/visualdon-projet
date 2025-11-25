@@ -10,6 +10,7 @@ function AppContent() {
   const { emissions, geoJson, perCapita, loading } = useData();
   const [year, setYear] = useState(2021);
   const [selectedCountry, setSelectedCountry] = useState(null);
+  const [displayCountry, setDisplayCountry] = useState(null);
   const [selectedCountryName, setSelectedCountryName] = useState('');
   const [isPlaying, setIsPlaying] = useState(false);
   const [category, setCategory] = useState('Total'); // 'Total' or 'Per Capita'
@@ -40,17 +41,21 @@ function AppContent() {
       return activeData.filter(d => d.Year === year);
   }, [activeData, year]);
 
-  // Fetch translated country name when selection changes
+  // Update displayCountry when selectedCountry changes to a valid value
   useEffect(() => {
-    if (!selectedCountry) {
-      setSelectedCountryName('');
-      return;
+    if (selectedCountry) {
+      setDisplayCountry(selectedCountry);
     }
+  }, [selectedCountry]);
+
+  // Fetch translated country name when displayCountry changes
+  useEffect(() => {
+    if (!displayCountry) return;
     
-    fetchCountryDetails(selectedCountry, language).then(name => {
+    fetchCountryDetails(displayCountry, language).then(name => {
       if (name) setSelectedCountryName(name);
     });
-  }, [selectedCountry, language]);
+  }, [displayCountry, language]);
 
 
   if (loading) {
@@ -87,7 +92,7 @@ function AppContent() {
 
       <main className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Controls & Charts */}
-        <div className="lg:col-span-4 space-y-6">
+        <div className="lg:col-span-4 space-y-6 h-[600px] flex flex-col">
           
           {/* Controls */}
           <div className="bg-slate-800/50 p-6 rounded-xl backdrop-blur-sm border border-slate-700 shadow-xl">
@@ -128,7 +133,7 @@ function AppContent() {
           </div>
 
           {/* Top Countries Chart */}
-          <div className="bg-slate-800/50 p-6 rounded-xl backdrop-blur-sm border border-slate-700 shadow-xl h-[400px]">
+          <div className="bg-slate-800/50 p-6 rounded-xl backdrop-blur-sm border border-slate-700 shadow-xl flex-1 min-h-0">
              <TopCountriesChart 
                 data={activeData} 
                 year={year} 
@@ -149,31 +154,29 @@ function AppContent() {
            />
            
            {/* Country Analysis Overlay */}
-           {selectedCountry && (
-             <div className="absolute bottom-0 left-0 right-0 top-0 bg-slate-900/85 backdrop-blur-md border-t-2 border-blue-500 shadow-2xl transition-all duration-500 ease-out overflow-hidden flex flex-col animate-slide-up">
-                <div className="flex justify-between items-start gap-4 p-4 flex-shrink-0">
-                    <h2 className="text-xl font-bold text-white flex items-center gap-2 flex-1 min-w-0">
-                        <span className="w-1 h-8 bg-gradient-to-b from-blue-500 to-emerald-400 rounded-full flex-shrink-0"></span>
-                        <span className="truncate">{selectedCountryName || selectedCountry}</span>
-                    </h2>
-                    <button 
-                        onClick={() => setSelectedCountry(null)}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/50 rounded-lg transition-all font-semibold flex-shrink-0 whitespace-nowrap text-sm"
-                        aria-label="Fermer"
-                    >
-                        <span>✕</span>
-                        <span>Fermer</span>
-                    </button>
-                </div>
-                <div className="flex-1 px-4 pb-4 overflow-auto">
-                    <CountryChart 
-                        countryCode={selectedCountry} 
-                        year={year} 
-                        emissionsData={emissions}
-                    />
-                </div>
-             </div>
-           )}
+           <div className={`absolute bottom-0 left-0 right-0 top-0 bg-slate-900/85 backdrop-blur-md border-t-2 border-blue-500 shadow-2xl transition-transform duration-500 ease-in-out overflow-hidden flex flex-col ${selectedCountry ? 'translate-y-0 pointer-events-auto' : 'translate-y-full pointer-events-none'}`}>
+              <div className="flex justify-between items-start gap-4 p-4 flex-shrink-0">
+                  <h2 className="text-xl font-bold text-white flex items-center gap-2 flex-1 min-w-0">
+                      <span className="w-1 h-8 bg-gradient-to-b from-blue-500 to-emerald-400 rounded-full flex-shrink-0"></span>
+                      <span className="truncate">{selectedCountryName || displayCountry}</span>
+                  </h2>
+                  <button 
+                      onClick={() => setSelectedCountry(null)}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/50 rounded-lg transition-all font-semibold flex-shrink-0 whitespace-nowrap text-sm"
+                      aria-label="Fermer"
+                  >
+                      <span>✕</span>
+                      <span>{t('close')}</span>
+                  </button>
+              </div>
+              <div className="flex-1 px-4 pb-4 overflow-auto">
+                  <CountryChart 
+                      countryCode={displayCountry} 
+                      year={year} 
+                      emissionsData={emissions}
+                  />
+              </div>
+           </div>
         </div>
 
       </main>
