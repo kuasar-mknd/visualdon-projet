@@ -54,10 +54,14 @@ function AppContent() {
     }
   }, [yearRange.max, year]);
 
-  // Memoize filtered data for performance
+  // Memoize filtered data for performance - exclude Global only
+  // Components will handle NaN/empty values themselves
   const currentYearData = useMemo(() => {
       if (!activeData) return [];
-      return activeData.filter(d => d.Year === year);
+      
+      return activeData
+        .filter(d => d.Year === year)
+        .filter(d => d["ISO 3166-1 alpha-3"] !== "WLD"); // Exclude Global only
   }, [activeData, year]);
 
   // Update displayCountry when selectedCountry changes to a valid value
