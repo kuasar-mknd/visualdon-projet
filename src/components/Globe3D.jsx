@@ -1,19 +1,18 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useState } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
-import { Sphere, OrbitControls, Stars } from '@react-three/drei';
+import { Sphere, OrbitControls, Stars, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import * as d3 from 'd3';
 
 const Globe3D = ({ onCountrySelect, data, geoJson }) => {
   const globeRef = useRef();
   const barsGroupRef = useRef();
+  const [hoveredCountry, setHoveredCountry] = useState(null);
   
-  // Load textures
-  const [colorMap, bumpMap, specularMap] = useLoader(THREE.TextureLoader, [
-    'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg',
-    'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_normal_2048.jpg',
-    'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_specular_2048.jpg'
-  ]);
+  // Load texture
+  const colorMap = useLoader(THREE.TextureLoader,
+    'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg'
+  );
 
   // Convert lat/lon to 3D sphere coordinates
   const latLonToVector3 = (lat, lon, radius = 2) => {
@@ -118,13 +117,10 @@ const Globe3D = ({ onCountrySelect, data, geoJson }) => {
       <group ref={globeRef}>
         {/* Earth Sphere */}
         <Sphere args={[2, 64, 64]}>
-          <meshPhongMaterial 
+          <meshStandardMaterial 
             map={colorMap}
-            bumpMap={bumpMap}
-            bumpScale={0.05}
-            specularMap={specularMap}
-            specular={new THREE.Color('grey')}
-            shininess={10}
+            roughness={0.7}
+            metalness={0.2}
           />
         </Sphere>
 
@@ -159,11 +155,22 @@ const Globe3D = ({ onCountrySelect, data, geoJson }) => {
             const quaternion = new THREE.Quaternion();
             quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal);
             
+            const isHovered = hoveredCountry === bar.code;
+            
             return (
               <mesh
                 key={bar.code}
                 position={position}
                 quaternion={quaternion}
+                onPointerOver={(e) => {
+                  e.stopPropagation();
+                  setHoveredCountry(bar.code);
+                  document.body.style.cursor = 'pointer';
+                }}
+                onPointerOut={() => {
+                  setHoveredCountry(null);
+                  document.body.style.cursor = 'default';
+                }}
                 onClick={(e) => {
                   e.stopPropagation();
                   onCountrySelect && onCountrySelect(bar.code);
@@ -171,14 +178,22 @@ const Globe3D = ({ onCountrySelect, data, geoJson }) => {
               >
                 {/* Glowing base point */}
                 <mesh position={[0, -normalizedHeight/2, 0]}>
-                  <sphereGeometry args={[0.04, 16, 16]} />
-                  <meshBasicMaterial color={color} opacity={0.8} transparent />
+                  <sphereGeometry args={[isHovered ? 0.06 : 0.04, 16, 16]} />
+                  <meshBasicMaterial 
+                    color={color} 
+                    opacity={isHovered ? 1 : 0.8} 
+                    transparent 
+                  />
                 </mesh>
                 
                 {/* Outline mesh for better visibility */}
                 <mesh>
                   <cylinderGeometry args={[0.028, 0.028, normalizedHeight, 16]} />
-                  <meshBasicMaterial color="#000000" opacity={0.5} transparent />
+                  <meshBasicMaterial 
+                    color="#000000" 
+                    opacity={isHovered ? 0.7 : 0.5} 
+                    transparent 
+                  />
                 </mesh>
                 
                 {/* Main bar */}
@@ -186,11 +201,32 @@ const Globe3D = ({ onCountrySelect, data, geoJson }) => {
                 <meshStandardMaterial 
                   color={color}
                   emissive={color}
-                  emissiveIntensity={1.2}
+                  emissiveIntensity={isHovered ? 2.5 : 1.2}
                   transparent={false}
                   roughness={0.2}
                   metalness={0.6}
                 />
+                
+                {/* Tooltip on hover */}
+                {isHovered && (
+                  <Html distanceFactor={10}>
+                    <div style={{
+                      background: 'rgba(0, 0, 0, 0.85)',
+                      color: 'white',
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      fontFamily: 'system-ui, sans-serif',
+                      whiteSpace: 'nowrap',
+                      pointerEvents: 'none',
+                      border: `2px solid ${color.getStyle()}`,
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
+                    }}>
+                      <strong>{bar.name}</strong><br/>
+                      {bar.value.toFixed(2)} Mt CO₂
+                    </div>
+                  </Html>
+                )}
               </mesh>
             );
           })}
