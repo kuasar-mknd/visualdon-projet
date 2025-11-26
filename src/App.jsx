@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import Globe3D from './components/Globe3D';
-import CountryChart from './components/CountryChart';
 import TopCountriesChart from './components/TopCountriesChart';
+import CountryChart from './components/CountryChart';
 import { useData } from './hooks/useData';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
+import ErrorBoundary from './components/ErrorBoundary';
 import { fetchCountryDetails } from './services/countryService';
 
 function AppContent() {
@@ -94,13 +95,15 @@ function AppContent() {
     <div className="relative h-screen w-screen overflow-hidden bg-slate-900">
       {/* 3D Background */}
       <div className="absolute inset-0 z-0">
-        <Canvas camera={{ position: [0, 0, 8], fov: 45 }}>
-          <Globe3D 
-            onCountrySelect={setSelectedCountry} 
-            data={currentYearData}
-            geoJson={geoJson}
-          />
-        </Canvas>
+        <ErrorBoundary>
+          <Canvas camera={{ position: [0, 0, 8], fov: 45 }}>
+            <Globe3D 
+              onCountrySelect={setSelectedCountry} 
+              data={currentYearData}
+              geoJson={geoJson}
+            />
+          </Canvas>
+        </ErrorBoundary>
       </div>
 
       {/* UI Overlay - Pointer events disabled by default, enabled on interactive elements */}

@@ -31,12 +31,7 @@ const Globe3D = ({ onCountrySelect, data, geoJson }) => {
 
   // Calculate country centroids and prepare bar data
   const barData = useMemo(() => {
-    if (!data || !geoJson || data.length === 0) {
-      console.log('❌ No data or geoJson available');
-      return [];
-    }
-    
-    console.log('📊 Processing data:', data.length, 'items');
+    if (!data || !geoJson || data.length === 0) return [];
     
     const countryMap = new Map();
     data.forEach(d => {
@@ -47,22 +42,10 @@ const Globe3D = ({ onCountrySelect, data, geoJson }) => {
       }
     });
 
-    console.log('🗺️ Country map size:', countryMap.size);
-    console.log('🔑 Sample country codes from data:', Array.from(countryMap.keys()).slice(0, 5));
-    
-    console.log('🌍 GeoJSON features:', geoJson.features.length);
-    if (geoJson.features.length > 0) {
-      console.log('🧪 First feature properties:', geoJson.features[0].properties);
-    }
-
     const bars = [];
-    geoJson.features.forEach((feature, index) => {
-      const code = feature.properties.A3;  // Fixed: use A3 property
+    geoJson.features.forEach((feature) => {
+      const code = feature.properties.A3;
       const value = countryMap.get(code);
-      
-      if (index === 0) {
-        console.log(`🔍 First feature code check: '${code}' -> value: ${value}`);
-      }
       
       if (value && value > 0) {
         const centroid = d3.geoCentroid(feature);
@@ -77,15 +60,10 @@ const Globe3D = ({ onCountrySelect, data, geoJson }) => {
       }
     });
 
-    console.log('🎯 Created bars:', bars.length);
-    if (bars.length > 0) {
-      console.log('📍 Sample bar:', bars[0]);
-    }
-
     return bars;
   }, [data, geoJson]);
 
-  // Create color scale
+  // Create color scale - Neon/Cyberpunk Palette
   const colorScale = useMemo(() => {
     if (barData.length === 0) return () => new THREE.Color(0x3b82f6);
     
@@ -93,9 +71,10 @@ const Globe3D = ({ onCountrySelect, data, geoJson }) => {
     return d3.scaleSequential()
       .domain([0, maxValue])
       .interpolator(t => {
-        if (t < 0.33) return d3.interpolateRgb("#3b82f6", "#10b981")(t * 3);
-        else if (t < 0.66) return d3.interpolateRgb("#10b981", "#fbbf24")((t - 0.33) * 3);
-        else return d3.interpolateRgb("#fbbf24", "#ef4444")((t - 0.66) * 3);
+        // Cyan -> Neon Green -> Hot Pink -> Bright Red
+        if (t < 0.33) return d3.interpolateRgb("#06b6d4", "#22c55e")(t * 3);
+        else if (t < 0.66) return d3.interpolateRgb("#22c55e", "#f472b6")((t - 0.33) * 3);
+        else return d3.interpolateRgb("#f472b6", "#ef4444")((t - 0.66) * 3);
       });
   }, [barData]);
 
@@ -128,28 +107,28 @@ const Globe3D = ({ onCountrySelect, data, geoJson }) => {
       cloudsRef.current.rotation.y += 0.0007;
     }
     
-    // Animate bars with subtle pulsing
-    if (barsGroupRef.current) {
-      barsGroupRef.current.children.forEach((bar, i) => {
-        const scale = 1 + Math.sin(state.clock.elapsedTime * 2 + i * 0.1) * 0.05;
-        bar.scale.y = scale;
-      });
-    }
+    // Bar pulsing disabled for stability
+    // if (barsGroupRef.current) {
+    //   barsGroupRef.current.children.forEach((bar, i) => {
+    //     const scale = 1 + Math.sin(state.clock.elapsedTime * 2 + i * 0.1) * 0.05;
+    //     bar.scale.y = scale;
+    //   });
+    // }
   });
 
   return (
     <>
-      <ambientLight intensity={0.8} />
-      <pointLight position={[10, 10, 10]} intensity={2} />
+      <ambientLight intensity={0.6} />
+      <pointLight position={[10, 10, 10]} intensity={1.5} />
       <directionalLight position={[5, 3, 5]} intensity={1} />
       <directionalLight position={[-5, -3, -5]} intensity={0.5} />
       
       {/* Stars Background */}
       <Stars radius={300} depth={60} count={5000} factor={7} saturation={0} fade speed={1} />
 
-      <group>
+      <group ref={globeRef}>
         {/* Earth Sphere */}
-        <Sphere ref={globeRef} args={[2, 64, 64]}>
+        <Sphere args={[2, 64, 64]}>
           <meshPhongMaterial 
             map={colorMap}
             bumpMap={bumpMap}
@@ -180,22 +159,36 @@ const Globe3D = ({ onCountrySelect, data, geoJson }) => {
             const normalizedHeight = (bar.value / maxValue) * 2 + 0.3;
             const color = new THREE.Color(colorScale(bar.value));
             
-            // Direction from center to surface
-            const direction = bar.position.clone().normalize();
-            const barHeight = normalizedHeight;
-            const barPosition = direction.multiplyScalar(2.1 + barHeight / 2);
+            // Direction from center to surface (normal)
+            const normal = bar.position.clone().normalize();
+            
+            // Position the center of the bar so its base is at the surface (radius 1.995)
+            // Center = Surface + Height/2
+            const position = normal.clone().multiplyScalar(1.995 + normalizedHeight / 2);
+            
+            // Create a quaternion to rotate the cylinder (which points up along Y) to align with the normal
+            const quaternion = new THREE.Quaternion();
+            quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal);
             
             return (
               <mesh
                 key={bar.code}
-                position={barPosition}
-                lookAt={direction.multiplyScalar(10)}
-                onClick={() => onCountrySelect && onCountrySelect(bar.code)}
+                position={position}
+                quaternion={quaternion}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCountrySelect && onCountrySelect(bar.code);
+                }}
               >
-                <cylinderGeometry args={[0.05, 0.05, barHeight, 8]} />
-                <meshBasicMaterial 
+                <cylinderGeometry args={[0.015, 0.015, normalizedHeight, 8]} />
+                <meshStandardMaterial 
                   color={color}
-                  opacity={1}
+                  emissive={color}
+                  emissiveIntensity={2}
+                  transparent
+                  opacity={0.6}
+                  roughness={0.2}
+                  metalness={0.8}
                 />
               </mesh>
             );
