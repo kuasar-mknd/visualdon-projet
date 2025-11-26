@@ -1,51 +1,160 @@
-# VisualDon - Projet HEIG-VD
-## Évolution des émissions de CO2 dans le monde de 1750 à 2021
-État du déploiement : dev [![Netlify Status](https://api.netlify.com/api/v1/badges/e5ca3c8a-15bb-420d-8885-4c1f7e6f877a/deploy-status)](https://visualdon-kuasar.netlify.app/)
-# Contexte
-Ce jeu de données fournit un aperçu détaillé des émissions mondiales de CO2 au niveau des pays, permettant une meilleure compréhension de la contribution de chaque pays et de l'impact humain sur le climat. Il contient des informations sur les émissions totales ainsi que sur celles provenant du charbon, du pétrole, du gaz, de la production de ciment et des torchères ainsi que d'autres sources.
+# 🌍 Global CO₂ Emissions Visualization
 
-### Source: 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7215364.svg)](https://doi.org/10.5281/zenodo.7215364)
+[![Deployment Status](https://img.shields.io/badge/Cloudflare%20Pages-Deployed-orange?logo=cloudflare)](https://visualdon-projet.pages.dev)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Data Source](https://zenodo.org/badge/DOI/10.5281/zenodo.7215364.svg)](https://doi.org/10.5281/zenodo.7215364)
+[![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react)](https://react.dev)
+[![Vite](https://img.shields.io/badge/Vite-7.2-646CFF?logo=vite)](https://vitejs.dev)
 
-### Auteur :
-[![Auteur](https://img.shields.io/badge/Auteur-Global%20Carbon%20Project-blue)](https://www.globalcarbonproject.org/)
-# Description
-Les données sont au format CSV et sont disponibles dans le dossier [dataset](dataset).
+An interactive 3D globe visualization exploring global CO₂ emissions from 1750 to 2024. Built with React, D3.js, and Three.js, this project transforms complex climate data into an engaging, accessible experience.
 
-| Nom de la colonne  | Description                                                                                    |
-|--------------------|------------------------------------------------------------------------------------------------|
-| Country            | Le nom du pays. (String)                                                                       |
-| ISO 3166-1 alpha-3 | Le code du pays. (String)                                                                      |
-| Year               | Année de collection. (Integer)                                                                 |
-| Total              | Le montant total des émissions de CO2 pour le pays donné dans l'année spécifiée. (Float)                   |
-| Coal               | Le montant des émissions de CO2 provenant du charbon pour le pays donné dans l'année spécifiée. (Float)               |
-| Oil                | Le montant des émissions de CO2 provenant du pétrole pour le pays donné dans l'année spécifiée. (Float)                |
-| Gas                | Le montant des émissions de CO2 provenant du gaz pour le pays donné dans l'année spécifiée. (Float)                |
-| Cement             | Le montant des émissions de CO2 provenant de la production de ciment pour le pays donné dans l'année spécifiée. (Float)  |
-| Flaring            | Le montant des émissions de CO2 provenant des opérations de torchage pour le pays donné dans l'année spécifiée. (Float) |
-| Other              | Le montant des émissions de CO2 provenant d'autres sources pour le pays donné dans l'année spécifiée. (Float)      |
-| Per Capita         | Le montant des émissions de CO2 par habitant pour le pays donné dans l'année spécifiée. (Float)              |
+![Preview](wireframes/preview.png)
 
-### Le dataset contient 2 fichiers CSV:
+## ✨ Features
 
-[GCB2022v27_MtCO2_flat.csv](dataset/GCB2022v27_MtCO2_flat.csv) : contient les données sur les émissions de CO2
+- **🌐 Interactive 3D Globe**: Explore emissions data on a fully interactive, rotatable globe with zoom controls
+- **📊 Dynamic Visualizations**: Real-time charts showing top emitters and country-specific breakdowns by sector
+- **⏱️ Time Travel**: Animate through 270+ years of emissions history with play/pause controls
+- **🌍 Bilingual Support**: Switch seamlessly between English and French interfaces
+- **📱 Responsive Design**: Optimized for desktop, tablet, and mobile devices
+- **♿ Accessible**: Built with accessibility best practices and semantic HTML
+- **🔄 Auto-updating Data**: Automated monthly data updates from the Global Carbon Budget
 
-[GCB2022v27_percapita_flat.csv](dataset/GCB2022v27_MtCO2_flat.csv) : contient les données sur les émissions de CO2 par habitant
+## 🚀 Quick Start
 
-# But
-Le but de ce projet est de créer une application web qui permet de visualiser les données de manière interactive.
-Les données seront présentée sous forme d'une carte du monde avec des données sur les émissions de CO2 par pays et de permettre de visualiser la progression en fonction des années.
-Cela permettra également de mettre en évidence les pays qui ont le plus d'émissions de CO2 et de voir les pays qui ont le plus progressé.
+### Prerequisites
 
-# Référence
+- Node.js 20.x or higher
+- npm or yarn
 
-[![DOI](https://zenodo.org/badge/DOI/10.5194/essd-13-5213-2021.svg)](http://doi.org/10.5194/essd-13-5213-2021)
+### Installation
 
-Cette étude présente un nouvel ensemble de données synthétiques sur les émissions anthropiques de gaz à effet de serre (GES) pour la période allant de 1750 à 2021, qui compilent des informations fiables sur les émissions de CO2. Les résultats montrent une croissance continue des émissions de CO2 dans tous les secteurs, sans réduction significative observée dans aucun secteur mondial. Les auteurs soulignent l'importance de développer des estimations d'émissions de GES indépendantes, robustes et en temps réel pour suivre les progrès de la politique climatique.
+```bash
+# Clone the repository
+git clone https://github.com/kuasar-mknd/visualdon-projet.git
+cd visualdon-projet
 
-# Wireframes
-![Wireframe1](https://user-images.githubusercontent.com/60432398/225912605-72723a33-2e76-4531-a0a4-b551e31d0658.png)
-![wireframe2](https://user-images.githubusercontent.com/60432398/225912011-2556706d-002b-4140-92ec-972d61db84ff.png)
-![wireframe3](https://user-images.githubusercontent.com/60432398/225912051-eecfce85-e0e6-4163-8a34-b99246c0742e.png)
-![wireframe4](https://user-images.githubusercontent.com/60432398/225912096-108eb151-9a92-4b3e-a304-9e703736383b.png)
+# Install dependencies
+npm install
 
+# Start development server
+npm run dev
+```
+
+The application will be available at `http://localhost:5173`
+
+### Building for Production
+
+```bash
+npm run build
+npm run preview
+```
+
+## 📊 Data
+
+This project uses authoritative emissions data from the [Global Carbon Budget](https://globalcarbonproject.org/), maintained by leading climate scientists worldwide.
+
+### Data Sources
+
+- **Territorial Emissions**: Country-level CO₂ emissions by source (coal, oil, gas, cement, flaring)
+- **Per Capita Emissions**: Population-adjusted emissions data
+- **Coverage**: 1750–2024 (updated annually)
+
+### Updating Data
+
+```bash
+# Fetch latest data from Global Carbon Budget
+npm run update-data
+```
+
+Data updates are also automated via GitHub Actions, running monthly. See [DATA_UPDATE.md](DATA_UPDATE.md) for details.
+
+## 🛠️ Technology Stack
+
+- **Frontend**: React 19.2 with hooks
+- **Visualization**: D3.js for charts, Three.js for 3D globe
+- **Styling**: Tailwind CSS 4
+- **Build Tool**: Vite 7
+- **Deployment**: Cloudflare Pages
+- **Data Processing**: Node.js scripts for CSV parsing and optimization
+
+## 📁 Project Structure
+
+```
+visualdon-projet/
+├── src/
+│   ├── components/      # React components (Globe, Charts, etc.)
+│   ├── context/         # React context (Language)
+│   ├── hooks/           # Custom React hooks (useData)
+│   ├── services/        # API services (country translations)
+│   ├── App.jsx          # Main application component
+│   └── main.jsx         # Application entry point
+├── public/
+│   └── data/            # CO₂ emissions datasets (CSV)
+├── scripts/
+│   └── update-data.js   # Data fetching and processing script
+├── .github/
+│   └── workflows/       # GitHub Actions for automated data updates
+└── dataset/             # Original raw datasets
+```
+
+## 🤝 Contributing
+
+We welcome contributions from the community! Whether you're fixing bugs, improving documentation, or proposing new features, your help is appreciated.
+
+### How to Contribute
+
+1. **Fork the repository**
+2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
+3. **Make your changes** and commit: `git commit -m 'Add amazing feature'`
+4. **Push to your branch**: `git push origin feature/amazing-feature`
+5. **Open a Pull Request**
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines, including:
+
+- Code style and conventions
+- Testing requirements
+- Commit message format
+- Pull request process
+
+### Development Guidelines
+
+- Follow the existing code style (ESLint configuration provided)
+- Write meaningful commit messages
+- Test your changes across different browsers and devices
+- Update documentation as needed
+
+## 📜 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **Data Provider**: [Global Carbon Project](https://www.globalcarbonproject.org/)
+- **Research Paper**: Friedlingstein et al. (2021) - [Global Carbon Budget 2021](https://doi.org/10.5194/essd-13-5213-2021)
+- **Country Translations**: [REST Countries API](https://restcountries.com/)
+- **Institution**: HEIG-VD (Haute École d'Ingénierie et de Gestion du Canton de Vaud)
+
+## 📖 Research Context
+
+This visualization is based on the Global Carbon Budget dataset, which provides comprehensive, peer-reviewed estimates of anthropogenic greenhouse gas emissions from 1750 to present. The research highlights:
+
+- Continuous growth in CO₂ emissions across all sectors
+- No significant reduction observed in any global sector to date
+- The critical importance of independent, real-time emissions tracking for climate policy
+
+> **Citation**: Friedlingstein, P., Jones, M. W., O'Sullivan, M., et al. (2021). Global Carbon Budget 2021. _Earth System Science Data_, 13(11), 5213-5252. https://doi.org/10.5194/essd-13-5213-2021
+
+## 🔗 Links
+
+- **Live Demo**: [https://visualdon-projet.pages.dev](https://visualdon-projet.pages.dev)
+- **Report Issues**: [GitHub Issues](https://github.com/kuasar-mknd/visualdon-projet/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/kuasar-mknd/visualdon-projet/discussions)
+
+## 📧 Contact
+
+For questions or suggestions, please [open an issue](https://github.com/kuasar-mknd/visualdon-projet/issues/new) or start a [discussion](https://github.com/kuasar-mknd/visualdon-projet/discussions/new).
+
+---
+
+<p align="center">Made with ❤️ for climate awareness and data transparency</p>

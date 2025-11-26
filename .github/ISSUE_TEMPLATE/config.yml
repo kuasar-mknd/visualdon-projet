@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 GitHub Discussions
+    url: https://github.com/kuasar-mknd/visualdon-projet/discussions
+    about: Ask questions and discuss ideas with the community
+  - name: 📖 Documentation
+    url: https://github.com/kuasar-mknd/visualdon-projet/blob/main/README.md
+    about: Read the project documentation
+  - name: 🔄 Data Update Guide
+    url: https://github.com/kuasar-mknd/visualdon-projet/blob/main/DATA_UPDATE.md
+    about: Learn how to update CO₂ emissions data
