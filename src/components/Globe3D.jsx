@@ -1,11 +1,20 @@
 import React, { useRef, useMemo } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useLoader } from '@react-three/fiber';
 import { Sphere, OrbitControls, Stars } from '@react-three/drei';
 import * as THREE from 'three';
 
 const Globe3D = ({ onCountrySelect }) => {
   const globeRef = useRef();
+  const cloudsRef = useRef();
   
+  // Load textures
+  const [colorMap, bumpMap, specularMap, cloudsMap] = useLoader(THREE.TextureLoader, [
+    'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg',
+    'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_normal_2048.jpg',
+    'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_specular_2048.jpg',
+    'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_clouds_1024.png'
+  ]);
+
   // Atmosphere shader material
   const atmosphereMaterial = useMemo(() => new THREE.ShaderMaterial({
     vertexShader: `
@@ -18,7 +27,7 @@ const Globe3D = ({ onCountrySelect }) => {
     fragmentShader: `
       varying vec3 vNormal;
       void main() {
-        float intensity = pow(0.7 - dot(vNormal, vec3(0, 0, 1.0)), 2.0);
+        float intensity = pow(0.6 - dot(vNormal, vec3(0, 0, 1.0)), 2.0);
         gl_FragColor = vec4(0.3, 0.6, 1.0, 1.0) * intensity;
       }
     `,
@@ -31,11 +40,14 @@ const Globe3D = ({ onCountrySelect }) => {
     if (globeRef.current) {
       globeRef.current.rotation.y += 0.0005;
     }
+    if (cloudsRef.current) {
+      cloudsRef.current.rotation.y += 0.0007;
+    }
   });
 
   return (
     <>
-      <ambientLight intensity={0.5} />
+      <ambientLight intensity={0.2} />
       <pointLight position={[10, 10, 10]} intensity={1.5} />
       <directionalLight position={[-5, 3, 5]} intensity={0.5} />
       
@@ -45,12 +57,28 @@ const Globe3D = ({ onCountrySelect }) => {
       <group>
         {/* Earth Sphere */}
         <Sphere ref={globeRef} args={[2, 64, 64]} onClick={(e) => console.log('Clicked globe')}>
-          <meshStandardMaterial 
-            color="#1e293b" // Slate-800 base
-            roughness={0.7}
-            metalness={0.1}
+          <meshPhongMaterial 
+            map={colorMap}
+            bumpMap={bumpMap}
+            bumpScale={0.05}
+            specularMap={specularMap}
+            specular={new THREE.Color('grey')}
+            shininess={10}
           />
         </Sphere>
+
+        {/* Clouds Layer */}
+        <mesh ref={cloudsRef} scale={[2.02, 2.02, 2.02]}>
+          <sphereGeometry args={[1, 64, 64]} />
+          <meshPhongMaterial 
+            map={cloudsMap}
+            transparent={true}
+            opacity={0.8}
+            blending={THREE.AdditiveBlending}
+            side={THREE.DoubleSide}
+            depthWrite={false}
+          />
+        </mesh>
 
         {/* Atmosphere Glow */}
         <mesh scale={[2.2, 2.2, 2.2]}>
