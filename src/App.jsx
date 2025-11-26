@@ -89,7 +89,7 @@ function AppContent() {
     <div className="min-h-screen bg-slate-900 text-slate-100 p-4 md:p-8 font-sans">
       <header className="mb-8 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
+          <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-blue-400 to-emerald-400">
             {t('title')}
           </h1>
           <p className="text-slate-400 mt-2">{t('subtitle')}</p>
@@ -174,14 +174,14 @@ function AppContent() {
            
            {/* Country Analysis Overlay */}
            <div className={`absolute bottom-0 left-0 right-0 top-0 bg-slate-900/85 backdrop-blur-md border-t-2 border-blue-500 shadow-2xl transition-transform duration-500 ease-in-out overflow-hidden flex flex-col ${selectedCountry ? 'translate-y-0 pointer-events-auto' : 'translate-y-full pointer-events-none'}`}>
-              <div className="flex justify-between items-start gap-4 p-4 flex-shrink-0">
+              <div className="flex justify-between items-start gap-4 p-4 shrink-0">
                   <h2 className="text-xl font-bold text-white flex items-center gap-2 flex-1 min-w-0">
-                      <span className="w-1 h-8 bg-gradient-to-b from-blue-500 to-emerald-400 rounded-full flex-shrink-0"></span>
+                      <span className="w-1 h-8 bg-linear-to-b from-blue-500 to-emerald-400 rounded-full shrink-0"></span>
                       <span className="truncate">{selectedCountryName || displayCountry}</span>
                   </h2>
                   <button 
                       onClick={() => setSelectedCountry(null)}
-                      className="flex items-center gap-2 px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/50 rounded-lg transition-all font-semibold flex-shrink-0 whitespace-nowrap text-sm"
+                      className="flex items-center gap-2 px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/50 rounded-lg transition-all font-semibold shrink-0 whitespace-nowrap text-sm"
                       aria-label="Fermer"
                   >
                       <span>✕</span>

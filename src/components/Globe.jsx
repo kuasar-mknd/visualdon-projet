@@ -233,7 +233,7 @@ const Globe = ({ data, geoJson, year, category, onCountrySelect }) => {
        {/* Tooltip for hovered country */}
        {hoveredCountryName && (
            <div className="absolute top-4 right-4 bg-slate-900/90 text-white px-4 py-3 rounded-xl border border-slate-700 shadow-2xl pointer-events-none backdrop-blur-md min-w-[200px]">
-               <div className="font-bold text-lg mb-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
+               <div className="font-bold text-lg mb-1 bg-clip-text text-transparent bg-linear-to-r from-blue-400/80 to-emerald-400/80">
                    {hoveredCountryName}
                </div>
                {hoveredValue !== null ? (
