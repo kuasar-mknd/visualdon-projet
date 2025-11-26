@@ -6,15 +6,13 @@ import * as d3 from 'd3';
 
 const Globe3D = ({ onCountrySelect, data, geoJson }) => {
   const globeRef = useRef();
-  const cloudsRef = useRef();
   const barsGroupRef = useRef();
   
   // Load textures
-  const [colorMap, bumpMap, specularMap, cloudsMap] = useLoader(THREE.TextureLoader, [
+  const [colorMap, bumpMap, specularMap] = useLoader(THREE.TextureLoader, [
     'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg',
     'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_normal_2048.jpg',
-    'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_specular_2048.jpg',
-    'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_clouds_1024.png'
+    'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_specular_2048.jpg'
   ]);
 
   // Convert lat/lon to 3D sphere coordinates
@@ -63,7 +61,7 @@ const Globe3D = ({ onCountrySelect, data, geoJson }) => {
     return bars;
   }, [data, geoJson]);
 
-  // Create color scale - Neon/Cyberpunk Palette
+  // Create color scale - High Contrast Palette for Readability
   const colorScale = useMemo(() => {
     if (barData.length === 0) return () => new THREE.Color(0x3b82f6);
     
@@ -71,14 +69,15 @@ const Globe3D = ({ onCountrySelect, data, geoJson }) => {
     return d3.scaleSequential()
       .domain([0, maxValue])
       .interpolator(t => {
-        // Cyan -> Neon Green -> Hot Pink -> Bright Red
-        if (t < 0.33) return d3.interpolateRgb("#06b6d4", "#22c55e")(t * 3);
-        else if (t < 0.66) return d3.interpolateRgb("#22c55e", "#f472b6")((t - 0.33) * 3);
-        else return d3.interpolateRgb("#f472b6", "#ef4444")((t - 0.66) * 3);
+        // Distinct color progression: Teal -> Yellow -> Orange -> Red
+        if (t < 0.25) return d3.interpolateRgb("#14b8a6", "#06b6d4")(t * 4);
+        else if (t < 0.5) return d3.interpolateRgb("#06b6d4", "#fbbf24")((t - 0.25) * 4);
+        else if (t < 0.75) return d3.interpolateRgb("#fbbf24", "#fb923c")((t - 0.5) * 4);
+        else return d3.interpolateRgb("#fb923c", "#ef4444")((t - 0.75) * 4);
       });
   }, [barData]);
 
-  // Atmosphere shader material
+  // Enhanced Atmosphere shader material
   const atmosphereMaterial = useMemo(() => new THREE.ShaderMaterial({
     vertexShader: `
       varying vec3 vNormal;
@@ -90,8 +89,8 @@ const Globe3D = ({ onCountrySelect, data, geoJson }) => {
     fragmentShader: `
       varying vec3 vNormal;
       void main() {
-        float intensity = pow(0.6 - dot(vNormal, vec3(0, 0, 1.0)), 2.0);
-        gl_FragColor = vec4(0.3, 0.6, 1.0, 1.0) * intensity;
+        float intensity = pow(0.7 - dot(vNormal, vec3(0, 0, 1.0)), 3.0);
+        gl_FragColor = vec4(0.2, 0.5, 1.0, 1.0) * intensity * 1.5;
       }
     `,
     blending: THREE.AdditiveBlending,
@@ -99,32 +98,22 @@ const Globe3D = ({ onCountrySelect, data, geoJson }) => {
     transparent: true
   }), []);
 
-  useFrame((state) => {
+  useFrame(() => {
     if (globeRef.current) {
-      globeRef.current.rotation.y += 0.0005;
+      globeRef.current.rotation.y += 0.0002; // Very slow rotation
     }
-    if (cloudsRef.current) {
-      cloudsRef.current.rotation.y += 0.0007;
-    }
-    
-    // Bar pulsing disabled for stability
-    // if (barsGroupRef.current) {
-    //   barsGroupRef.current.children.forEach((bar, i) => {
-    //     const scale = 1 + Math.sin(state.clock.elapsedTime * 2 + i * 0.1) * 0.05;
-    //     bar.scale.y = scale;
-    //   });
-    // }
   });
 
   return (
     <>
-      <ambientLight intensity={0.6} />
-      <pointLight position={[10, 10, 10]} intensity={1.5} />
-      <directionalLight position={[5, 3, 5]} intensity={1} />
-      <directionalLight position={[-5, -3, -5]} intensity={0.5} />
+      <ambientLight intensity={0.8} />
+      <pointLight position={[10, 10, 10]} intensity={2} />
+      <directionalLight position={[5, 3, 5]} intensity={1.5} />
+      <directionalLight position={[-5, -3, -5]} intensity={0.8} />
+      <directionalLight position={[0, -5, 0]} intensity={1} />
       
       {/* Stars Background */}
-      <Stars radius={300} depth={60} count={5000} factor={7} saturation={0} fade speed={1} />
+      <Stars radius={300} depth={60} count={6000} factor={8} saturation={0} fade speed={1} />
 
       <group ref={globeRef}>
         {/* Earth Sphere */}
@@ -139,24 +128,24 @@ const Globe3D = ({ onCountrySelect, data, geoJson }) => {
           />
         </Sphere>
 
-        {/* Clouds Layer */}
-        <mesh ref={cloudsRef} scale={[2.02, 2.02, 2.02]}>
-          <sphereGeometry args={[1, 64, 64]} />
-          <meshPhongMaterial 
-            map={cloudsMap}
-            transparent={true}
-            opacity={0.8}
-            blending={THREE.AdditiveBlending}
-            side={THREE.DoubleSide}
-            depthWrite={false}
-          />
-        </mesh>
+        {/* Country markers - bright points at data locations */}
+        {barData.map((bar) => {
+          const normal = bar.position.clone().normalize();
+          const markerPosition = normal.clone().multiplyScalar(2.01);
+          
+          return (
+            <mesh key={`marker-${bar.code}`} position={markerPosition}>
+              <sphereGeometry args={[0.015, 16, 16]} />
+              <meshBasicMaterial color="#ffffff" opacity={0.6} transparent />
+            </mesh>
+          );
+        })}
 
         {/* Data Visualization - 3D Bars */}
         <group ref={barsGroupRef}>
           {barData.map((bar) => {
             const maxValue = Math.max(...barData.map(d => d.value));
-            const normalizedHeight = (bar.value / maxValue) * 2 + 0.3;
+            const normalizedHeight = (bar.value / maxValue) * 2.5 + 0.4;
             const color = new THREE.Color(colorScale(bar.value));
             
             // Direction from center to surface (normal)
@@ -180,23 +169,35 @@ const Globe3D = ({ onCountrySelect, data, geoJson }) => {
                   onCountrySelect && onCountrySelect(bar.code);
                 }}
               >
-                <cylinderGeometry args={[0.015, 0.015, normalizedHeight, 8]} />
+                {/* Glowing base point */}
+                <mesh position={[0, -normalizedHeight/2, 0]}>
+                  <sphereGeometry args={[0.04, 16, 16]} />
+                  <meshBasicMaterial color={color} opacity={0.8} transparent />
+                </mesh>
+                
+                {/* Outline mesh for better visibility */}
+                <mesh>
+                  <cylinderGeometry args={[0.028, 0.028, normalizedHeight, 16]} />
+                  <meshBasicMaterial color="#000000" opacity={0.5} transparent />
+                </mesh>
+                
+                {/* Main bar */}
+                <cylinderGeometry args={[0.025, 0.025, normalizedHeight, 16]} />
                 <meshStandardMaterial 
                   color={color}
                   emissive={color}
-                  emissiveIntensity={2}
-                  transparent
-                  opacity={0.6}
+                  emissiveIntensity={1.2}
+                  transparent={false}
                   roughness={0.2}
-                  metalness={0.8}
+                  metalness={0.6}
                 />
               </mesh>
             );
           })}
         </group>
 
-        {/* Atmosphere Glow */}
-        <mesh scale={[2.2, 2.2, 2.2]}>
+        {/* Enhanced Atmosphere Glow */}
+        <mesh scale={[2.3, 2.3, 2.3]}>
           <sphereGeometry args={[1, 64, 64]} />
           <primitive object={atmosphereMaterial} attach="material" />
         </mesh>
@@ -205,11 +206,12 @@ const Globe3D = ({ onCountrySelect, data, geoJson }) => {
       <OrbitControls 
         enablePan={false} 
         enableZoom={true} 
-        minDistance={3} 
-        maxDistance={10}
-        rotateSpeed={0.5}
-        zoomSpeed={0.5}
-        autoRotate={false}
+        minDistance={3.5} 
+        maxDistance={12}
+        rotateSpeed={0.7}
+        zoomSpeed={0.7}
+        autoRotate={true}
+        autoRotateSpeed={0.1}
       />
     </>
   );
