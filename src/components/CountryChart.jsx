@@ -4,12 +4,12 @@ import { useLanguage } from '../context/LanguageContext';
 import { fetchCountryDetails } from '../services/countryService';
 
 const colorMapping = {
-    'Coal': '#3b82f6',
-    'Oil': '#f97316',
-    'Gas': '#10b981',
-    'Cement': '#ef4444',
-    'Flaring': '#a855f7',
-    'Other': '#eab308'
+    'Coal': '#3b82f6', // Blue
+    'Oil': '#f97316', // Orange
+    'Gas': '#10b981', // Emerald
+    'Cement': '#ef4444', // Red
+    'Flaring': '#a855f7', // Purple
+    'Other': '#eab308' // Yellow
 };
 
 const CountryChart = ({ countryCode, emissionsData }) => {
@@ -46,11 +46,11 @@ const CountryChart = ({ countryCode, emissionsData }) => {
         .attr("width", width)
         .attr("height", height);
 
-    // Add background
-    svg.append("rect")
-        .attr("width", width)
-        .attr("height", height)
-        .attr("fill", "#0f172a");
+    // Add background - Transparent for glassmorphism
+    // svg.append("rect")
+    //     .attr("width", width)
+    //     .attr("height", height)
+    //     .attr("fill", "transparent");
 
 
     if (viewMode === 'bubbles') {
@@ -98,10 +98,10 @@ const CountryChart = ({ countryCode, emissionsData }) => {
           .attr("transform", `translate(0, ${height - padding.bottom})`)
           .call(xAxis)
           .call(g => g.selectAll("text")
-              .attr("fill", "#cbd5e1")
+              .attr("fill", "#64748b") // Slate-500
               .attr("font-size", "11px"))
-          .call(g => g.selectAll("line").attr("stroke", "#475569"))
-          .call(g => g.select(".domain").attr("stroke", "#475569"));
+          .call(g => g.selectAll("line").attr("stroke", "#cbd5e1")) // Slate-300
+          .call(g => g.select(".domain").attr("stroke", "#cbd5e1"));
 
       const yAxis = d3.axisLeft(yScale).ticks(5);
       const yAxisGroup = svg.append("g")
@@ -143,7 +143,7 @@ const CountryChart = ({ countryCode, emissionsData }) => {
          .attr("text-anchor", "middle")
          .style("font-size", "18px")
          .style("font-weight", "600")
-         .style("fill", "#e2e8f0")
+         .style("fill", "#334155") // Slate-700
          .text(`${t('emissionsBySector')} - ${countryName}`);
 
       // Add clip path to prevent bubbles from overflowing
@@ -462,8 +462,8 @@ const CountryChart = ({ countryCode, emissionsData }) => {
             onClick={() => setViewMode('bubbles')}
             className={`px-4 py-2 rounded-lg font-semibold transition-all ${
               viewMode === 'bubbles'
-                ? 'bg-blue-500/30 text-blue-300 border border-blue-500/50'
-                : 'bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700'
+                ? 'bg-blue-50 text-blue-600 border border-blue-200 shadow-sm'
+                : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
             }`}
           >
             🫧 Bulles
@@ -472,8 +472,8 @@ const CountryChart = ({ countryCode, emissionsData }) => {
             onClick={() => setViewMode('lines')}
             className={`px-4 py-2 rounded-lg font-semibold transition-all ${
               viewMode === 'lines'
-                ? 'bg-blue-500/30 text-blue-300 border border-blue-500/50'
-                : 'bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700'
+                ? 'bg-blue-50 text-blue-600 border border-blue-200 shadow-sm'
+                : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
             }`}
           >
             📈 Graphique empilé
@@ -498,7 +498,7 @@ const CountryChart = ({ countryCode, emissionsData }) => {
       </div>
       
       {/* Chart Container */}
-      <div className="flex-1 bg-slate-800/50 rounded-lg border border-slate-700 overflow-hidden">
+      <div className="flex-1 bg-transparent rounded-lg overflow-hidden">
         <div ref={containerRef} className="w-full h-full" />
       </div>
     </div>

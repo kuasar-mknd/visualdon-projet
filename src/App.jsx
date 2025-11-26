@@ -83,49 +83,49 @@ function AppContent() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-slate-900 text-white">
-        <div className="text-2xl animate-pulse">{t('loading')}</div>
+      <div className="flex items-center justify-center h-screen bg-transparent text-slate-800">
+        <div className="text-2xl font-light tracking-widest animate-pulse uppercase">{t('loading')}</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 p-4 md:p-8 font-sans">
-      <header className="mb-8 flex justify-between items-center">
+    <div className="min-h-screen text-slate-800 p-2 md:p-4 font-sans selection:bg-blue-100 selection:text-blue-900 overflow-hidden">
+      <header className="mb-4 flex flex-col md:flex-row justify-between items-center gap-4 glass-panel-light p-4 rounded-2xl">
         <div>
-          <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-blue-400 to-emerald-400">
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-800 tracking-tight">
             {t('title')}
           </h1>
-          <p className="text-slate-400 mt-2">{t('subtitle')}</p>
+          <p className="text-slate-500 mt-0.5 text-sm font-normal">{t('subtitle')}</p>
         </div>
         
         <div className="flex items-center gap-4">
             <button 
                 onClick={toggleLanguage}
-                className="px-3 py-1 rounded border border-slate-600 hover:bg-slate-800 transition-colors text-sm font-medium"
+                className="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 transition-all duration-300 text-xs font-semibold text-slate-600 hover:text-slate-900"
             >
                 {language === 'en' ? 'FR' : 'EN'}
             </button>
-            <div className="text-right">
-                <div className="text-4xl font-mono font-bold text-emerald-400">{year}</div>
-                <div className="text-sm text-slate-500">{t('year')}</div>
+            <div className="text-right bg-white/50 px-4 py-1.5 rounded-xl border border-slate-100 shadow-sm">
+                <div className="text-3xl font-mono font-bold text-blue-600 leading-none">{year}</div>
+                <div className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold leading-none">{t('year')}</div>
             </div>
         </div>
       </header>
 
-      <main className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-[calc(100vh-140px)]">
         {/* Left Column: Controls & Charts */}
-        <div className="lg:col-span-4 space-y-6 h-[600px] flex flex-col">
+        <div className="lg:col-span-4 space-y-4 flex flex-col h-full">
           
           {/* Controls */}
-          <div className="bg-slate-800/50 p-6 rounded-xl backdrop-blur-sm border border-slate-700 shadow-xl">
-            <div className="flex gap-4 mb-6">
+          <div className="glass-panel-light p-4 rounded-2xl shrink-0">
+            <div className="flex gap-3 mb-4">
               <button
                 onClick={() => setIsPlaying(!isPlaying)}
-                className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-all ${
+                className={`flex-1 py-3 px-6 rounded-xl font-semibold tracking-wide transition-all duration-300 shadow-sm hover:shadow-md ${
                   isPlaying 
-                    ? 'bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/30' 
-                    : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-500/30'
+                    ? 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100' 
+                    : 'bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100'
                 }`}
               >
                 {isPlaying ? t('pause') : t('play')}
@@ -134,29 +134,31 @@ function AppContent() {
               <select 
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                className="bg-white border border-slate-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-slate-700 font-medium shadow-sm cursor-pointer hover:border-blue-300 transition-colors text-sm"
               >
                 <option value="Total">{t('total')}</option>
                 <option value="Per Capita">{t('perCapita')}</option>
               </select>
             </div>
 
-            <input
-              type="range"
-              min={yearRange.min}
-              max={yearRange.max}
-              value={year}
-              onChange={(e) => setYear(parseInt(e.target.value))}
-              className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
-            />
-            <div className="flex justify-between text-xs text-slate-500 mt-2">
-              <span>{yearRange.min}</span>
-              <span>{yearRange.max}</span>
+            <div className="px-1">
+              <input
+                type="range"
+                min={yearRange.min}
+                max={yearRange.max}
+                value={year}
+                onChange={(e) => setYear(parseInt(e.target.value))}
+                className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+              />
+              <div className="flex justify-between text-[10px] font-mono text-slate-500 mt-2">
+                <span>{yearRange.min}</span>
+                <span>{yearRange.max}</span>
+              </div>
             </div>
           </div>
 
           {/* Top Countries Chart */}
-          <div className="bg-slate-800/50 p-6 rounded-xl backdrop-blur-sm border border-slate-700 shadow-xl flex-1 min-h-0">
+          <div className="glass-panel-light p-4 rounded-2xl flex-1 min-h-0 relative overflow-hidden">
              <TopCountriesChart 
                 data={activeData} 
                 year={year} 
@@ -167,7 +169,7 @@ function AppContent() {
         </div>
 
         {/* Middle: Globe */}
-        <div className="lg:col-span-8 bg-slate-800/50 rounded-xl backdrop-blur-sm border border-slate-700 shadow-xl overflow-hidden relative">
+        <div className="lg:col-span-8 glass-panel-light rounded-2xl overflow-hidden relative shadow-xl border-white/50">
            <Globe 
               data={currentYearData} 
               geoJson={geoJson} 
@@ -177,22 +179,22 @@ function AppContent() {
            />
            
            {/* Country Analysis Overlay */}
-           <div className={`absolute bottom-0 left-0 right-0 top-0 bg-slate-900/85 backdrop-blur-md border-t-2 border-blue-500 shadow-2xl transition-transform duration-500 ease-in-out overflow-hidden flex flex-col ${selectedCountry ? 'translate-y-0 pointer-events-auto' : 'translate-y-full pointer-events-none'}`}>
-              <div className="flex justify-between items-start gap-4 p-4 shrink-0">
-                  <h2 className="text-xl font-bold text-white flex items-center gap-2 flex-1 min-w-0">
-                      <span className="w-1 h-8 bg-linear-to-b from-blue-500 to-emerald-400 rounded-full shrink-0"></span>
+           <div className={`absolute bottom-0 left-0 right-0 top-0 bg-white/80 backdrop-blur-xl border-t border-white/50 shadow-2xl transition-all duration-500 ease-in-out overflow-hidden flex flex-col ${selectedCountry ? 'translate-y-0 opacity-100 pointer-events-auto' : 'translate-y-[110%] opacity-0 pointer-events-none'}`}>
+              <div className="flex justify-between items-start gap-4 p-6 shrink-0">
+                  <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-4 flex-1 min-w-0">
+                      <span className="w-1.5 h-8 bg-blue-500 rounded-full shrink-0 shadow-sm"></span>
                       <span className="truncate">{selectedCountryName || displayCountry}</span>
                   </h2>
                   <button 
                       onClick={() => setSelectedCountry(null)}
-                      className="flex items-center gap-2 px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/50 rounded-lg transition-all font-semibold shrink-0 whitespace-nowrap text-sm"
+                      className="flex items-center gap-2 px-4 py-2 bg-white/50 hover:bg-white text-slate-500 hover:text-slate-800 border border-slate-200/50 rounded-xl transition-all font-semibold shrink-0 whitespace-nowrap text-sm shadow-sm hover:shadow"
                       aria-label="Fermer"
                   >
                       <span>✕</span>
                       <span>{t('close')}</span>
                   </button>
               </div>
-              <div className="flex-1 px-4 pb-4 overflow-auto">
+              <div className="flex-1 px-6 pb-6 overflow-auto">
                   <CountryChart 
                       countryCode={displayCountry} 
                       year={year} 
@@ -202,7 +204,7 @@ function AppContent() {
            </div>
         </div>
 
-      </main>
+      </div>
       
       <footer className="mt-12 text-center text-slate-500 text-sm">
         <p>{t('source')}</p>

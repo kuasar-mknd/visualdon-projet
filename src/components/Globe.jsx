@@ -179,21 +179,21 @@ const Globe = ({ data, geoJson, year, category, onCountrySelect }) => {
     });
   }, [geoJson, pathGenerator, dataMap, category, colorScale, onCountrySelect, language]);
 
-  if (!data || !geoJson || !width) return <div ref={containerRef} className="w-full h-[600px] bg-slate-800" />;
+  if (!data || !geoJson || !width) return <div ref={containerRef} className="w-full h-full bg-slate-100" />;
 
   return (
-    <div ref={containerRef} className="w-full h-[600px] relative bg-slate-800 overflow-hidden">
-       <svg ref={svgRef} width={width} height={height} style={{background: 'radial-gradient(circle at 50% 50%, #0f172a 0%, #020617 100%)'}}>
+    <div ref={containerRef} className="w-full h-full relative bg-slate-50 overflow-hidden">
+       <svg ref={svgRef} width={width} height={height} style={{background: 'radial-gradient(circle at 50% 50%, #f8fafc 0%, #e2e8f0 100%)'}}>
           <defs>
             {/* Ocean Gradient - gives depth to the water */}
             <radialGradient id="oceanGradient" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#1e3a8a" stopOpacity="1" />
-                <stop offset="100%" stopColor="#0f172a" stopOpacity="1" />
+                <stop offset="0%" stopColor="#dbeafe" stopOpacity="1" />
+                <stop offset="100%" stopColor="#bfdbfe" stopOpacity="1" />
             </radialGradient>
             
             {/* Atmosphere Glow - outer glow */}
             <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="15" result="coloredBlur"/>
+                <feGaussianBlur stdDeviation="10" result="coloredBlur"/>
                 <feMerge>
                     <feMergeNode in="coloredBlur"/>
                     <feMergeNode in="SourceGraphic"/>
@@ -203,7 +203,7 @@ const Globe = ({ data, geoJson, year, category, onCountrySelect }) => {
             {/* Sphere Shading - inner shadow to make it look round */}
             <radialGradient id="sphereShadow" cx="50%" cy="50%" r="50%">
                 <stop offset="80%" stopColor="#000000" stopOpacity="0" />
-                <stop offset="100%" stopColor="#000000" stopOpacity="0.6" />
+                <stop offset="100%" stopColor="#000000" stopOpacity="0.2" />
             </radialGradient>
           </defs>
 
@@ -216,7 +216,7 @@ const Globe = ({ data, geoJson, year, category, onCountrySelect }) => {
             />
 
             {/* 2. Atmosphere / Glow Effect (behind the globe) */}
-            <circle cx={width/2} cy={height/2} r={projection.scale()} fill="#3b82f6" opacity="0.1" filter="url(#glow)" />
+            <circle cx={width/2} cy={height/2} r={projection.scale()} fill="#60a5fa" opacity="0.1" filter="url(#glow)" />
 
             {/* 3. Landmasses */}
             {paths}
@@ -232,49 +232,48 @@ const Globe = ({ data, geoJson, year, category, onCountrySelect }) => {
        
        {/* Tooltip for hovered country */}
        {hoveredCountryName && (
-           <div className="absolute top-4 right-4 bg-slate-900/90 text-white px-4 py-3 rounded-xl border border-slate-700 shadow-2xl pointer-events-none backdrop-blur-md min-w-[200px]">
-               <div className="font-bold text-lg mb-1 bg-clip-text text-transparent bg-linear-to-r from-blue-400/80 to-emerald-400/80">
+           <div className="absolute top-4 right-4 bg-white/90 text-slate-800 px-4 py-3 rounded-xl border border-slate-200 shadow-xl pointer-events-none backdrop-blur-md min-w-[200px]">
+               <div className="font-bold text-lg mb-1 text-blue-600">
                    {hoveredCountryName}
                </div>
                {hoveredValue !== null ? (
                    <div className="flex items-baseline gap-2">
-                       <span className="text-2xl font-mono font-bold text-white">{hoveredValue.toFixed(2)}</span>
-                       <span className="text-sm text-slate-400">
+                       <span className="text-2xl font-mono font-bold text-slate-800">{hoveredValue.toFixed(2)}</span>
+                       <span className="text-sm text-slate-500">
                            {category === 'Per Capita' ? 'tCO₂/hab' : 'MtCO₂'}
                        </span>
                    </div>
                ) : (
-                   <div className="text-sm text-slate-500 italic">{t('noData')}</div>
+                   <div className="text-sm text-slate-400 italic">{t('noData')}</div>
                )}
            </div>
        )}
-       
-       {/* Color Legend */}
-       <div className="absolute bottom-4 left-4 bg-slate-900/80 backdrop-blur-sm rounded-xl border border-slate-700 p-4 text-white text-xs shadow-xl">
-           <div className="font-semibold mb-3 text-sm text-slate-300">{t('emissionsLabel')}</div>
-           <div className="space-y-2">
-               <div className="flex items-center gap-3">
-                   <div className="w-3 h-3 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.5)]" style={{background: '#3b82f6'}}></div>
-                   <span className="text-slate-300">{t('legend.low')}</span>
-               </div>
-               <div className="flex items-center gap-3">
-                   <div className="w-3 h-3 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.5)]" style={{background: '#10b981'}}></div>
-                   <span className="text-slate-300">{t('legend.moderate')}</span>
-               </div>
-               <div className="flex items-center gap-3">
-                   <div className="w-3 h-3 rounded-full shadow-[0_0_8px_rgba(251,191,36,0.5)]" style={{background: '#fbbf24'}}></div>
-                   <span className="text-slate-300">{t('legend.medium')}</span>
-               </div>
-               <div className="flex items-center gap-3">
-                   <div className="w-3 h-3 rounded-full shadow-[0_0_8px_rgba(239,68,68,0.5)]" style={{background: '#ef4444'}}></div>
-                   <span className="text-slate-300">{t('legend.high')}</span>
-               </div>
-               <div className="flex items-center gap-3 pt-1 border-t border-slate-700 mt-1">
-                   <div className="w-3 h-3 rounded-full bg-slate-600"></div>
-                   <span className="text-slate-500">{t('noData')}</span>
-               </div>
-           </div>
-       </div>
+              {/* Color Legend */}
+        <div className="absolute bottom-4 left-4 bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200 p-4 text-slate-600 text-xs shadow-lg">
+            <div className="font-semibold mb-3 text-sm text-slate-700">{t('emissionsLabel')}</div>
+            <div className="space-y-2">
+                <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 rounded-full" style={{background: '#3b82f6'}}></div>
+                    <span className="text-slate-600">{t('legend.low')}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 rounded-full" style={{background: '#10b981'}}></div>
+                    <span className="text-slate-600">{t('legend.moderate')}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 rounded-full" style={{background: '#fbbf24'}}></div>
+                    <span className="text-slate-600">{t('legend.medium')}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 rounded-full" style={{background: '#ef4444'}}></div>
+                    <span className="text-slate-600">{t('legend.high')}</span>
+                </div>
+                <div className="flex items-center gap-3 pt-1 border-t border-slate-200 mt-1">
+                    <div className="w-3 h-3 rounded-full bg-slate-300"></div>
+                    <span className="text-slate-400">{t('noData')}</span>
+                </div>
+            </div>
+        </div>
     </div>
   );
 };

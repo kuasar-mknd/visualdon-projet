@@ -90,7 +90,7 @@ const TopCountriesChart = ({ data, year, category }) => {
            .attr("text-anchor", "middle")
            .style("font-size", "16px")
            .style("font-weight", "600")
-           .style("fill", "#e2e8f0");
+           .style("fill", "#334155"); // Slate-700
     }
 
     // Update Title
@@ -141,9 +141,9 @@ const TopCountriesChart = ({ data, year, category }) => {
         .attr("y", y.bandwidth() / 2)
         .attr("dy", "0.35em")
         .attr("text-anchor", "end")
-        .attr("fill", "#cbd5e1")
+        .attr("fill", "#475569") // Slate-600
         .style("font-size", "13px")
-        .style("font-weight", "500")
+        .style("font-weight", "600")
         .text(d => translatedNames[d["ISO 3166-1 alpha-3"]] || d.Country);
 
     enter.append("text")
@@ -151,7 +151,7 @@ const TopCountriesChart = ({ data, year, category }) => {
         .attr("x", 5) // Initial position
         .attr("y", y.bandwidth() / 2)
         .attr("dy", "0.35em")
-        .attr("fill", "#fff")
+        .attr("fill", "#1e293b") // Slate-800
         .style("font-size", "12px")
         .style("font-weight", "bold")
         .style("opacity", 0);
