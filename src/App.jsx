@@ -8,7 +8,7 @@ import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { fetchCountryDetails } from './services/countryService';
 
 function AppContent() {
-  const { emissions, perCapita, loading } = useData();
+  const { emissions, geoJson, perCapita, loading } = useData();
   const [year, setYear] = useState(2021);
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [displayCountry, setDisplayCountry] = useState(null);
@@ -55,6 +55,16 @@ function AppContent() {
     }
   }, [yearRange.max, year]);
 
+  // Memoize filtered data for performance - exclude Global only
+  // Components will handle NaN/empty values themselves
+  const currentYearData = useMemo(() => {
+      if (!activeData) return [];
+      
+      return activeData
+        .filter(d => d.Year === year)
+        .filter(d => d["ISO 3166-1 alpha-3"] !== "WLD"); // Exclude Global only
+  }, [activeData, year]);
+
   // Update displayCountry when selectedCountry changes to a valid value
   useEffect(() => {
     if (selectedCountry) {
@@ -85,7 +95,11 @@ function AppContent() {
       {/* 3D Background */}
       <div className="absolute inset-0 z-0">
         <Canvas camera={{ position: [0, 0, 8], fov: 45 }}>
-          <Globe3D onCountrySelect={setSelectedCountry} />
+          <Globe3D 
+            onCountrySelect={setSelectedCountry} 
+            data={currentYearData}
+            geoJson={geoJson}
+          />
         </Canvas>
       </div>
 
