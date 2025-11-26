@@ -1,4 +1,6 @@
 name: Update CO2 Emissions Data
+permissions:
+  contents: write
 
 on:
   # Run monthly on the 1st at midnight
