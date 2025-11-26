@@ -12,7 +12,7 @@ const colorMapping = {
     'Other': '#eab308'
 };
 
-const CountryChart = ({ countryCode, year, emissionsData }) => {
+const CountryChart = ({ countryCode, emissionsData }) => {
   const containerRef = useRef(null);
   const [split, setSplit] = useState(false);
   const [viewMode, setViewMode] = useState('bubbles'); // 'bubbles' or 'lines'

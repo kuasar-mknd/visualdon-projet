@@ -2,6 +2,7 @@ import React, { createContext, useState, useContext } from 'react';
 
 const LanguageContext = createContext();
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const translations = {
   en: {
     title: "CO2 Emissions History",
@@ -90,4 +91,5 @@ export const LanguageProvider = ({ children }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useLanguage = () => useContext(LanguageContext);
