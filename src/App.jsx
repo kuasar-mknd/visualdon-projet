@@ -22,9 +22,9 @@ function AppContent() {
     if (isPlaying) {
       interval = setInterval(() => {
         setYear(prev => {
-          if (prev >= 2021) {
+          if (prev >= yearRange.max) {
             setIsPlaying(false);
-            return 2021;
+            return yearRange.max;
           }
           return prev + 1;
         });
@@ -34,6 +34,25 @@ function AppContent() {
   }, [isPlaying]);
 
   const activeData = category === 'Per Capita' ? perCapita : emissions;
+
+  // Calculate year range dynamically from data
+  const yearRange = useMemo(() => {
+    if (!emissions || emissions.length === 0) {
+      return { min: 1750, max: 2021 }; // Default fallback
+    }
+    const years = emissions.map(d => d.Year).filter(y => y != null);
+    return {
+      min: Math.min(...years),
+      max: Math.max(...years)
+    };
+  }, [emissions]);
+
+  // Update year to max available when data loads (if currently at default or old max)
+  useEffect(() => {
+    if (yearRange.max > 2021 && year === 2021) {
+       setYear(yearRange.max);
+    }
+  }, [yearRange.max, year]);
 
   // Memoize filtered data for performance
   const currentYearData = useMemo(() => {
@@ -120,15 +139,15 @@ function AppContent() {
 
             <input
               type="range"
-              min="1750"
-              max="2021"
+              min={yearRange.min}
+              max={yearRange.max}
               value={year}
               onChange={(e) => setYear(parseInt(e.target.value))}
               className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
             />
             <div className="flex justify-between text-xs text-slate-500 mt-2">
-              <span>1750</span>
-              <span>2021</span>
+              <span>{yearRange.min}</span>
+              <span>{yearRange.max}</span>
             </div>
           </div>
 
