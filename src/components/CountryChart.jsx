@@ -144,7 +144,6 @@ const CountryChart = ({ countryCode, emissionsData }) => {
          .style("font-size", "18px")
          .style("font-weight", "600")
          .style("fill", "#334155") // Slate-700
-         .text(`${t('emissionsBySector')} - ${countryName}`);
 
       // Add clip path to prevent bubbles from overflowing
       svg.append("defs")
@@ -402,7 +401,6 @@ const CountryChart = ({ countryCode, emissionsData }) => {
         .style("font-size", "18px")
         .style("font-weight", "600")
         .style("fill", "#e2e8f0")
-        .text(`${t('emissionsBySector')} - ${countryName}`);
 
       // Legend
       const legend = svg.append("g")
