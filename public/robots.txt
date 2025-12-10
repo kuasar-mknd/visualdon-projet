@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://co2.kuasar.xyz/sitemap.xml
