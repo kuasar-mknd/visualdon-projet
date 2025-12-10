@@ -16,6 +16,8 @@ An interactive 3D globe visualization exploring global CO₂ emissions from 1750
 - **📊 Dynamic Visualizations**: Real-time charts showing top emitters and country-specific breakdowns by sector
 - **⏱️ Time Travel**: Animate through 270+ years of emissions history with play/pause controls
 - **🌍 Bilingual Support**: Switch seamlessly between English and French interfaces
+- **📈 Cloudflare Analytics**: Integrated privacy-first web analytics
+- **🔍 SEO Optimized**: Metadata, Sitemap, and Robots.txt for better discoverability
 - **📱 Responsive Design**: Optimized for desktop, tablet, and mobile devices
 - **♿ Accessible**: Built with accessibility best practices and semantic HTML
 - **🔄 Auto-updating Data**: Automated monthly data updates from the Global Carbon Budget
@@ -76,6 +78,7 @@ Data updates are also automated via GitHub Actions, running monthly. See [DATA_U
 - **Styling**: Tailwind CSS 4
 - **Build Tool**: Vite 7
 - **Deployment**: Cloudflare Pages
+- **Analytics**: Cloudflare Web Analytics
 - **Data Processing**: Node.js scripts for CSV parsing and optimization
 
 ## 📁 Project Structure
@@ -83,14 +86,21 @@ Data updates are also automated via GitHub Actions, running monthly. See [DATA_U
 ```
 visualdon-projet/
 ├── src/
-│   ├── components/      # React components (Globe, Charts, etc.)
+│   ├── components/      # React components
+│   │   ├── charts/      # D3 Charts (Bubble, StackedArea)
+│   │   ├── controls/    # UI Controls (Play, Slider)
+│   │   ├── globe/       # 3D Globe elements & Legend
+│   │   ├── layout/      # Header, Footer
+│   │   └── overlay/     # Details Panel
 │   ├── context/         # React context (Language)
 │   ├── hooks/           # Custom React hooks (useData)
 │   ├── services/        # API services (country translations)
-│   ├── App.jsx          # Main application component
+│   ├── App.jsx          # Main orchestrator
 │   └── main.jsx         # Application entry point
 ├── public/
-│   └── data/            # CO₂ emissions datasets (CSV)
+│   ├── data/            # CO₂ emissions datasets (CSV)
+│   ├── sitemap.xml      # SEO Sitemap
+│   └── robots.txt       # Crawler directives
 ├── scripts/
 │   └── update-data.js   # Data fetching and processing script
 ├── .github/
