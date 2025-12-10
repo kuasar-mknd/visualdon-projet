@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Globe from './components/Globe';
-import CountryChart from './components/CountryChart';
 import TopCountriesChart from './components/TopCountriesChart';
+import Header from './components/layout/Header';
+import Footer from './components/layout/Footer';
+import Controls from './components/controls/Controls';
+import CountryDetailsOverlay from './components/overlay/CountryDetailsOverlay';
 import { useData } from './hooks/useData';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { fetchCountryDetails } from './services/countryService';
@@ -14,7 +17,7 @@ function AppContent() {
   const [selectedCountryName, setSelectedCountryName] = useState('');
   const [isPlaying, setIsPlaying] = useState(false);
   const [category, setCategory] = useState('Total'); // 'Total' or 'Per Capita'
-  const { t, language, toggleLanguage } = useLanguage();
+  const { t, language } = useLanguage();
 
   // Animation loop
   useEffect(() => {
@@ -91,71 +94,21 @@ function AppContent() {
 
   return (
     <div className="min-h-screen text-slate-800 p-2 md:p-4 font-sans selection:bg-blue-100 selection:text-blue-900 overflow-hidden">
-      <header className="mb-4 flex flex-col md:flex-row justify-between items-center gap-4 glass-panel-light p-4 rounded-2xl">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-800 tracking-tight">
-            {t('title')}
-          </h1>
-          <p className="text-slate-500 mt-0.5 text-sm font-normal">{t('subtitle')}</p>
-        </div>
-        
-        <div className="flex items-center gap-4">
-            <button 
-                onClick={toggleLanguage}
-                className="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 transition-all duration-300 text-xs font-semibold text-slate-600 hover:text-slate-900"
-            >
-                {language === 'en' ? 'FR' : 'EN'}
-            </button>
-            <div className="text-right bg-white/50 px-4 py-1.5 rounded-xl border border-slate-100 shadow-sm">
-                <div className="text-3xl font-mono font-bold text-blue-600 leading-none">{year}</div>
-                <div className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold leading-none">{t('year')}</div>
-            </div>
-        </div>
-      </header>
+      <Header year={year} />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-[calc(100vh-140px)]">
         {/* Left Column: Controls & Charts */}
         <div className="lg:col-span-4 space-y-4 flex flex-col h-full">
           
-          {/* Controls */}
-          <div className="glass-panel-light p-4 rounded-2xl shrink-0">
-            <div className="flex gap-3 mb-4">
-              <button
-                onClick={() => setIsPlaying(!isPlaying)}
-                className={`flex-1 py-3 px-6 rounded-xl font-semibold tracking-wide transition-all duration-300 shadow-sm hover:shadow-md ${
-                  isPlaying 
-                    ? 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100' 
-                    : 'bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100'
-                }`}
-              >
-                {isPlaying ? t('pause') : t('play')}
-              </button>
-              
-              <select 
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="bg-white border border-slate-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-slate-700 font-medium shadow-sm cursor-pointer hover:border-blue-300 transition-colors text-sm"
-              >
-                <option value="Total">{t('total')}</option>
-                <option value="Per Capita">{t('perCapita')}</option>
-              </select>
-            </div>
-
-            <div className="px-1">
-              <input
-                type="range"
-                min={yearRange.min}
-                max={yearRange.max}
-                value={year}
-                onChange={(e) => setYear(parseInt(e.target.value))}
-                className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-              />
-              <div className="flex justify-between text-[10px] font-mono text-slate-500 mt-2">
-                <span>{yearRange.min}</span>
-                <span>{yearRange.max}</span>
-              </div>
-            </div>
-          </div>
+          <Controls 
+            isPlaying={isPlaying} 
+            setIsPlaying={setIsPlaying}
+            category={category}
+            setCategory={setCategory}
+            year={year}
+            setYear={setYear}
+            yearRange={yearRange}
+          />
 
           {/* Top Countries Chart */}
           <div className="glass-panel-light p-4 rounded-2xl flex-1 min-h-0 relative overflow-hidden">
@@ -178,48 +131,19 @@ function AppContent() {
               onCountrySelect={setSelectedCountry}
            />
            
-           {/* Country Analysis Overlay */}
-           <div className={`absolute bottom-0 left-0 right-0 top-0 bg-white/80 backdrop-blur-xl border-t border-white/50 shadow-2xl transition-all duration-500 ease-in-out overflow-hidden flex flex-col ${selectedCountry ? 'translate-y-0 opacity-100 pointer-events-auto' : 'translate-y-[110%] opacity-0 pointer-events-none'}`}>
-              <div className="flex justify-between items-start gap-4 p-6 shrink-0">
-                  <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-4 flex-1 min-w-0">
-                      <span className="w-1.5 h-8 bg-blue-500 rounded-full shrink-0 shadow-sm"></span>
-                      <span className="truncate">{selectedCountryName || displayCountry}</span>
-                  </h2>
-                  <button 
-                      onClick={() => setSelectedCountry(null)}
-                      className="flex items-center gap-2 px-4 py-2 bg-white/50 hover:bg-white text-slate-500 hover:text-slate-800 border border-slate-200/50 rounded-xl transition-all font-semibold shrink-0 whitespace-nowrap text-sm shadow-sm hover:shadow"
-                      aria-label="Fermer"
-                  >
-                      <span>✕</span>
-                      <span>{t('close')}</span>
-                  </button>
-              </div>
-              <div className="flex-1 px-6 pb-6 overflow-auto">
-                  <CountryChart 
-                      countryCode={displayCountry} 
-                      year={year} 
-                      emissionsData={emissions}
-                  />
-              </div>
-           </div>
+           <CountryDetailsOverlay 
+              selectedCountry={selectedCountry}
+              selectedCountryName={selectedCountryName}
+              displayCountry={displayCountry}
+              onClose={() => setSelectedCountry(null)}
+              year={year}
+              emissions={emissions}
+           />
         </div>
 
       </div>
       
-      <footer className="mt-12 text-center text-slate-500 text-sm pb-8 flex flex-col md:flex-row items-center justify-center gap-6">
-        <p>{t('source')}</p>
-        <a 
-          href="https://github.com/kuasar-mknd/visualdon-projet" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 hover:text-slate-800 transition-colors group"
-        >
-          <svg viewBox="0 0 16 16" width="16" height="16" className="fill-current opacity-60 group-hover:opacity-100 transition-opacity">
-            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
-          </svg>
-          <span>GitHub</span>
-        </a>
-      </footer>
+      <Footer />
     </div>
   );
 }
