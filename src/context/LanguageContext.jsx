@@ -32,6 +32,12 @@ export const translations = {
       Cement: "Cement",
       Flaring: "Flaring",
       Other: "Other"
+    },
+    aria: {
+      selectCategory: "Select emission category",
+      selectYear: "Select year",
+      toggleLanguage: "Switch language",
+      closeOverlay: "Close details"
     }
   },
   fr: {
@@ -62,6 +68,12 @@ export const translations = {
       Cement: "Ciment",
       Flaring: "Torcharge",
       Other: "Autre"
+    },
+    aria: {
+      selectCategory: "Sélectionner la catégorie d'émission",
+      selectYear: "Sélectionner l'année",
+      toggleLanguage: "Changer de langue",
+      closeOverlay: "Fermer les détails"
     }
   }
 };
