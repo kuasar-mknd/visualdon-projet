@@ -22,6 +22,7 @@ const Controls = ({ isPlaying, setIsPlaying, category, setCategory, year, setYea
           value={category}
           onChange={(e) => setCategory(e.target.value)}
           className="bg-white border border-slate-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-slate-700 font-medium shadow-sm cursor-pointer hover:border-blue-300 transition-colors text-sm"
+          aria-label={t('aria.selectCategory')}
         >
           <option value="Total">{t('total')}</option>
           <option value="Per Capita">{t('perCapita')}</option>
@@ -36,6 +37,7 @@ const Controls = ({ isPlaying, setIsPlaying, category, setCategory, year, setYea
           value={year}
           onChange={(e) => setYear(parseInt(e.target.value))}
           className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+          aria-label={t('aria.selectYear')}
         />
         <div className="flex justify-between text-[10px] font-mono text-slate-500 mt-2">
           <span>{yearRange.min}</span>
