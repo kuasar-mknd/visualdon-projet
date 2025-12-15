@@ -12,9 +12,8 @@ const TopCountriesChart = ({ data, year, category }) => {
   useEffect(() => {
     if (!data) return;
 
-    const yearData = data
-      .filter(d => d.Year === year)
-      .filter(d => d["ISO 3166-1 alpha-3"] !== "WLD"); // Exclude Global only
+    // data is already filtered by year and excludes WLD in App.jsx
+    const yearData = data;
     
     const topData = yearData
       .filter(d => !isNaN(parseFloat(d[category])) && parseFloat(d[category]) > 0) // Filter NaN for sorting
@@ -42,10 +41,8 @@ const TopCountriesChart = ({ data, year, category }) => {
   useEffect(() => {
     if (!data || !svgRef.current) return;
 
-    // 1. Data Processing - Filter out Global only
-    const yearData = data
-      .filter(d => d.Year === year)
-      .filter(d => d["ISO 3166-1 alpha-3"] !== "WLD"); // Exclude Global only
+    // 1. Data Processing - data is already filtered by year and excludes WLD
+    const yearData = data;
     
     const topData = yearData
         .filter(d => !isNaN(parseFloat(d[category])) && parseFloat(d[category]) > 0) // Filter NaN for sorting
