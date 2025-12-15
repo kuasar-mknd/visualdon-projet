@@ -125,12 +125,11 @@ const Globe = ({ data, geoJson, year, category, onCountrySelect }) => {
     if (!data) return new Map();
     const map = new Map();
     data.forEach(d => {
-        if (d.Year === year) {
-            map.set(d["ISO 3166-1 alpha-3"], d);
-        }
+        // data is already filtered by year in App.jsx
+        map.set(d["ISO 3166-1 alpha-3"], d);
     });
     return map;
-  }, [data, year]);
+  }, [data]);
 
   // Derived hovered value
   const hoveredValue = useMemo(() => {
