@@ -1,6 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useLanguage } from '../context/LanguageContext';
-import { fetchCountryDetails } from '../services/countryService';
 import BubbleChart from './charts/BubbleChart';
 import StackedAreaChart from './charts/StackedAreaChart';
 
@@ -17,18 +15,7 @@ const CountryChart = ({ countryCode, emissionsData }) => {
   const containerRef = useRef(null);
   const [split, setSplit] = useState(false);
   const [viewMode, setViewMode] = useState('bubbles'); // 'bubbles' or 'lines'
-  const [countryName, setCountryName] = useState('');
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-  const { language } = useLanguage();
-
-  // Fetch translated country name
-  useEffect(() => {
-    if (!countryCode) return;
-    
-    fetchCountryDetails(countryCode, language).then(name => {
-      if (name) setCountryName(name);
-    });
-  }, [countryCode, language]);
 
   // Handle Resize
   useEffect(() => {
