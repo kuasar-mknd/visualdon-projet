@@ -17,7 +17,7 @@ const CountryChart = ({ countryCode, emissionsData }) => {
   const containerRef = useRef(null);
   const [split, setSplit] = useState(false);
   const [viewMode, setViewMode] = useState('bubbles'); // 'bubbles' or 'lines'
-  const [countryName, setCountryName] = useState('');
+  const [countryName, setCountryName] = useState(''); // eslint-disable-line no-unused-vars
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const { language } = useLanguage();
 
