@@ -113,7 +113,7 @@ function AppContent() {
           {/* Top Countries Chart */}
           <div className="glass-panel-light p-4 rounded-2xl flex-1 min-h-0 relative overflow-hidden">
              <TopCountriesChart 
-                data={activeData} 
+                data={currentYearData}
                 year={year} 
                 category={category === 'Per Capita' ? 'Total' : category} 
              />

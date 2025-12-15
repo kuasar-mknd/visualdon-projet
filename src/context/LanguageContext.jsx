@@ -36,9 +36,10 @@ export const translations = {
     aria: {
       play: "Play animation",
       pause: "Pause animation",
-      selectCategory: "Select data category",
+      selectCategory: "Select emission category",
       selectYear: "Select year",
-      toggleLanguage: "Switch language"
+      toggleLanguage: "Switch language",
+      closeOverlay: "Close details"
     }
   },
   fr: {
@@ -73,9 +74,10 @@ export const translations = {
     aria: {
       play: "Démarrer l'animation",
       pause: "Mettre en pause l'animation",
-      selectCategory: "Choisir la catégorie de données",
-      selectYear: "Choisir l'année",
-      toggleLanguage: "Changer de langue"
+      selectCategory: "Sélectionner la catégorie d'émission",
+      selectYear: "Sélectionner l'année",
+      toggleLanguage: "Changer de langue",
+      closeOverlay: "Fermer les détails"
     }
   }
 };
