@@ -1,6 +1,18 @@
 import React from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 
+const PlayIcon = () => (
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
+    <path d="M8 5v14l11-7z" />
+  </svg>
+);
+
+const PauseIcon = () => (
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
+    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+  </svg>
+);
+
 const Controls = ({ isPlaying, setIsPlaying, category, setCategory, year, setYear, yearRange }) => {
   const { t } = useLanguage();
 
@@ -9,13 +21,23 @@ const Controls = ({ isPlaying, setIsPlaying, category, setCategory, year, setYea
       <div className="flex gap-3 mb-4">
         <button
           onClick={() => setIsPlaying(!isPlaying)}
-          className={`flex-1 py-3 px-6 rounded-xl font-semibold tracking-wide transition-all duration-300 shadow-sm hover:shadow-md ${
+          className={`flex-1 py-3 px-6 rounded-xl font-semibold tracking-wide transition-all duration-300 shadow-sm hover:shadow-md flex items-center justify-center gap-2 ${
             isPlaying 
               ? 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100' 
               : 'bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100'
           }`}
         >
-          {isPlaying ? t('pause') : t('play')}
+          {isPlaying ? (
+            <>
+              <PauseIcon />
+              {t('pause')}
+            </>
+          ) : (
+            <>
+              <PlayIcon />
+              {t('play')}
+            </>
+          )}
         </button>
         
         <select 
