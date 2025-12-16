@@ -4,7 +4,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { fetchCountryDetails } from '../services/countryService';
 import GlobeLegend from './globe/GlobeLegend';
 
-const Globe = ({ data, geoJson, year, category, onCountrySelect }) => {
+const Globe = ({ data, geoJson, category, onCountrySelect }) => {
   const containerRef = useRef(null);
   const svgRef = useRef(null);
   const [width, setWidth] = useState(0);
