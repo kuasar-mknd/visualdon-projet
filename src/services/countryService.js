@@ -1,18 +1,30 @@
 const CACHE_KEY = 'visualdon_country_cache';
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
 
+// Optimization: In-memory cache to avoid frequent synchronous localStorage reads/parsing
+// This significantly reduces main-thread blocking during animations where fetchCountryDetails is called repeatedly.
+let memoryCache = null;
+
 const getCache = () => {
+  if (memoryCache !== null) return memoryCache;
+
   try {
     const cache = localStorage.getItem(CACHE_KEY);
-    if (!cache) return {};
-    return JSON.parse(cache);
+    if (!cache) {
+      memoryCache = {};
+      return memoryCache;
+    }
+    memoryCache = JSON.parse(cache);
+    return memoryCache;
   } catch (e) {
     console.error("Error reading cache", e);
-    return {};
+    memoryCache = {};
+    return memoryCache;
   }
 };
 
 const setCache = (cache) => {
+  memoryCache = cache;
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
   } catch (e) {
