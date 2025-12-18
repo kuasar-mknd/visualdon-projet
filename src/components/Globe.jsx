@@ -40,6 +40,14 @@ const Globe = ({ data, geoJson, category, onCountrySelect }) => {
     return d3.geoPath().projection(projection);
   }, [projection]);
 
+  // Optimization: Memoize path strings to avoid re-calculating d3.geoPath (expensive)
+  // when only data changes (e.g. during animation), but rotation/zoom (projection) is constant.
+  // This separates geometry calculation from styling.
+  const pathStrings = useMemo(() => {
+    if (!geoJson || !pathGenerator) return [];
+    return geoJson.features.map(feature => pathGenerator(feature));
+  }, [geoJson, pathGenerator]);
+
   // Color scale - from light (low emissions) to red (high emissions)
   const colorScale = useMemo(() => {
     if (!data) return d3.scaleSequential(d3.interpolateBlues).domain([0, 100]);
@@ -151,7 +159,7 @@ const Globe = ({ data, geoJson, category, onCountrySelect }) => {
   };
 
   const paths = useMemo(() => {
-    if (!geoJson || !pathGenerator) return [];
+    if (!geoJson || !pathStrings.length) return [];
     return geoJson.features.map((feature, i) => {
         const countryId = feature.properties.A3 || feature.id;
         const countryData = dataMap.get(countryId);
@@ -162,7 +170,7 @@ const Globe = ({ data, geoJson, category, onCountrySelect }) => {
         return (
             <path
                 key={countryId || i}
-                d={pathGenerator(feature)}
+                d={pathStrings[i]}
                 fill={fillColor}
                 stroke="#0f172a"
                 strokeWidth="0.5"
@@ -177,7 +185,7 @@ const Globe = ({ data, geoJson, category, onCountrySelect }) => {
             </path>
         );
     });
-  }, [geoJson, pathGenerator, dataMap, category, colorScale, onCountrySelect, language]);
+  }, [geoJson, pathStrings, dataMap, category, colorScale, onCountrySelect, language]);
 
   if (!data || !geoJson || !width) return <div ref={containerRef} className="w-full h-full bg-slate-100" />;
 
