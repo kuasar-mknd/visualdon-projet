@@ -64,6 +64,6 @@ jobs:
 
 The data comes from the Global Carbon Budget project, specifically from their Zenodo repository:
 
-- https://zenodo.org/communities/global-carbon-budget
+- <https://zenodo.org/communities/global-carbon-budget>
 
 Always check their website for the latest version numbers and update the URLs in `scripts/update-data.js` accordingly.
