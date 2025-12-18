@@ -21,6 +21,7 @@ const Controls = ({ isPlaying, setIsPlaying, category, setCategory, year, setYea
       <div className="flex gap-3 mb-4">
         <button
           onClick={() => setIsPlaying(!isPlaying)}
+          aria-label={isPlaying ? t('aria.pause') : t('aria.play')}
           className={`flex-1 py-3 px-6 rounded-xl font-semibold tracking-wide transition-all duration-300 shadow-sm hover:shadow-md focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none flex items-center justify-center gap-2 ${
             isPlaying 
               ? 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100' 
@@ -43,8 +44,8 @@ const Controls = ({ isPlaying, setIsPlaying, category, setCategory, year, setYea
         <select 
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="bg-white border border-slate-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-slate-700 font-medium shadow-sm cursor-pointer hover:border-blue-300 transition-colors text-sm"
           aria-label={t('aria.selectCategory')}
+          className="bg-white border border-slate-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-slate-700 font-medium shadow-sm cursor-pointer hover:border-blue-300 transition-colors text-sm"
         >
           <option value="Total">{t('total')}</option>
           <option value="Per Capita">{t('perCapita')}</option>
@@ -58,8 +59,8 @@ const Controls = ({ isPlaying, setIsPlaying, category, setCategory, year, setYea
           max={yearRange.max}
           value={year}
           onChange={(e) => setYear(parseInt(e.target.value))}
-          className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none"
           aria-label={t('aria.selectYear')}
+          className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none"
         />
         <div className="flex justify-between text-[10px] font-mono text-slate-500 mt-2">
           <span>{yearRange.min}</span>

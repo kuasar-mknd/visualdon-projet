@@ -1,5 +1,7 @@
 # BOLT'S JOURNAL
 
+This journal tracks critical learnings about performance optimizations in this codebase.
+
 ## 2025-12-16 - D3 and CSP Conflict
 **Learning:** `d3.autoType` and `d3.csv` (v7+) use `new Function` for performance/parsing, which triggers `unsafe-eval` CSP violations. This blocks data loading in strict CSP environments.
 **Action:** When working with D3 in a strict CSP environment, either relax CSP (risky) or implement a custom row converter function instead of `d3.autoType` to avoid `new Function` usage. For this task, I kept `d3.autoType` but noted the issue.

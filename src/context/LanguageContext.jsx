@@ -34,6 +34,8 @@ export const translations = {
       Other: "Other"
     },
     aria: {
+      play: "Play animation",
+      pause: "Pause animation",
       selectCategory: "Select emission category",
       selectYear: "Select year",
       toggleLanguage: "Switch language",
@@ -70,6 +72,8 @@ export const translations = {
       Other: "Autre"
     },
     aria: {
+      play: "Démarrer l'animation",
+      pause: "Mettre en pause l'animation",
       selectCategory: "Sélectionner la catégorie d'émission",
       selectYear: "Sélectionner l'année",
       toggleLanguage: "Changer de langue",
