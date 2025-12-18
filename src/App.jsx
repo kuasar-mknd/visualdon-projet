@@ -43,11 +43,16 @@ function AppContent() {
     if (!emissions || emissions.length === 0) {
       return { min: 1750, max: 2021 }; // Default fallback
     }
-    const years = emissions.map(d => d.Year).filter(y => y != null);
-    return {
-      min: Math.min(...years),
-      max: Math.max(...years)
-    };
+
+    // Optimization: Use reduce instead of map+filter+spread to avoid stack overflow with large datasets
+    // and reduce iterations (O(N) vs 3*O(N))
+    return emissions.reduce((acc, d) => {
+        if (d.Year != null) {
+            if (d.Year < acc.min) acc.min = d.Year;
+            if (d.Year > acc.max) acc.max = d.Year;
+        }
+        return acc;
+    }, { min: Infinity, max: -Infinity });
   }, [emissions]);
 
   // Update year to max available when data loads (if currently at default or old max)
@@ -57,15 +62,29 @@ function AppContent() {
     }
   }, [yearRange.max, year]);
 
-  // Memoize filtered data for performance - exclude Global only
-  // Components will handle NaN/empty values themselves
-  const currentYearData = useMemo(() => {
-      if (!activeData) return [];
+  // Optimization: Pre-group data by year to make currentYearData lookup O(1) instead of O(N)
+  // This significantly improves performance during animation
+  const dataByYear = useMemo(() => {
+    if (!activeData) return new Map();
+
+    const map = new Map();
+    // Single pass to group by year and exclude WLD
+    for (const d of activeData) {
+      if (d["ISO 3166-1 alpha-3"] === "WLD") continue;
       
-      return activeData
-        .filter(d => d.Year === year)
-        .filter(d => d["ISO 3166-1 alpha-3"] !== "WLD"); // Exclude Global only
-  }, [activeData, year]);
+      const year = d.Year;
+      if (!map.has(year)) {
+        map.set(year, []);
+      }
+      map.get(year).push(d);
+    }
+    return map;
+  }, [activeData]);
+
+  // Memoize filtered data for performance
+  const currentYearData = useMemo(() => {
+      return dataByYear.get(year) || [];
+  }, [dataByYear, year]);
 
   // Update displayCountry when selectedCountry changes to a valid value
   useEffect(() => {
