@@ -6,13 +6,13 @@ This project aims to make climate data accessible and understandable through int
 
 ## 📋 Table of Contents
 
-- [Code of Conduct](#code-of-conduct)
-- [How Can I Contribute?](#how-can-i-contribute)
-- [Development Setup](#development-setup)
-- [Coding Standards](#coding-standards)
-- [Commit Guidelines](#commit-guidelines)
-- [Pull Request Process](#pull-request-process)
-- [Project Structure](#project-structure)
+- [Code of Conduct](#-code-of-conduct)
+- [How Can I Contribute?](#-how-can-i-contribute)
+- [Development Setup](#-development-setup)
+- [Coding Standards](#-coding-standards)
+- [Commit Guidelines](#-commit-guidelines)
+- [Pull Request Process](#-pull-request-process)
+- [Project Structure](#-project-structure)
 
 ## 📜 Code of Conduct
 
@@ -132,7 +132,7 @@ We follow the [Conventional Commits](https://www.conventionalcommits.org/) speci
 
 ### Commit Message Format
 
-```
+```text
 <type>(<scope>): <subject>
 
 <body>
@@ -194,7 +194,7 @@ Fixes #38
 
 ## 📂 Project Structure
 
-```
+```text
 src/
 ├── components/
 │   ├── Globe.jsx              # 3D globe visualization
