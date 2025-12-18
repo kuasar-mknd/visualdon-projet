@@ -17,7 +17,7 @@ const Header = ({ year }) => {
           <button 
               onClick={toggleLanguage}
               aria-label={t('aria.toggleLanguage')}
-              className="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 transition-all duration-300 text-xs font-semibold text-slate-600 hover:text-slate-900"
+              className="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 transition-all duration-300 text-xs font-semibold text-slate-600 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none"
           >
               {language === 'en' ? 'FR' : 'EN'}
           </button>

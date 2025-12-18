@@ -15,6 +15,7 @@ const CountryChart = ({ countryCode, emissionsData }) => {
   const containerRef = useRef(null);
   const [split, setSplit] = useState(false);
   const [viewMode, setViewMode] = useState('bubbles'); // 'bubbles' or 'lines'
+
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
   // Handle Resize
@@ -92,7 +93,7 @@ const CountryChart = ({ countryCode, emissionsData }) => {
         <div className="flex gap-2">
           <button
             onClick={() => setViewMode('bubbles')}
-            className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+            className={`px-4 py-2 rounded-lg font-semibold transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none ${
               viewMode === 'bubbles'
                 ? 'bg-blue-50 text-blue-600 border border-blue-200 shadow-sm'
                 : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
@@ -102,7 +103,7 @@ const CountryChart = ({ countryCode, emissionsData }) => {
           </button>
           <button
             onClick={() => setViewMode('lines')}
-            className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+            className={`px-4 py-2 rounded-lg font-semibold transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none ${
               viewMode === 'lines'
                 ? 'bg-blue-50 text-blue-600 border border-blue-200 shadow-sm'
                 : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
@@ -113,12 +114,12 @@ const CountryChart = ({ countryCode, emissionsData }) => {
         </div>
 
         {viewMode === 'bubbles' && (
-          <label className="flex items-center gap-3 px-4 py-2 bg-slate-800 rounded-lg border border-slate-700 cursor-pointer hover:bg-slate-700 transition-colors">
+          <label className="flex items-center gap-3 px-4 py-2 bg-slate-800 rounded-lg border border-slate-700 cursor-pointer hover:bg-slate-700 transition-colors focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
             <input 
               type="checkbox" 
               checked={split} 
               onChange={(e) => setSplit(e.target.checked)}
-              className="w-4 h-4 accent-blue-500 cursor-pointer"
+              className="w-4 h-4 accent-blue-500 cursor-pointer outline-none"
             />
             <span className="text-slate-300 font-medium">Séparer par secteur</span>
           </label>

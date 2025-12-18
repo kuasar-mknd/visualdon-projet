@@ -83,7 +83,7 @@ Data updates are also automated via GitHub Actions, running monthly. See [DATA_U
 
 ## 📁 Project Structure
 
-```
+```text
 visualdon-projet/
 ├── src/
 │   ├── components/      # React components
@@ -153,7 +153,7 @@ This visualization is based on the Global Carbon Budget dataset, which provides 
 - No significant reduction observed in any global sector to date
 - The critical importance of independent, real-time emissions tracking for climate policy
 
-> **Citation**: Friedlingstein, P., Jones, M. W., O'Sullivan, M., et al. (2021). Global Carbon Budget 2021. _Earth System Science Data_, 13(11), 5213-5252. https://doi.org/10.5194/essd-13-5213-2021
+> **Citation**: Friedlingstein, P., Jones, M. W., O'Sullivan, M., et al. (2021). Global Carbon Budget 2021. _Earth System Science Data_, 13(11), 5213-5252. <https://doi.org/10.5194/essd-13-5213-2021>
 
 ## 🔗 Links
 
@@ -167,4 +167,4 @@ For questions or suggestions, please [open an issue](https://github.com/kuasar-m
 
 ---
 
-<p align="center">Made with ❤️ for climate awareness and data transparency</p>
+**Made with ❤️ for climate awareness and data transparency**
