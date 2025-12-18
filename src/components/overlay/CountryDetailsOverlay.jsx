@@ -1,16 +1,31 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import CountryChart from '../CountryChart';
 import { useLanguage } from '../../context/LanguageContext';
 
 const CountryDetailsOverlay = ({ selectedCountry, selectedCountryName, displayCountry, onClose, year, emissions }) => {
   const { t } = useLanguage();
 
+  // Close overlay on Escape key press
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && selectedCountry) {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedCountry, onClose]);
+
   return (
     <div 
-      className={`absolute bottom-0 left-0 right-0 top-0 bg-white/80 backdrop-blur-xl border-t border-white/50 shadow-2xl transition-all duration-500 ease-in-out overflow-hidden flex flex-col ${selectedCountry ? 'translate-y-0 opacity-100 pointer-events-auto' : 'translate-y-[110%] opacity-0 pointer-events-none'}`}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="overlay-title"
+      className={`absolute bottom-0 left-0 right-0 top-0 bg-white/80 backdrop-blur-xl border-t border-white/50 shadow-2xl transition-all duration-500 ease-in-out overflow-hidden flex flex-col ${selectedCountry ? 'translate-y-0 opacity-100 pointer-events-auto' : 'translate-y-[110%] opacity-0 pointer-events-none invisible'}`}
     >
         <div className="flex justify-between items-start gap-4 p-6 shrink-0">
-            <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-4 flex-1 min-w-0">
+            <h2 id="overlay-title" className="text-2xl font-bold text-slate-800 flex items-center gap-4 flex-1 min-w-0">
                 <span className="w-1.5 h-8 bg-blue-500 rounded-full shrink-0 shadow-sm"></span>
                 <span className="truncate">{selectedCountryName || displayCountry}</span>
             </h2>
