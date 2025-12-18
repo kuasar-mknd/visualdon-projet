@@ -15,6 +15,10 @@ async function safeCsv(url, rowConverter) {
   const data = body.map(row => {
     const obj = {};
     header.forEach((key, i) => {
+      // Prevent prototype pollution
+      if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+        return;
+      }
       obj[key] = row[i];
     });
     return rowConverter ? rowConverter(obj) : obj;
