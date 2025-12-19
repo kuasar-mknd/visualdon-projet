@@ -33,4 +33,4 @@ const GlobeLegend = () => {
     );
 };
 
-export default GlobeLegend;
+export default React.memo(GlobeLegend);
