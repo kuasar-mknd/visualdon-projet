@@ -8,35 +8,57 @@ const TopCountriesChart = ({ data, year, category }) => {
   const { t, language } = useLanguage();
   const [translatedNames, setTranslatedNames] = useState({});
 
-  // Fetch translated country names when data, year, or language changes
+  // Reset translations when language changes to force re-fetch in new language
+  useEffect(() => {
+    setTranslatedNames({});
+  }, [language]);
+
+  // Fetch translated country names when data changes, but only update state if needed
   useEffect(() => {
     if (!data) return;
 
-    // data is already filtered by year and excludes WLD in App.jsx
     const yearData = data;
     
+    // Sort and get top 10
     const topData = yearData
-      .filter(d => !isNaN(parseFloat(d[category])) && parseFloat(d[category]) > 0) // Filter NaN for sorting
+      .filter(d => !isNaN(parseFloat(d[category])) && parseFloat(d[category]) > 0)
       .sort((a, b) => parseFloat(b[category]) - parseFloat(a[category]))
       .slice(0, 10);
 
-    // Fetch all translations
+    // Identify which countries need translation (not already in cache)
+    const neededCodes = topData
+      .map(d => d["ISO 3166-1 alpha-3"])
+      .filter(code => !translatedNames[code]);
+
+    // Optimization: If all needed codes are already translated, skip processing and re-render
+    if (neededCodes.length === 0) return;
+
+    // Fetch missing translations
     const fetchTranslations = async () => {
-      const translations = {};
+      const newTranslations = {};
+      let hasNewData = false;
+
       await Promise.all(
-        topData.map(async (d) => {
-          const code = d["ISO 3166-1 alpha-3"];
+        neededCodes.map(async (code) => {
           const name = await fetchCountryDetails(code, language);
           if (name) {
-            translations[code] = name;
+            newTranslations[code] = name;
+            hasNewData = true;
           }
         })
       );
-      setTranslatedNames(translations);
+
+      // Only trigger re-render if we actually fetched new data
+      if (hasNewData) {
+        setTranslatedNames(prev => ({
+          ...prev,
+          ...newTranslations
+        }));
+      }
     };
 
     fetchTranslations();
-  }, [data, year, category, language]);
+  }, [data, year, category, language, translatedNames]);
 
   useEffect(() => {
     if (!data || !svgRef.current) return;
