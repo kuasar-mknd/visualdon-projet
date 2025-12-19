@@ -41,6 +41,15 @@ export const translations = {
       selectYear: "Select year",
       toggleLanguage: "Switch language",
       closeOverlay: "Close details"
+    },
+    chart: {
+      selectCountryPrompt: "Select a country to view details",
+      selectViewMode: "Select view mode",
+      bubbles: "Bubbles",
+      stackedChart: "Stacked Chart",
+      splitBySector: "Split by Sector",
+      hoverBubbles: "Hover over bubbles or legend",
+      hoverZones: "Hover over zones or legend"
     }
   },
   fr: {
@@ -79,6 +88,15 @@ export const translations = {
       selectYear: "Sélectionner l'année",
       toggleLanguage: "Changer de langue",
       closeOverlay: "Fermer les détails"
+    },
+    chart: {
+      selectCountryPrompt: "Sélectionnez un pays pour voir les détails",
+      selectViewMode: "Sélectionner le mode d'affichage",
+      bubbles: "Bulles",
+      stackedChart: "Graphique empilé",
+      splitBySector: "Séparer par secteur",
+      hoverBubbles: "Survolez les bulles ou la légende",
+      hoverZones: "Survolez les zones ou la légende"
     }
   }
 };

@@ -80,6 +80,17 @@ const TopCountriesChart = ({ data, year, category }) => {
 
     // 2. Setup SVG
     const svg = d3.select(svgRef.current);
+
+    svg.attr("role", "graphics-document")
+       .attr("aria-label", `${t('top10')} (${year})`);
+
+    // Add accessible description if not present
+    if (svg.select("title").empty()) {
+        svg.append("title").text(`${t('top10')} (${year})`);
+        svg.append("desc").text(t('subtitle'));
+    } else {
+        svg.select("title").text(`${t('top10')} (${year})`);
+    }
     
     // Ensure SVG exists and has correct dimensions
     let g = svg.select(".chart-group");
@@ -110,12 +121,25 @@ const TopCountriesChart = ({ data, year, category }) => {
            .attr("text-anchor", "middle")
            .style("font-size", "16px")
            .style("font-weight", "600")
-           .style("fill", "#334155"); // Slate-700
+           .style("fill", "#334155")
+           .attr("aria-hidden", "true"); // Slate-700
     }
 
     // Update Title
     svg.select(".chart-title")
        .text(`${t('top10')} (${year}) - ${category === 'Total' ? t('total') : t('perCapita')}`);
+
+    // Check if data is empty
+    if (topData.length === 0) {
+        g.selectAll("*").remove();
+        g.append("text")
+         .attr("x", innerWidth / 2)
+         .attr("y", innerHeight / 2)
+         .attr("text-anchor", "middle")
+         .attr("fill", "#94a3b8")
+         .text(t('noData'));
+        return;
+    }
 
     // 3. Scales
     const x = d3.scaleLinear()
