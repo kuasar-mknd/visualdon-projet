@@ -22,8 +22,8 @@ const __dirname = path.dirname(__filename);
 const DATA_DIR = path.join(__dirname, '../public/data');
 const TEMP_DIR = path.join(__dirname, '../.temp');
 
-// Latest Zenodo record ID for GCP Fossil CO2 emissions
-const ZENODO_RECORD_ID = '17417124'; // GCB2025 (November 2025)
+// Zenodo Concept Record ID for GCP Fossil CO2 emissions (stable across versions)
+const ZENODO_CONCEPT_ID = '5569234';
 
 /**
  * Fetch JSON from URL
@@ -94,15 +94,18 @@ function downloadFile(url, destPath) {
 async function getZenodoData() {
   console.log('🔍 Fetching data from Zenodo...');
   
-  const apiUrl = `https://zenodo.org/api/records/${ZENODO_RECORD_ID}`;
+  // Query for the latest version using the concept ID
+  const apiUrl = `https://zenodo.org/api/records?q=conceptrecid:${ZENODO_CONCEPT_ID}&sort=mostrecent&size=1`;
   const response = await fetchJSON(apiUrl);
   
-  if (!response || !response.metadata) {
-    throw new Error('Invalid response from Zenodo API');
+  if (!response || !response.hits || !response.hits.hits || response.hits.hits.length === 0) {
+    throw new Error('Invalid response from Zenodo API or no records found');
   }
   
-  const metadata = response.metadata;
-  const files = response.files;
+  // The first hit is the latest version
+  const record = response.hits.hits[0];
+  const metadata = record.metadata;
+  const files = record.files;
   
   console.log(`✓ Found dataset`);
   console.log(`  Version: ${metadata.version || metadata.publication_date.substring(0, 4)}`);
