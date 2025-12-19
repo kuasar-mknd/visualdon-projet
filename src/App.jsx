@@ -11,7 +11,7 @@ import { fetchCountryDetails } from './services/countryService';
 
 function AppContent() {
   const { emissions, geoJson, perCapita, loading } = useData();
-  const [year, setYear] = useState(2021);
+  const [year, setYear] = useState(null);
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [displayCountry, setDisplayCountry] = useState(null);
   const [selectedCountryName, setSelectedCountryName] = useState('');
@@ -41,7 +41,7 @@ function AppContent() {
   // Calculate year range dynamically from data
   const yearRange = useMemo(() => {
     if (!emissions || emissions.length === 0) {
-      return { min: 1750, max: 2021 }; // Default fallback
+      return { min: 0, max: 0 };
     }
 
     // Optimization: Use reduce instead of map+filter+spread to avoid stack overflow with large datasets
@@ -57,10 +57,10 @@ function AppContent() {
 
   // Update year to max available when data loads (if currently at default or old max)
   useEffect(() => {
-    if (yearRange.max > 2021 && year === 2021) {
+    if (yearRange.max > 0 && (year === null || year > yearRange.max || year < yearRange.min)) {
        setYear(yearRange.max);
     }
-  }, [yearRange.max, year]);
+  }, [yearRange, year]);
 
   // Optimization: Pre-group data by year to make currentYearData lookup O(1) instead of O(N)
   // This significantly improves performance during animation
