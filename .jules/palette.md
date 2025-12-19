@@ -1,7 +1,12 @@
-## 2024-05-23 - Keyboard Focus Accessibility
-**Learning:** Standard browser focus rings are often suppressed or insufficient in modern CSS frameworks like Tailwind when not explicitly configured, especially for custom-styled buttons and range inputs.
-**Action:** Always verify keyboard navigation and add `focus-visible:ring-2` (or similar) to interactive elements that lack explicit focus states.
+# Palette's Journal 🎨
 
-## 2024-05-24 - Animated Overlay Visibility
-**Learning:** When animating overlays with `opacity` and `transform`, simply using `pointer-events-none` leaves the content in the accessibility tree and tab order.
-**Action:** Use `invisible` (which applies `visibility: hidden`) in the closed state. Combined with `transition-all`, this correctly waits for the transition to finish before hiding the element from screen readers and keyboard navigation.
+## Critical Learnings
+
+### Accessibility
+- **SVG Charts:** Interactive SVG charts (D3) require `role="graphics-document"`, `<title>`, and `<desc>` tags to be accessible to screen readers. Bars/elements inside should be focusable if interactive.
+- **Decorative Icons:** Icons next to text links must be hidden with `aria-hidden="true"` to avoid redundant announcements.
+- **Dynamic Content:** Updates to charts (like year changes) should use `aria-live` regions or be announced politely if they don't shift focus.
+
+### UX Decisions
+- **Empty States:** Charts must explicitely handle "No Data" states rather than rendering empty axes, which can be confusing.
+- **Hardcoded Text:** All UI text must be routed through `LanguageContext` to support the bilingual nature of the app.

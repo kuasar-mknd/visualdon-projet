@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import BubbleChart from './charts/BubbleChart';
 import StackedAreaChart from './charts/StackedAreaChart';
+import { useLanguage } from '../context/LanguageContext';
 
 const colorMapping = {
     'Coal': '#3b82f6', // Blue
@@ -14,6 +15,7 @@ const colorMapping = {
 
 const CountryChart = ({ countryCode, emissionsData }) => {
   const containerRef = useRef(null);
+  const { t } = useLanguage();
   const [split, setSplit] = useState(false);
   const [viewMode, setViewMode] = useState('bubbles'); // 'bubbles' or 'lines'
 
@@ -80,7 +82,7 @@ const CountryChart = ({ countryCode, emissionsData }) => {
   if (!countryCode) {
     return (
       <div className="flex items-center justify-center h-full text-slate-400">
-        <p className="text-lg">Sélectionnez un pays pour voir les détails</p>
+        <p className="text-lg">{t('chart.selectCountryPrompt')}</p>
       </div>
     );
   }
@@ -91,26 +93,28 @@ const CountryChart = ({ countryCode, emissionsData }) => {
     <div className="w-full h-full flex flex-col">
       {/* View Mode Toggle */}
       <div className="flex items-center gap-3 mb-4 flex-wrap">
-        <div className="flex gap-2">
+        <div role="group" aria-label={t('chart.selectViewMode')} className="flex gap-2">
           <button
             onClick={() => setViewMode('bubbles')}
+            aria-pressed={viewMode === 'bubbles'}
             className={`px-4 py-2 rounded-lg font-semibold transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none ${
               viewMode === 'bubbles'
                 ? 'bg-blue-50 text-blue-600 border border-blue-200 shadow-sm'
                 : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
             }`}
           >
-            🫧 Bulles
+            🫧 {t('chart.bubbles')}
           </button>
           <button
             onClick={() => setViewMode('lines')}
+            aria-pressed={viewMode === 'lines'}
             className={`px-4 py-2 rounded-lg font-semibold transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none ${
               viewMode === 'lines'
                 ? 'bg-blue-50 text-blue-600 border border-blue-200 shadow-sm'
                 : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
             }`}
           >
-            📈 Graphique empilé
+            📈 {t('chart.stackedChart')}
           </button>
         </div>
 
@@ -122,40 +126,44 @@ const CountryChart = ({ countryCode, emissionsData }) => {
               onChange={(e) => setSplit(e.target.checked)}
               className="w-4 h-4 accent-blue-500 cursor-pointer outline-none"
             />
-            <span className="text-slate-300 font-medium">Séparer par secteur</span>
+            <span className="text-slate-300 font-medium">{t('chart.splitBySector')}</span>
           </label>
         )}
 
         <div className="text-xs text-slate-500 italic ml-auto">
-          {viewMode === 'bubbles' ? 'Survolez les bulles ou la légende' : 'Survolez les zones ou la légende'}
+          {viewMode === 'bubbles' ? t('chart.hoverBubbles') : t('chart.hoverZones')}
         </div>
       </div>
       
       {/* Chart Container */}
       <div className="flex-1 bg-transparent rounded-lg overflow-hidden relative">
-        <div ref={containerRef} className="w-full h-full absolute inset-0">
-           {dimensions.width > 0 && dimensions.height > 0 && emissionData.length > 0 && (
-              viewMode === 'bubbles' ? (
-                <BubbleChart 
-                  chartData={chartData}
-                  width={dimensions.width}
-                  height={dimensions.height}
-                  padding={padding}
-                  split={split}
-                  colorMapping={colorMapping}
-                />
+        <div ref={containerRef} className="w-full h-full absolute inset-0 flex items-center justify-center">
+           {dimensions.width > 0 && dimensions.height > 0 ? (
+              emissionData.length > 0 ? (
+                viewMode === 'bubbles' ? (
+                  <BubbleChart
+                    chartData={chartData}
+                    width={dimensions.width}
+                    height={dimensions.height}
+                    padding={padding}
+                    split={split}
+                    colorMapping={colorMapping}
+                  />
+                ) : (
+                  <StackedAreaChart
+                    years={years}
+                    emissionData={emissionData}
+                    sectors={Object.keys(colorMapping)}
+                    width={dimensions.width}
+                    height={dimensions.height}
+                    padding={padding}
+                    colorMapping={colorMapping}
+                  />
+                )
               ) : (
-                <StackedAreaChart 
-                  years={years}
-                  emissionData={emissionData}
-                  sectors={Object.keys(colorMapping)}
-                  width={dimensions.width}
-                  height={dimensions.height}
-                  padding={padding}
-                  colorMapping={colorMapping}
-                />
+                <div className="text-slate-400">{t('noData')}</div>
               )
-           )}
+           ) : null}
         </div>
       </div>
     </div>
