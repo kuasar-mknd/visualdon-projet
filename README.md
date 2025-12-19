@@ -37,10 +37,10 @@ git clone https://github.com/kuasar-mknd/visualdon-projet.git
 cd visualdon-projet
 
 # Install dependencies
-npm install
+pnpm install
 
 # Start development server
-npm run dev
+pnpm run dev
 ```
 
 The application will be available at `http://localhost:5173`
@@ -48,8 +48,8 @@ The application will be available at `http://localhost:5173`
 ### Building for Production
 
 ```bash
-npm run build
-npm run preview
+pnpm run build
+pnpm run preview
 ```
 
 ## 📊 Data
@@ -66,7 +66,7 @@ This project uses authoritative emissions data from the [Global Carbon Budget](h
 
 ```bash
 # Fetch latest data from Global Carbon Budget
-npm run update-data
+pnpm run update-data
 ```
 
 Data updates are also automated via GitHub Actions, running monthly. See [DATA_UPDATE.md](DATA_UPDATE.md) for details.
