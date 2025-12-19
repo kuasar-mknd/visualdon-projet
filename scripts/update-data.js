@@ -250,16 +250,42 @@ async function updateData() {
     
     const perCapitaData = calculatePerCapita(mtCO2Data, populationData);
     
-    // Save files (with generic names so code doesn't need to change)
+    // Save files (with dynamic names and manifest)
     console.log('💾 Saving data...');
     
-    const mtCO2Final = path.join(DATA_DIR, 'GCB_latest_MtCO2_flat-clean.csv');
+    // Use the original filename for emissions data
+    const mtCO2FinalName = zenodoData.mtCO2Filename;
+    const mtCO2Final = path.join(DATA_DIR, mtCO2FinalName);
+
+    if (!mtCO2Final.startsWith(DATA_DIR)) {
+      throw new Error('Path traversal detected in MtCO2 final filename');
+    }
+
     fs.writeFileSync(mtCO2Final, mtCO2Content, 'utf-8');
     console.log(`✓ Saved: ${mtCO2Final}`);
     
-    const perCapitaFinal = path.join(DATA_DIR, 'GCB_latest_percapita_flat-clean.csv');
+    // Create dynamic name for per-capita data
+    const perCapitaFinalName = `GCB_${zenodoData.version}_percapita_flat-clean.csv`;
+    const perCapitaFinal = path.join(DATA_DIR, perCapitaFinalName);
+
+    if (!perCapitaFinal.startsWith(DATA_DIR)) {
+      throw new Error('Path traversal detected in per-capita final filename');
+    }
+
     fs.writeFileSync(perCapitaFinal, arrayToCSV(perCapitaData), 'utf-8');
     console.log(`✓ Saved: ${perCapitaFinal}\n`);
+
+    // Create and save manifest
+    const manifest = {
+      emissions: mtCO2FinalName,
+      perCapita: perCapitaFinalName,
+      version: zenodoData.version,
+      lastUpdated: new Date().toISOString()
+    };
+
+    const manifestPath = path.join(DATA_DIR, 'manifest.json');
+    fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), 'utf-8');
+    console.log(`✓ Saved manifest: ${manifestPath}\n`);
     
     console.log('✅ Data update completed successfully!');
     console.log(`📈 Version: ${zenodoData.version}`);
