@@ -1,9 +1,24 @@
-import React, { useEffect, useRef, useMemo, useState } from 'react';
+import React, { useEffect, useRef, useMemo, useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import * as d3 from 'd3';
 import { useLanguage } from '../context/LanguageContext';
 import { fetchCountryDetails } from '../services/countryService';
 import GlobeLegend from './globe/GlobeLegend';
+
+// Create a custom interpolator for better visibility and meaning
+// Low emissions: Blue/Green, Medium: Yellow/Orange, High: Red
+const customInterpolator = t => {
+  if (t < 0.33) {
+    // Blue to Green (0 to 0.33)
+    return d3.interpolateRgb("#3b82f6", "#10b981")(t * 3);
+  } else if (t < 0.66) {
+    // Green to Yellow (0.33 to 0.66)
+    return d3.interpolateRgb("#10b981", "#fbbf24")((t - 0.33) * 3);
+  } else {
+    // Yellow to Orange to Red (0.66 to 1)
+    return d3.interpolateRgb("#fbbf24", "#ef4444")((t - 0.66) * 3);
+  }
+};
 
 const Globe = ({ data, geoJson, category, onCountrySelect }) => {
   const containerRef = useRef(null);
@@ -53,21 +68,6 @@ const Globe = ({ data, geoJson, category, onCountrySelect }) => {
   const colorScale = useMemo(() => {
     if (!data) return d3.scaleSequential(d3.interpolateBlues).domain([0, 100]);
     const max = d3.max(data, d => parseFloat(d[category])) || 100;
-    
-    // Create a custom interpolator for better visibility and meaning
-    // Low emissions: Blue/Green, Medium: Yellow/Orange, High: Red
-    const customInterpolator = t => {
-      if (t < 0.33) {
-        // Blue to Green (0 to 0.33)
-        return d3.interpolateRgb("#3b82f6", "#10b981")(t * 3);
-      } else if (t < 0.66) {
-        // Green to Yellow (0.33 to 0.66)
-        return d3.interpolateRgb("#10b981", "#fbbf24")((t - 0.33) * 3);
-      } else {
-        // Yellow to Orange to Red (0.66 to 1)
-        return d3.interpolateRgb("#fbbf24", "#ef4444")((t - 0.66) * 3);
-      }
-    };
     
     // Use log scale for better distribution
     return d3.scaleSequentialLog(customInterpolator)
@@ -148,16 +148,16 @@ const Globe = ({ data, geoJson, category, onCountrySelect }) => {
   }, [hoveredCountryId, dataMap, category]);
 
   // Fetch country name on hover
-  const handleMouseEnter = async (countryId) => {
+  const handleMouseEnter = useCallback(async (countryId) => {
       setHoveredCountryId(countryId);
       const name = await fetchCountryDetails(countryId, language);
       setHoveredCountryName(name);
-  };
+  }, [language]);
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = useCallback(() => {
       setHoveredCountryName(null);
       setHoveredCountryId(null);
-  };
+  }, []);
 
   const paths = useMemo(() => {
     if (!geoJson || !pathStrings.length) return [];
@@ -199,7 +199,7 @@ const Globe = ({ data, geoJson, category, onCountrySelect }) => {
             </path>
         );
     });
-  }, [geoJson, pathStrings, dataMap, category, colorScale, onCountrySelect, language, hoveredCountryId, hoveredCountryName]);
+  }, [geoJson, pathStrings, dataMap, category, colorScale, onCountrySelect, hoveredCountryId, hoveredCountryName, handleMouseEnter, handleMouseLeave]);
 
   if (!data || !geoJson || !width) return <div ref={containerRef} className="w-full h-full bg-slate-100" />;
 
@@ -288,4 +288,4 @@ Globe.propTypes = {
   onCountrySelect: PropTypes.func.isRequired,
 };
 
-export default Globe;
+export default React.memo(Globe);

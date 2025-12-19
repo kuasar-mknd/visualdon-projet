@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Globe from './components/Globe';
 import TopCountriesChart from './components/TopCountriesChart';
 import Header from './components/layout/Header';
@@ -102,6 +102,17 @@ function AppContent() {
     });
   }, [displayCountry, language]);
 
+  // Stable handlers
+  const handleCloseOverlay = useCallback(() => {
+    setSelectedCountry(null);
+  }, []);
+
+  // Implicitly stable because useState setter is stable, but for clarity/consistency
+  // and in case logic is added later.
+  // Although passing setSelectedCountry directly is fine, wrapping it doesn't hurt.
+  // More importantly, we should REMOVE `year={year}` from Globe props if it's not used
+  // to prevent re-renders on every tick.
+
 
   if (loading) {
     return (
@@ -143,10 +154,10 @@ function AppContent() {
 
         {/* Middle: Globe */}
         <div className="lg:col-span-8 glass-panel-light rounded-2xl overflow-hidden relative shadow-xl border-white/50">
+           {/* Removed year prop as it caused unnecessary re-renders and wasn't used by Globe */}
            <Globe 
               data={currentYearData} 
               geoJson={geoJson} 
-              year={year}
               category={category === 'Per Capita' ? 'Total' : category}
               onCountrySelect={setSelectedCountry}
            />
@@ -155,7 +166,7 @@ function AppContent() {
               selectedCountry={selectedCountry}
               selectedCountryName={selectedCountryName}
               displayCountry={displayCountry}
-              onClose={() => setSelectedCountry(null)}
+              onClose={handleCloseOverlay}
               year={year}
               emissions={emissions}
            />

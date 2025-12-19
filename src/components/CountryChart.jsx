@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, Suspense } from 'react';
 import PropTypes from 'prop-types';
-import BubbleChart from './charts/BubbleChart';
-import StackedAreaChart from './charts/StackedAreaChart';
 import { useLanguage } from '../context/LanguageContext';
+
+const BubbleChart = React.lazy(() => import('./charts/BubbleChart'));
+const StackedAreaChart = React.lazy(() => import('./charts/StackedAreaChart'));
 
 const colorMapping = {
     'Coal': '#3b82f6', // Blue
@@ -18,6 +19,7 @@ const CountryChart = ({ countryCode, emissionsData }) => {
   const { t } = useLanguage();
   const [split, setSplit] = useState(false);
   const [viewMode, setViewMode] = useState('bubbles'); // 'bubbles' or 'lines'
+  const { t } = useLanguage();
 
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
@@ -137,10 +139,10 @@ const CountryChart = ({ countryCode, emissionsData }) => {
       
       {/* Chart Container */}
       <div className="flex-1 bg-transparent rounded-lg overflow-hidden relative">
-        <div ref={containerRef} className="w-full h-full absolute inset-0 flex items-center justify-center">
-           {dimensions.width > 0 && dimensions.height > 0 ? (
-              emissionData.length > 0 ? (
-                viewMode === 'bubbles' ? (
+        <div ref={containerRef} className="w-full h-full absolute inset-0">
+           {dimensions.width > 0 && dimensions.height > 0 && emissionData.length > 0 && (
+             <Suspense fallback={<div className="flex items-center justify-center h-full text-slate-400">{t('loading')}...</div>}>
+                {viewMode === 'bubbles' ? (
                   <BubbleChart
                     chartData={chartData}
                     width={dimensions.width}
@@ -159,11 +161,9 @@ const CountryChart = ({ countryCode, emissionsData }) => {
                     padding={padding}
                     colorMapping={colorMapping}
                   />
-                )
-              ) : (
-                <div className="text-slate-400">{t('noData')}</div>
-              )
-           ) : null}
+                )}
+             </Suspense>
+           )}
         </div>
       </div>
     </div>
@@ -178,4 +178,4 @@ CountryChart.propTypes = {
   })),
 };
 
-export default CountryChart;
+export default React.memo(CountryChart);

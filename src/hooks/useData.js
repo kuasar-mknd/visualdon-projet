@@ -41,18 +41,20 @@ export function useData() {
     async function loadData() {
       try {
         // First load the manifest to get current filenames
+        // Use a cache-busting strategy or check if we can rely on browser caching.
+        // For now, we fetch manifest.json.
         const manifest = await d3.json('/data/manifest.json');
         if (!manifest || !manifest.emissions || !manifest.perCapita) {
           throw new Error('Invalid manifest');
         }
 
+        // Parallelize fetching
         const [emissions, geoJson, perCapita] = await Promise.all([
           safeCsv(`/data/${manifest.emissions}`, d3.autoType),
           d3.json('/data/countries-coastline-10km.geo.json'),
           safeCsv(`/data/${manifest.perCapita}`, d3.autoType),
         ]);
 
-        console.log("Data loaded:", { emissions: emissions.length, geoJson: geoJson.features.length, perCapita: perCapita.length });
         setData({
           emissions,
           geoJson,

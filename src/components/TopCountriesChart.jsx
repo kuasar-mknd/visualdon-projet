@@ -241,4 +241,4 @@ TopCountriesChart.propTypes = {
   category: PropTypes.string.isRequired,
 };
 
-export default TopCountriesChart;
+export default React.memo(TopCountriesChart);
