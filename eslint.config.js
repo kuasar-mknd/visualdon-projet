@@ -28,7 +28,7 @@ export default [
       ...js.configs.recommended.rules,
       ...react.configs.recommended.rules,
       ...react.configs['jsx-runtime'].rules,
-      'react/jsx-no-target-blank': 'off',
+      'react/jsx-no-target-blank': 'warn',
       'react/prop-types': 'error', // Enable prop-types validation
       'no-unused-vars': ['warn', { varsIgnorePattern: '^React$' }], // Ignore unused React import
       'no-undef': 'error', // Strict undefined variable check

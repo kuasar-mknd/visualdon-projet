@@ -30,10 +30,19 @@ const ZENODO_CONCEPT_ID = '5569234';
  */
 function fetchJSON(url) {
   return new Promise((resolve, reject) => {
-    https.get(url, (res) => {
+    const req = https.get(url, { timeout: 10000 }, (res) => {
+      const contentType = res.headers['content-type'];
+      if (res.statusCode === 200 && contentType && !contentType.includes('application/json')) {
+        console.warn(`⚠️  Warning: Expected application/json but got ${contentType}`);
+      }
+
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
+        if (res.statusCode !== 200) {
+          reject(new Error(`API Error: ${res.statusCode}`));
+          return;
+        }
         try {
           resolve(JSON.parse(data));
         } catch {
@@ -41,7 +50,13 @@ function fetchJSON(url) {
         }
       });
       res.on('error', reject);
-    }).on('error', reject);
+    });
+
+    req.on('error', reject);
+    req.on('timeout', () => {
+      req.destroy();
+      reject(new Error('Request timed out'));
+    });
   });
 }
 
@@ -50,16 +65,33 @@ function fetchJSON(url) {
  */
 function downloadFile(url, destPath) {
   return new Promise((resolve, reject) => {
+    let redirects = 0;
+    const maxRedirects = 5;
+
     const download = (fileUrl) => {
+      if (!fileUrl.startsWith('https://')) {
+        reject(new Error('Insecure protocol: HTTPS required'));
+        return;
+      }
+
       const file = fs.createWriteStream(destPath);
-      const protocol = fileUrl.startsWith('https') ? https : require('http');
       
-      protocol.get(fileUrl, (response) => {
+      const req = https.get(fileUrl, { timeout: 15000 }, (response) => {
         // Handle redirects
         if (response.statusCode === 302 || response.statusCode === 301) {
           file.close();
           fs.unlinkSync(destPath);
-          return download(response.headers.location);
+          redirects++;
+          if (redirects > maxRedirects) {
+            reject(new Error('Too many redirects'));
+            return;
+          }
+          const location = response.headers.location;
+          if (!location) {
+             reject(new Error('Redirect missing location header'));
+             return;
+          }
+          return download(location);
         }
         
         if (response.statusCode !== 200) {
@@ -78,9 +110,17 @@ function downloadFile(url, destPath) {
           fs.unlinkSync(destPath);
           reject(err);
         });
-      }).on('error', (err) => {
+      });
+
+      req.on('error', (err) => {
         if (fs.existsSync(destPath)) fs.unlinkSync(destPath);
         reject(err);
+      });
+
+      req.on('timeout', () => {
+        req.destroy();
+        if (fs.existsSync(destPath)) fs.unlinkSync(destPath);
+        reject(new Error('Download timed out'));
       });
     };
     
@@ -134,12 +174,18 @@ async function getZenodoData() {
  * Parse CSV into array of objects
  */
 function parseCSV(csvContent) {
-  const lines = csvContent.trim().split('\n');
-  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+  const lines = csvContent.trim().split(/\r?\n/);
+  // Split by comma but ignore commas inside quotes
+  const splitRegex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
+
+  const headers = lines[0].split(splitRegex).map(h => h.trim().replace(/^"|"$/g, ''));
   
   const data = [];
   for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+    const line = lines[i].trim();
+    if (!line) continue;
+
+    const values = line.split(splitRegex).map(v => v.trim().replace(/^"|"$/g, ''));
     const row = {};
     headers.forEach((header, index) => {
       row[header] = values[index] || '';
