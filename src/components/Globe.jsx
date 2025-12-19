@@ -167,25 +167,38 @@ const Globe = ({ data, geoJson, category, onCountrySelect }) => {
         // Use gray for countries with no data
         const fillColor = value > 0 ? colorScale(value) : '#475569';
         
+        const isHovered = hoveredCountryId === countryId;
+
         return (
             <path
                 key={countryId || i}
                 d={pathStrings[i]}
                 fill={fillColor}
-                stroke="#0f172a"
-                strokeWidth="0.5"
-                className="transition-colors duration-300 hover:opacity-80 cursor-pointer"
+                stroke={isHovered ? "#ffffff" : "#0f172a"}
+                strokeWidth={isHovered ? "1.5" : "0.5"}
+                className="transition-colors duration-300 hover:opacity-80 cursor-pointer focus:outline-none"
+                role="button"
+                tabIndex="0"
+                aria-label={isHovered && hoveredCountryName ? hoveredCountryName : (feature.properties.NAME || countryId)}
                 onClick={(e) => {
                     e.stopPropagation();
                     onCountrySelect(countryId);
                 }}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        onCountrySelect(countryId);
+                    }
+                }}
+                onFocus={() => handleMouseEnter(countryId)}
+                onBlur={handleMouseLeave}
                 onMouseEnter={() => handleMouseEnter(countryId)}
                 onMouseLeave={handleMouseLeave}
             >
             </path>
         );
     });
-  }, [geoJson, pathStrings, dataMap, category, colorScale, onCountrySelect, language]);
+  }, [geoJson, pathStrings, dataMap, category, colorScale, onCountrySelect, language, hoveredCountryId, hoveredCountryName]);
 
   if (!data || !geoJson || !width) return <div ref={containerRef} className="w-full h-full bg-slate-100" />;
 
