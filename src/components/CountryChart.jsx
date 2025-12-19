@@ -19,7 +19,6 @@ const CountryChart = ({ countryCode, emissionsData }) => {
   const { t } = useLanguage();
   const [split, setSplit] = useState(false);
   const [viewMode, setViewMode] = useState('bubbles'); // 'bubbles' or 'lines'
-  const { t } = useLanguage();
 
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
