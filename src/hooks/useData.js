@@ -52,7 +52,6 @@ export function useData() {
           safeCsv(`/data/${manifest.perCapita}`, d3.autoType),
         ]);
 
-        console.log("Data loaded:", { emissions: emissions.length, geoJson: geoJson.features.length, perCapita: perCapita.length });
         setData({
           emissions,
           geoJson,
