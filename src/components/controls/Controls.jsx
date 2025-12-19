@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { useLanguage } from '../../context/LanguageContext';
 
 const PlayIcon = () => (
@@ -69,6 +70,19 @@ const Controls = ({ isPlaying, setIsPlaying, category, setCategory, year, setYea
       </div>
     </div>
   );
+};
+
+Controls.propTypes = {
+  isPlaying: PropTypes.bool.isRequired,
+  setIsPlaying: PropTypes.func.isRequired,
+  category: PropTypes.string.isRequired,
+  setCategory: PropTypes.func.isRequired,
+  year: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  setYear: PropTypes.func.isRequired,
+  yearRange: PropTypes.shape({
+    min: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    max: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  }).isRequired,
 };
 
 export default Controls;

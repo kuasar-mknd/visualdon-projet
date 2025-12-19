@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import PropTypes from 'prop-types';
 import * as d3 from 'd3';
 import { useLanguage } from '../context/LanguageContext';
 import { fetchCountryDetails } from '../services/countryService';
@@ -204,6 +205,16 @@ const TopCountriesChart = ({ data, year, category }) => {
   }, [data, year, category, t, translatedNames]);
 
   return <svg ref={svgRef} className="w-full h-full rounded-lg" />;
+};
+
+TopCountriesChart.propTypes = {
+  data: PropTypes.arrayOf(PropTypes.shape({
+    Country: PropTypes.string,
+    "ISO 3166-1 alpha-3": PropTypes.string,
+    // Dynamic access for category, so we can't be too strict here without listing all possible categories
+  })).isRequired,
+  year: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  category: PropTypes.string.isRequired,
 };
 
 export default TopCountriesChart;

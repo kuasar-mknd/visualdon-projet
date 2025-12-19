@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import PropTypes from 'prop-types';
 import * as d3 from 'd3';
 import { useLanguage } from '../../context/LanguageContext';
 
@@ -241,6 +242,25 @@ const BubbleChart = ({
   }, [chartData, width, height, padding, split, colorMapping, t]);
 
   return <div ref={containerRef} className="w-full h-full" />;
+};
+
+BubbleChart.propTypes = {
+  chartData: PropTypes.arrayOf(PropTypes.shape({
+    year: PropTypes.number,
+    value: PropTypes.number,
+    sector: PropTypes.string,
+    color: PropTypes.string
+  })).isRequired,
+  width: PropTypes.number.isRequired,
+  height: PropTypes.number.isRequired,
+  padding: PropTypes.shape({
+    top: PropTypes.number,
+    right: PropTypes.number,
+    bottom: PropTypes.number,
+    left: PropTypes.number
+  }).isRequired,
+  split: PropTypes.bool.isRequired,
+  colorMapping: PropTypes.object.isRequired
 };
 
 export default BubbleChart;

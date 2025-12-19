@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import PropTypes from 'prop-types';
 import BubbleChart from './charts/BubbleChart';
 import StackedAreaChart from './charts/StackedAreaChart';
 
@@ -159,6 +160,14 @@ const CountryChart = ({ countryCode, emissionsData }) => {
       </div>
     </div>
   );
+};
+
+CountryChart.propTypes = {
+  countryCode: PropTypes.string,
+  emissionsData: PropTypes.arrayOf(PropTypes.shape({
+    Year: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    "ISO 3166-1 alpha-3": PropTypes.string,
+  })),
 };
 
 export default CountryChart;

@@ -29,7 +29,7 @@ export default [
       ...react.configs.recommended.rules,
       ...react.configs['jsx-runtime'].rules,
       'react/jsx-no-target-blank': 'off',
-      'react/prop-types': 'off', // Disable prop-types validation
+      'react/prop-types': 'error', // Enable prop-types validation
       'no-unused-vars': ['warn', { varsIgnorePattern: '^React$' }], // Ignore unused React import
       'no-undef': 'warn', // Downgrade undef to warn for now
       'react-refresh/only-export-components': [
