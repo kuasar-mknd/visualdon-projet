@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import PropTypes from 'prop-types';
 import CountryChart from '../CountryChart';
 import { useLanguage } from '../../context/LanguageContext';
 
@@ -47,6 +48,15 @@ const CountryDetailsOverlay = ({ selectedCountry, selectedCountryName, displayCo
         </div>
     </div>
   );
+};
+
+CountryDetailsOverlay.propTypes = {
+  selectedCountry: PropTypes.string,
+  selectedCountryName: PropTypes.string,
+  displayCountry: PropTypes.string,
+  onClose: PropTypes.func.isRequired,
+  year: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  emissions: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 
 export default CountryDetailsOverlay;

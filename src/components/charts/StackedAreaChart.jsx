@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import PropTypes from 'prop-types';
 import * as d3 from 'd3';
 import { useLanguage } from '../../context/LanguageContext';
 
@@ -171,6 +172,21 @@ const StackedAreaChart = ({
   }, [years, emissionData, sectors, width, height, padding, colorMapping, t]);
 
   return <div ref={containerRef} className="w-full h-full" />;
+};
+
+StackedAreaChart.propTypes = {
+  years: PropTypes.arrayOf(PropTypes.number).isRequired,
+  emissionData: PropTypes.arrayOf(PropTypes.object).isRequired,
+  sectors: PropTypes.arrayOf(PropTypes.string).isRequired,
+  width: PropTypes.number.isRequired,
+  height: PropTypes.number.isRequired,
+  padding: PropTypes.shape({
+    top: PropTypes.number,
+    right: PropTypes.number,
+    bottom: PropTypes.number,
+    left: PropTypes.number
+  }).isRequired,
+  colorMapping: PropTypes.object.isRequired
 };
 
 export default StackedAreaChart;

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useMemo, useState } from 'react';
+import PropTypes from 'prop-types';
 import * as d3 from 'd3';
 import { useLanguage } from '../context/LanguageContext';
 import { fetchCountryDetails } from '../services/countryService';
@@ -272,6 +273,19 @@ const Globe = ({ data, geoJson, category, onCountrySelect }) => {
      <GlobeLegend />
   </div>
   );
+};
+
+Globe.propTypes = {
+  data: PropTypes.arrayOf(PropTypes.shape({
+    "ISO 3166-1 alpha-3": PropTypes.string,
+    // Dynamic access for category, so we can't be too strict here without listing all possible categories
+  })).isRequired,
+  geoJson: PropTypes.shape({
+    type: PropTypes.string,
+    features: PropTypes.arrayOf(PropTypes.object)
+  }),
+  category: PropTypes.string.isRequired,
+  onCountrySelect: PropTypes.func.isRequired,
 };
 
 export default Globe;

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { useLanguage } from '../../context/LanguageContext';
 
 const Header = ({ year }) => {
@@ -28,6 +29,10 @@ const Header = ({ year }) => {
       </div>
     </header>
   );
+};
+
+Header.propTypes = {
+  year: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
 };
 
 export default Header;
