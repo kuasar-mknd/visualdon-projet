@@ -57,10 +57,11 @@ const Controls = ({ isPlaying, setIsPlaying, category, setCategory, year, setYea
           type="range"
           min={yearRange.min}
           max={yearRange.max}
-          value={year}
+          value={year || yearRange.min}
+          disabled={!year}
           onChange={(e) => setYear(parseInt(e.target.value))}
           aria-label={t('aria.selectYear')}
-          className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none"
+          className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
         />
         <div className="flex justify-between text-[10px] font-mono text-slate-500 mt-2">
           <span>{yearRange.min}</span>
