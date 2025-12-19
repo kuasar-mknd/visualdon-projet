@@ -122,8 +122,8 @@ async function getZenodoData() {
     version: metadata.version || metadata.publication_date.substring(0, 4),
     mtCO2Url: mtCO2File.links.self,
     populationUrl: populationFile.links.self,
-    mtCO2Filename: mtCO2File.key,
-    populationFilename: populationFile.key
+    mtCO2Filename: path.basename(mtCO2File.key),
+    populationFilename: path.basename(populationFile.key)
   };
 }
 
@@ -218,11 +218,21 @@ async function updateData() {
     // Download files
     console.log(`⬇️  Downloading ${zenodoData.mtCO2Filename}...`);
     const mtCO2Temp = path.join(TEMP_DIR, zenodoData.mtCO2Filename);
+
+    if (!mtCO2Temp.startsWith(TEMP_DIR)) {
+      throw new Error('Path traversal detected in MtCO2 filename');
+    }
+
     await downloadFile(zenodoData.mtCO2Url, mtCO2Temp);
     console.log(`✓ Downloaded (${(fs.statSync(mtCO2Temp).size / 1024).toFixed(0)} KB)\n`);
     
     console.log(`⬇️  Downloading ${zenodoData.populationFilename}...`);
     const populationTemp = path.join(TEMP_DIR, zenodoData.populationFilename);
+
+    if (!populationTemp.startsWith(TEMP_DIR)) {
+      throw new Error('Path traversal detected in population filename');
+    }
+
     await downloadFile(zenodoData.populationUrl, populationTemp);
     console.log(`✓ Downloaded (${(fs.statSync(populationTemp).size / 1024).toFixed(0)} KB)\n`);
     
