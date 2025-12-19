@@ -38,22 +38,34 @@ export function useData() {
   });
 
   useEffect(() => {
-    Promise.all([
-      safeCsv('/data/GCB_latest_MtCO2_flat-clean.csv', d3.autoType),
-      d3.json('/data/countries-coastline-10km.geo.json'),
-      safeCsv('/data/GCB_latest_percapita_flat-clean.csv', d3.autoType),
-    ]).then(([emissions, geoJson, perCapita]) => {
-      console.log("Data loaded:", { emissions: emissions.length, geoJson: geoJson.features.length, perCapita: perCapita.length });
-      setData({
-        emissions,
-        geoJson,
-        perCapita,
-        loading: false,
-      });
-    }).catch(err => {
-      console.error("Error loading data:", err);
-      setData(prev => ({ ...prev, loading: false }));
-    });
+    async function loadData() {
+      try {
+        // First load the manifest to get current filenames
+        const manifest = await d3.json('/data/manifest.json');
+        if (!manifest || !manifest.emissions || !manifest.perCapita) {
+          throw new Error('Invalid manifest');
+        }
+
+        const [emissions, geoJson, perCapita] = await Promise.all([
+          safeCsv(`/data/${manifest.emissions}`, d3.autoType),
+          d3.json('/data/countries-coastline-10km.geo.json'),
+          safeCsv(`/data/${manifest.perCapita}`, d3.autoType),
+        ]);
+
+        console.log("Data loaded:", { emissions: emissions.length, geoJson: geoJson.features.length, perCapita: perCapita.length });
+        setData({
+          emissions,
+          geoJson,
+          perCapita,
+          loading: false,
+        });
+      } catch (err) {
+        console.error("Error loading data:", err);
+        setData(prev => ({ ...prev, loading: false }));
+      }
+    }
+
+    loadData();
   }, []);
 
   return data;
