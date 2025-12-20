@@ -35,4 +35,5 @@ Header.propTypes = {
   year: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
 };
 
-export default Header;
+// Optimization: Memoize to prevent re-renders when parent re-renders but props are same.
+export default React.memo(Header);

@@ -86,4 +86,5 @@ Controls.propTypes = {
   }).isRequired,
 };
 
-export default Controls;
+// Optimization: Memoize to prevent re-renders when parent re-renders but props are same.
+export default React.memo(Controls);
