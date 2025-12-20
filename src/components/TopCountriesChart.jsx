@@ -163,7 +163,14 @@ const TopCountriesChart = ({ data, year, category }) => {
         .append("g")
         .attr("class", "bar-group")
         .attr("transform", d => `translate(0, ${y(d["ISO 3166-1 alpha-3"])})`)
-        .style("opacity", 0);
+        .style("opacity", 0)
+        .attr("tabindex", "0")
+        .attr("role", "listitem")
+        .attr("aria-label", d => {
+            const name = translatedNames[d["ISO 3166-1 alpha-3"]] || d.Country;
+            const val = parseFloat(d[category]).toFixed(1);
+            return `${name}: ${val}`;
+        });
 
     enter.append("rect")
         .attr("class", "bar-rect")
@@ -207,6 +214,13 @@ const TopCountriesChart = ({ data, year, category }) => {
 
     update.select(".country-label")
         .text(d => translatedNames[d["ISO 3166-1 alpha-3"]] || d.Country); // Update with translated name
+
+    // Update accessible labels
+    update.attr("aria-label", d => {
+        const name = translatedNames[d["ISO 3166-1 alpha-3"]] || d.Country;
+        const val = parseFloat(d[category]).toFixed(1);
+        return `${name}: ${val}`;
+    });
 
     update.select(".value-label")
         .transition(tTransition)
