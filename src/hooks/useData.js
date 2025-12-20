@@ -62,7 +62,8 @@ export function useData() {
           loading: false,
         });
       } catch (err) {
-        console.error("Error loading data:", err);
+        // Log only the message to avoid leaking potential data structure details in the error object
+        console.error("Error loading data:", err.message);
         setData(prev => ({ ...prev, loading: false }));
       }
     }
