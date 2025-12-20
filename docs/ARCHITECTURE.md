@@ -1,7 +1,7 @@
 # Architecture
 
 ## Overview
-This project is a client-side Single Page Application (SPA) built with React 19 and Vite. It visualizes global CO₂ emissions data using D3.js for charts and potentially Three.js (via React components) for 3D elements. The application is designed to be performant, accessible, and responsive.
+This project is a client-side Single Page Application (SPA) built with React 19 and Vite. It visualizes global CO₂ emissions data using D3.js for charts and Three.js (via React components) for 3D globe elements. The application is designed to be performant, accessible, and responsive.
 
 ## Core Technologies
 - **React 19**: UI library for building component-based user interfaces.
@@ -45,6 +45,20 @@ Node.js scripts for maintenance tasks.
 6.  **Updates**: When the user interacts (e.g., moves the time slider), the state updates, triggering re-renders of the visualizations to show data for the selected year.
 
 ## Design Patterns
-- **Component Composition**: UI is built by composing smaller, reusable components.
-- **Custom Hooks**: Logic for data fetching and state management is encapsulated in hooks (`useData`).
-- **Context API**: Global state (like Language) is shared using React Context to avoid prop drilling.
+
+### Component Architecture
+The application follows a component-based architecture where each UI element is a self-contained unit.
+- **Container/Presenter**: Some components act as containers (fetching data/state) while others are purely presentational.
+
+### Clean Architecture Mapping
+While this is a frontend-only application, the structure loosely maps to Clean Architecture principles:
+- **Domain Layer**: Implicitly defined by the data structures (emissions data) and types. `src/services/` contains domain-specific logic like country translation.
+- **Application Layer**: `src/hooks/` and `src/context/` manage the application state and business logic (e.g., filtering data by year).
+- **Infrastructure Layer**: `d3.csv` and `fetch` APIs act as the infrastructure for data retrieval. `scripts/update-data.js` handles external data source integration.
+- **Presentation Layer**: React components (`src/components/`) handle the UI and user interaction.
+
+### Custom Hooks
+Logic for data fetching and state management is encapsulated in hooks (`useData`) to separate concerns and keep components clean.
+
+### Context API
+Global state (like Language) is shared using React Context to avoid prop drilling.
