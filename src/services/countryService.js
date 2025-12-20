@@ -49,7 +49,9 @@ export const fetchCountryDetails = async (code, language) => {
   }
 
   try {
-    const response = await fetch(`https://restcountries.com/v3.1/alpha/${code}`);
+    // Sanitize input to prevent URL injection
+    const safeCode = encodeURIComponent(code);
+    const response = await fetch(`https://restcountries.com/v3.1/alpha/${safeCode}`);
     if (!response.ok) throw new Error('Network response was not ok');
     
     const data = await response.json();

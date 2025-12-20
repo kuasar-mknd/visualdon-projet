@@ -7,3 +7,8 @@
 **Vulnerability:** `d3.csv` (via `d3-dsv`) uses `new Function` (eval) to create object converters, which violates strict CSP (`script-src 'self'`) that disallows `unsafe-eval`.
 **Learning:** Even modern libraries (d3 v7) may trigger CSP violations depending on their internal implementation or bundling. `d3-dsv` creates optimized parsers using function construction.
 **Prevention:** Use `d3.csvParseRows` (which is iteration-based) and manually map headers to values instead of relying on `d3.csv`'s automatic object creation when strict CSP is required.
+
+## 2025-12-18 - URL Injection via Unsanitized Input
+**Vulnerability:** The `fetchCountryDetails` service interpolated the country code directly into the URL path (`.../alpha/${code}`), allowing potential URL injection/manipulation if the code contained special characters.
+**Learning:** Even when inputs come from internal data (like CSV files), treating them as untrusted is safer ("Defense in Depth"). External APIs might be leveraged for unexpected behavior if inputs are manipulated.
+**Prevention:** Always use `encodeURIComponent()` when constructing URL paths or query parameters dynamically, regardless of the perceived trust level of the input source.
