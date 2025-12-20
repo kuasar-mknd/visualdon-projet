@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import * as d3 from 'd3';
 import { useLanguage } from '../context/LanguageContext';
@@ -14,18 +14,19 @@ const TopCountriesChart = ({ data, year, category }) => {
     setTranslatedNames({});
   }, [language]);
 
-  // Fetch translated country names when data changes, but only update state if needed
-  useEffect(() => {
-    if (!data) return;
-
-    const yearData = data;
+  // Optimization: Memoize the filtered and sorted topData calculation
+  // This prevents re-calculation on every render and ensures consistency
+  const topData = useMemo(() => {
+    if (!data) return [];
     
-    // Sort and get top 10
-    const topData = yearData
+    return data
       .filter(d => !isNaN(parseFloat(d[category])) && parseFloat(d[category]) > 0)
       .sort((a, b) => parseFloat(b[category]) - parseFloat(a[category]))
       .slice(0, 10);
+  }, [data, category]);
 
+  // Fetch translated country names when topData changes
+  useEffect(() => {
     // Identify which countries need translation (not already in cache)
     const neededCodes = topData
       .map(d => d["ISO 3166-1 alpha-3"])
@@ -59,18 +60,10 @@ const TopCountriesChart = ({ data, year, category }) => {
     };
 
     fetchTranslations();
-  }, [data, year, category, language, translatedNames]);
+  }, [topData, language, translatedNames]);
 
   useEffect(() => {
     if (!data || !svgRef.current) return;
-
-    // 1. Data Processing - data is already filtered by year and excludes WLD
-    const yearData = data;
-    
-    const topData = yearData
-        .filter(d => !isNaN(parseFloat(d[category])) && parseFloat(d[category]) > 0) // Filter NaN for sorting
-        .sort((a, b) => parseFloat(b[category]) - parseFloat(a[category]))
-        .slice(0, 10);
 
     const width = svgRef.current.clientWidth;
     const height = svgRef.current.clientHeight || 400; // Use actual height
@@ -226,7 +219,7 @@ const TopCountriesChart = ({ data, year, category }) => {
             };
         });
 
-  }, [data, year, category, t, translatedNames]);
+  }, [data, topData, year, category, t, translatedNames]); // Added topData to dependencies
 
   return <svg ref={svgRef} className="w-full h-full rounded-lg" />;
 };
