@@ -189,4 +189,5 @@ StackedAreaChart.propTypes = {
   colorMapping: PropTypes.object.isRequired
 };
 
-export default StackedAreaChart;
+// Optimization: Memoize the component to prevent re-renders when parent re-renders but props are same.
+export default React.memo(StackedAreaChart);

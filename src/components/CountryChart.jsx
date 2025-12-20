@@ -14,6 +14,10 @@ const colorMapping = {
     'Other': '#eab308' // Yellow
 };
 
+// Optimization: Define padding outside the component to ensure stability across renders
+// This prevents unnecessary re-renders of child charts that depend on this object.
+const padding = {top: 60, right: 160, bottom: 60, left: 70};
+
 const CountryChart = ({ countryCode, emissionsData }) => {
   const containerRef = useRef(null);
   const { t } = useLanguage();
@@ -87,8 +91,6 @@ const CountryChart = ({ countryCode, emissionsData }) => {
       </div>
     );
   }
-
-  const padding = {top: 60, right: 160, bottom: 60, left: 70};
 
   return (
     <div className="w-full h-full flex flex-col">
