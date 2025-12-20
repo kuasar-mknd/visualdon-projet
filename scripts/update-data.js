@@ -188,6 +188,10 @@ function parseCSV(csvContent) {
     const values = line.split(splitRegex).map(v => v.trim().replace(/^"|"$/g, ''));
     const row = {};
     headers.forEach((header, index) => {
+      // Prevent prototype pollution
+      if (header === '__proto__' || header === 'constructor' || header === 'prototype') {
+        return;
+      }
       row[header] = values[index] || '';
     });
     data.push(row);
@@ -268,7 +272,7 @@ async function updateData() {
     console.log(`⬇️  Downloading ${zenodoData.mtCO2Filename}...`);
     const mtCO2Temp = path.join(TEMP_DIR, zenodoData.mtCO2Filename);
 
-    if (!mtCO2Temp.startsWith(TEMP_DIR)) {
+    if (!mtCO2Temp.startsWith(TEMP_DIR + path.sep)) {
       throw new Error('Path traversal detected in MtCO2 filename');
     }
 
@@ -278,7 +282,7 @@ async function updateData() {
     console.log(`⬇️  Downloading ${zenodoData.populationFilename}...`);
     const populationTemp = path.join(TEMP_DIR, zenodoData.populationFilename);
 
-    if (!populationTemp.startsWith(TEMP_DIR)) {
+    if (!populationTemp.startsWith(TEMP_DIR + path.sep)) {
       throw new Error('Path traversal detected in population filename');
     }
 
@@ -303,7 +307,7 @@ async function updateData() {
     const mtCO2FinalName = zenodoData.mtCO2Filename;
     const mtCO2Final = path.join(DATA_DIR, mtCO2FinalName);
 
-    if (!mtCO2Final.startsWith(DATA_DIR)) {
+    if (!mtCO2Final.startsWith(DATA_DIR + path.sep)) {
       throw new Error('Path traversal detected in MtCO2 final filename');
     }
 
@@ -314,7 +318,7 @@ async function updateData() {
     const perCapitaFinalName = `GCB_${zenodoData.version}_percapita_flat-clean.csv`;
     const perCapitaFinal = path.join(DATA_DIR, perCapitaFinalName);
 
-    if (!perCapitaFinal.startsWith(DATA_DIR)) {
+    if (!perCapitaFinal.startsWith(DATA_DIR + path.sep)) {
       throw new Error('Path traversal detected in per-capita final filename');
     }
 
@@ -344,7 +348,10 @@ async function updateData() {
     
   } catch (error) {
     console.error('\n❌ Error:', error.message);
-    console.error(error.stack);
+    // Don't log stack trace in production/CI logs if unnecessary, or keep it for debugging but ensure no sensitive data is there.
+    // Here we are in a dev/maintenance script, so stack is useful, but we ensure the error message is what we rely on.
+    // To comply with strict "fail safe" (errors shouldn't leak system details), we'll reduce verbosity unless needed.
+    // console.error(error.stack);
     process.exit(1);
   }
 }
