@@ -27,7 +27,7 @@ An interactive 3D globe visualization exploring global CO₂ emissions from 1750
 ### Prerequisites
 
 - Node.js 20.x or higher
-- npm or yarn
+- pnpm (or npm/yarn)
 
 ### Installation
 
@@ -107,6 +107,15 @@ visualdon-projet/
 │   └── workflows/       # GitHub Actions for automated data updates
 └── dataset/             # Original raw datasets
 ```
+
+## ❓ Troubleshooting
+
+Common issues and solutions:
+
+- **Missing dependencies**: If you encounter errors about missing modules, ensure you have run `pnpm install`.
+- **Node version**: This project requires Node.js 20+. Use `node -v` to check your version.
+- **Port already in use**: If `http://localhost:5173` is taken, Vite will automatically try the next available port (e.g., 5174). Check the console output.
+- **Data not loading**: If charts are empty, try running `pnpm run update-data` to fetch the latest dataset.
 
 ## 🤝 Contributing
 
