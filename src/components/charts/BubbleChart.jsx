@@ -119,6 +119,53 @@ const BubbleChart = ({
         .append("g")
         .attr("class", "bubble-group");
 
+    // Shared handlers for mouse and keyboard interactions
+    const handleInteractionStart = function(event, d) {
+        d3.select(this)
+            .transition()
+            .duration(200)
+            .attr("opacity", 1)
+            .attr("stroke-width", 3);
+
+        // Remove existing tooltips to prevent duplicates
+        svg.selectAll(".tooltip").remove();
+
+        const tooltip = svg.append("g")
+            .attr("class", "tooltip")
+            .attr("transform", `translate(${xScale(d.year)}, ${yScale(d.value) - sizeScale(d.value) - 10})`);
+
+        const text = `${t(`sectors.${d.sector}`)}: ${d.value.toFixed(1)} MtCO₂`;
+        const bbox = {width: text.length * 7, height: 20};
+
+        tooltip.append("rect")
+            .attr("x", -bbox.width / 2 - 5)
+            .attr("y", -bbox.height - 5)
+            .attr("width", bbox.width + 10)
+            .attr("height", bbox.height + 10)
+            .attr("fill", "#1e293b")
+            .attr("rx", 4)
+            .attr("stroke", d.color)
+            .attr("stroke-width", 2);
+
+        tooltip.append("text")
+            .attr("text-anchor", "middle")
+            .attr("y", -bbox.height / 2)
+            .attr("fill", "white")
+            .attr("font-size", "13px")
+            .attr("font-weight", "500")
+            .text(text);
+    };
+
+    const handleInteractionEnd = function() {
+        d3.select(this)
+            .transition()
+            .duration(200)
+            .attr("opacity", 0.7)
+            .attr("stroke-width", 2);
+
+        svg.selectAll(".tooltip").remove();
+    };
+
     bubbles.append("circle")
         .attr("class", "bubble")
         .attr("cx", d => xScale(d.year))
@@ -129,47 +176,13 @@ const BubbleChart = ({
         .attr("stroke", d => d.color)
         .attr("stroke-width", 2)
         .style("cursor", "pointer")
-        .on("mouseover", function(event, d) {
-            d3.select(this)
-                .transition()
-                .duration(200)
-                .attr("opacity", 1)
-                .attr("stroke-width", 3);
-            
-            const tooltip = svg.append("g")
-                .attr("class", "tooltip")
-                .attr("transform", `translate(${xScale(d.year)}, ${yScale(d.value) - sizeScale(d.value) - 10})`);
-            
-            const text = `${t(`sectors.${d.sector}`)}: ${d.value.toFixed(1)} MtCO₂`;
-            const bbox = {width: text.length * 7, height: 20};
-            
-            tooltip.append("rect")
-                .attr("x", -bbox.width / 2 - 5)
-                .attr("y", -bbox.height - 5)
-                .attr("width", bbox.width + 10)
-                .attr("height", bbox.height + 10)
-                .attr("fill", "#1e293b")
-                .attr("rx", 4)
-                .attr("stroke", d.color)
-                .attr("stroke-width", 2);
-            
-            tooltip.append("text")
-                .attr("text-anchor", "middle")
-                .attr("y", -bbox.height / 2)
-                .attr("fill", "white")
-                .attr("font-size", "13px")
-                .attr("font-weight", "500")
-                .text(text);
-        })
-        .on("mouseout", function() {
-            d3.select(this)
-                .transition()
-                .duration(200)
-                .attr("opacity", 0.7)
-                .attr("stroke-width", 2);
-            
-            svg.selectAll(".tooltip").remove();
-        });
+        .attr("tabindex", "0")
+        .attr("role", "button")
+        .attr("aria-label", d => `${t(`sectors.${d.sector}`)}: ${d.value.toFixed(1)} MtCO₂`)
+        .on("mouseover", handleInteractionStart)
+        .on("focus", handleInteractionStart)
+        .on("mouseout", handleInteractionEnd)
+        .on("blur", handleInteractionEnd);
 
     // Legend
     const legend = svg.append("g")

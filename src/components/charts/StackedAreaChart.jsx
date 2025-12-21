@@ -60,6 +60,20 @@ const StackedAreaChart = ({
       .y1(d => yScale(d[1]))
       .curve(d3.curveMonotoneX);
 
+    // Shared handlers
+    const handleInteractionStart = function(event, d) {
+        d3.select(this).attr('opacity', 1);
+
+        // Highlight in legend
+        svg.selectAll('.legend-row')
+          .attr('opacity', row => row === d.key ? 1 : 0.3);
+    };
+
+    const handleInteractionEnd = function() {
+        d3.select(this).attr('opacity', 0.8);
+        svg.selectAll('.legend-row').attr('opacity', 1);
+    };
+
     // Draw areas
     svg.selectAll('.area')
       .data(series)
@@ -69,17 +83,13 @@ const StackedAreaChart = ({
       .attr('d', area)
       .attr('opacity', 0.8)
       .style('cursor', 'pointer')
-      .on('mouseover', function(event, d) {
-        d3.select(this).attr('opacity', 1);
-        
-        // Highlight in legend
-        svg.selectAll('.legend-row')
-          .attr('opacity', row => row === d.key ? 1 : 0.3);
-      })
-      .on('mouseout', function() {
-        d3.select(this).attr('opacity', 0.8);
-        svg.selectAll('.legend-row').attr('opacity', 1);
-      });
+      .attr("tabindex", "0")
+      .attr("role", "button")
+      .attr("aria-label", d => t(`sectors.${d.key}`) || d.key)
+      .on('mouseover', handleInteractionStart)
+      .on('focus', handleInteractionStart)
+      .on('mouseout', handleInteractionEnd)
+      .on('blur', handleInteractionEnd);
 
     // Axes
     const xAxis = d3.axisBottom(xScale).tickFormat(d3.format("d")).ticks(10);
