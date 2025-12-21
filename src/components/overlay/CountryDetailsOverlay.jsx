@@ -1,10 +1,36 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import CountryChart from '../CountryChart';
 import { useLanguage } from '../../context/LanguageContext';
 
 const CountryDetailsOverlay = ({ selectedCountry, selectedCountryName, displayCountry, onClose, year, emissions }) => {
   const { t } = useLanguage();
+
+  const closeButtonRef = useRef(null);
+  const previousFocusRef = useRef(null);
+
+  // Focus management
+  useEffect(() => {
+    let timer;
+    if (selectedCountry) {
+      // Store current focus
+      previousFocusRef.current = document.activeElement;
+
+      // Move focus to close button
+      // Use setTimeout to ensure visibility transition has started (removing 'invisible' class)
+      // otherwise focus() might fail on a hidden element.
+      timer = setTimeout(() => {
+          closeButtonRef.current?.focus();
+      }, 100);
+    } else {
+      // Restore focus
+      if (previousFocusRef.current) {
+        previousFocusRef.current.focus();
+        previousFocusRef.current = null;
+      }
+    }
+    return () => clearTimeout(timer);
+  }, [selectedCountry]);
 
   // Close overlay on Escape key press
   useEffect(() => {
@@ -31,6 +57,7 @@ const CountryDetailsOverlay = ({ selectedCountry, selectedCountryName, displayCo
                 <span className="truncate">{selectedCountryName || displayCountry}</span>
             </h2>
             <button 
+                ref={closeButtonRef}
                 onClick={onClose}
                 className="flex items-center gap-2 px-4 py-2 bg-white/50 hover:bg-white text-slate-500 hover:text-slate-800 border border-slate-200/50 rounded-xl transition-all font-semibold shrink-0 whitespace-nowrap text-sm shadow-sm hover:shadow focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none"
                 aria-label={t('aria.closeOverlay')}
