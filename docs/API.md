@@ -1,17 +1,34 @@
 # API & Data Documentation
 
 ## Overview
-This application is a **frontend-only** visualization tool. It does not communicate with a traditional backend API for its core functionality during runtime. Instead, it relies on static data files served from the `public/data` directory.
+This application is a **frontend-only** visualization tool. It does not communicate with a traditional backend API for its core functionality during runtime. Instead, it relies on static data files served from the `public/data` directory, managed via a manifest file.
 
-## Data Source
-The primary data source is the [Global Carbon Project](https://globalcarbonproject.org/).
-- **Location**: `public/data/`
-- **Format**: CSV (Comma Separated Values)
-- **Access**: Fetched via HTTP GET requests by the client-side application (using `d3.csv` or similar).
+## Data Architecture
 
-### Data Files
-- **`co2_data.csv`** (Hypothetical name based on context): Contains historical CO₂ emissions data.
-  - **Columns**: `Year`, `Country`, `ISO`, `Cement`, `Oil`, `Gas`, `Coal`, `Flaring`, `Total`.
+### Data Loading Strategy
+To support versioned data without requiring code changes, the application uses a **Manifest-based loading strategy**:
+
+1.  **Manifest**: The app first fetches `public/data/manifest.json`.
+2.  **Dynamic Resolution**: This JSON file contains the specific filenames for the current dataset version.
+3.  **Data Fetching**: The app then fetches the CSV files specified in the manifest.
+
+### Data Files (`public/data/`)
+
+- **`manifest.json`**:
+  ```json
+  {
+    "emissions": "GCB2023v43_MtCO2_flat.csv",
+    "perCapita": "GCB_2023_percapita_flat-clean.csv",
+    "version": "2023",
+    "lastUpdated": "2023-12-05T10:00:00.000Z"
+  }
+  ```
+- **Emissions Data** (e.g., `GCB2023v43_MtCO2_flat.csv`):
+  - **Source**: Directly from Global Carbon Budget (Zenodo).
+  - **Columns**: `Country`, `ISO 3166-1 alpha-3`, `Year`, `Total`, `Coal`, `Oil`, `Gas`, `Cement`, `Flaring`, `Other`, `Per Capita`.
+- **Per Capita Data** (e.g., `GCB_2023_percapita_flat-clean.csv`):
+  - **Source**: Calculated during the update process.
+  - **Columns**: `Country`, `Year`, `Per Capita`.
 
 ## Internal Services
 
@@ -26,6 +43,10 @@ A utility service module running in the browser to handle country data normaliza
 
 ### Data Update Script (`scripts/update-data.js`)
 This Node.js script is used at **build/maintenance time** to fetch the latest data.
-- **Source**: Fetches from an external URL (e.g., Global Carbon Project or Zenodo).
+- **Source**: Fetches from the Global Carbon Budget Zenodo repository using a stable Concept ID.
 - **Execution**: `pnpm run update-data`
-- **Output**: Updates the CSV files in `public/data/`.
+- **Output**:
+  - Downloads the latest CSV files.
+  - Calculates per-capita data if needed.
+  - Generates `manifest.json`.
+  - Updates files in `public/data/`.

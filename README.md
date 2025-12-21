@@ -79,7 +79,7 @@ Data updates are also automated via GitHub Actions, running monthly. See [DATA_U
 - **Build Tool**: Vite 7
 - **Deployment**: Cloudflare Pages
 - **Analytics**: Cloudflare Web Analytics
-- **Data Processing**: Node.js scripts for CSV parsing and optimization
+- **Data Processing**: Node.js scripts for CSV parsing and optimization (see `scripts/update-data.js`)
 
 ## 📁 Project Structure
 
