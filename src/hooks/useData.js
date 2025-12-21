@@ -12,15 +12,17 @@ async function safeCsv(url, rowConverter) {
   const header = rows[0];
   const body = rows.slice(1);
 
+  // Optimization: Pre-filter safe headers once instead of checking every key in every row
+  const safeHeaders = header
+    .map((key, index) => ({ key, index }))
+    .filter(({ key }) => key !== '__proto__' && key !== 'constructor' && key !== 'prototype');
+
   const data = body.map(row => {
     const obj = {};
-    header.forEach((key, i) => {
-      // Prevent prototype pollution
-      if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
-        return;
-      }
-      obj[key] = row[i];
-    });
+    for (let j = 0; j < safeHeaders.length; j++) {
+      const { key, index } = safeHeaders[j];
+      obj[key] = row[index];
+    }
     return rowConverter ? rowConverter(obj) : obj;
   });
 
