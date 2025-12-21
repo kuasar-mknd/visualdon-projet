@@ -48,10 +48,16 @@ export const fetchCountryDetails = async (code, language) => {
     return getNameFromData(data, language);
   }
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
   try {
     // Sanitize input to prevent URL injection
     const safeCode = encodeURIComponent(code);
-    const response = await fetch(`https://restcountries.com/v3.1/alpha/${safeCode}`);
+    const response = await fetch(`https://restcountries.com/v3.1/alpha/${safeCode}`, {
+      signal: controller.signal
+    });
+
     if (!response.ok) throw new Error('Network response was not ok');
     
     const data = await response.json();
@@ -68,6 +74,8 @@ export const fetchCountryDetails = async (code, language) => {
   } catch (error) {
     console.warn(`Failed to fetch data for ${code}:`, error);
     return null;
+  } finally {
+    clearTimeout(timeoutId);
   }
 };
 
