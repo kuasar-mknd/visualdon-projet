@@ -54,7 +54,7 @@ The application follows a component-based architecture where each UI element is 
 While this is a frontend-only application, the structure loosely maps to Clean Architecture principles:
 - **Domain Layer**: Implicitly defined by the data structures (emissions data) and types. `src/services/` contains domain-specific logic like country translation.
 - **Application Layer**: `src/hooks/` and `src/context/` manage the application state and business logic (e.g., filtering data by year).
-- **Infrastructure Layer**: `d3.csv` and `fetch` APIs act as the infrastructure for data retrieval. `scripts/update-data.js` handles external data source integration.
+- **Infrastructure Layer**: `d3.csv` and `fetch` APIs act as the infrastructure for data retrieval. `scripts/update-data.js` handles external data source integration and manifest generation.
 - **Presentation Layer**: React components (`src/components/`) handle the UI and user interaction.
 
 ### Custom Hooks
