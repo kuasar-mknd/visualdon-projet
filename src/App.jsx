@@ -36,8 +36,6 @@ function AppContent() {
     return () => clearInterval(interval);
   }, [isPlaying]);
 
-  const activeData = category === 'Per Capita' ? perCapita : emissions;
-
   // Calculate year range dynamically from data
   const yearRange = useMemo(() => {
     if (!emissions || emissions.length === 0) {
@@ -62,14 +60,13 @@ function AppContent() {
     }
   }, [yearRange, year]);
 
-  // Optimization: Pre-group data by year to make currentYearData lookup O(1) instead of O(N)
-  // This significantly improves performance during animation
-  const dataByYear = useMemo(() => {
-    if (!activeData) return new Map();
+  // Helper to group data by year
+  const groupDataByYear = useCallback((data) => {
+    if (!data) return new Map();
 
     const map = new Map();
     // Single pass to group by year and exclude WLD
-    for (const d of activeData) {
+    for (const d of data) {
       if (d["ISO 3166-1 alpha-3"] === "WLD") continue;
       
       const year = d.Year;
@@ -79,7 +76,15 @@ function AppContent() {
       map.get(year).push(d);
     }
     return map;
-  }, [activeData]);
+  }, []);
+
+  // Optimization: Pre-group data by year for BOTH datasets once on load.
+  // This avoids O(N) iteration every time the user switches categories.
+  // This significantly improves responsiveness when toggling metrics.
+  const emissionsByYear = useMemo(() => groupDataByYear(emissions), [emissions, groupDataByYear]);
+  const perCapitaByYear = useMemo(() => groupDataByYear(perCapita), [perCapita, groupDataByYear]);
+
+  const dataByYear = category === 'Per Capita' ? perCapitaByYear : emissionsByYear;
 
   // Memoize filtered data for performance
   const currentYearData = useMemo(() => {
