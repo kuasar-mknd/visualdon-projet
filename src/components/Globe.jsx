@@ -4,6 +4,7 @@ import * as d3 from 'd3';
 import { useLanguage } from '../context/LanguageContext';
 import { fetchCountryDetails } from '../services/countryService';
 import GlobeLegend from './globe/GlobeLegend';
+import GlobeTooltip from './globe/GlobeTooltip';
 
 // Create a custom interpolator for better visibility and meaning
 // Low emissions: Blue/Green, Medium: Yellow/Orange, High: Red
@@ -20,7 +21,7 @@ const customInterpolator = t => {
   }
 };
 
-const Globe = ({ data, geoJson, category, onCountrySelect }) => {
+const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
   const containerRef = useRef(null);
   const svgRef = useRef(null);
   const [width, setWidth] = useState(0);
@@ -29,7 +30,8 @@ const Globe = ({ data, geoJson, category, onCountrySelect }) => {
   const [scale, setScale] = useState(250); // Initial scale
   const [hoveredCountryName, setHoveredCountryName] = useState(null);
   const [hoveredCountryId, setHoveredCountryId] = useState(null);
-  const { language, t } = useLanguage();
+  const hoverTimeoutRef = useRef(null);
+  const { language } = useLanguage();
 
   // Resize observer
   useEffect(() => {
@@ -66,14 +68,15 @@ const Globe = ({ data, geoJson, category, onCountrySelect }) => {
 
   // Color scale - from light (low emissions) to red (high emissions)
   const colorScale = useMemo(() => {
-    if (!data) return d3.scaleSequential(d3.interpolateBlues).domain([0, 100]);
-    const max = d3.max(data, d => parseFloat(d[category])) || 100;
+    // Optimization: Use passed maxVal instead of recalculating max from data every render
+    // This improves performance (O(1)) and ensures a stable color scale across years
+    const max = maxVal || 100;
     
     // Use log scale for better distribution
     return d3.scaleSequentialLog(customInterpolator)
         .domain([0.1, max])
         .clamp(true);
-  }, [data, category]);
+  }, [maxVal]);
 
   // Drag & Zoom handling
   useEffect(() => {
@@ -140,6 +143,16 @@ const Globe = ({ data, geoJson, category, onCountrySelect }) => {
     return map;
   }, [data]);
 
+  // Create a map of features by ID for quick highlight lookup
+  const featureMap = useMemo(() => {
+      if (!geoJson) return new Map();
+      const map = new Map();
+      geoJson.features.forEach(f => {
+          map.set(f.properties.A3 || f.id, f);
+      });
+      return map;
+  }, [geoJson]);
+
   // Derived hovered value
   const hoveredValue = useMemo(() => {
       if (!hoveredCountryId) return null;
@@ -147,18 +160,28 @@ const Globe = ({ data, geoJson, category, onCountrySelect }) => {
       return countryData ? parseFloat(countryData[category]) : null;
   }, [hoveredCountryId, dataMap, category]);
 
-  // Fetch country name on hover
-  const handleMouseEnter = useCallback(async (countryId) => {
+  // Handle mouse enter with debounce for API calls
+  const handleMouseEnter = useCallback((countryId, featureName) => {
       setHoveredCountryId(countryId);
-      const name = await fetchCountryDetails(countryId, language);
-      setHoveredCountryName(name);
+
+      // Clear any pending fetch
+      if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+
+      // Debounce the expensive fetch/update
+      hoverTimeoutRef.current = setTimeout(async () => {
+          const name = await fetchCountryDetails(countryId, language);
+          setHoveredCountryName(name || featureName);
+      }, 150); // 150ms debounce
   }, [language]);
 
   const handleMouseLeave = useCallback(() => {
+      if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
       setHoveredCountryName(null);
       setHoveredCountryId(null);
   }, []);
 
+  // Base paths - Does NOT depend on hoveredCountryId anymore
+  // This ensures the main globe doesn't re-render 200 paths when one is hovered
   const paths = useMemo(() => {
     if (!geoJson || !pathStrings.length) return [];
     return geoJson.features.map((feature, i) => {
@@ -168,19 +191,17 @@ const Globe = ({ data, geoJson, category, onCountrySelect }) => {
         // Use gray for countries with no data
         const fillColor = value > 0 ? colorScale(value) : '#475569';
         
-        const isHovered = hoveredCountryId === countryId;
-
         return (
             <path
                 key={countryId || i}
                 d={pathStrings[i]}
                 fill={fillColor}
-                stroke={isHovered ? "#ffffff" : "#0f172a"}
-                strokeWidth={isHovered ? "1.5" : "0.5"}
+                stroke="#0f172a" // Fixed stroke for base layer
+                strokeWidth="0.5"
                 className="transition-colors duration-300 hover:opacity-80 cursor-pointer focus:outline-none"
                 role="button"
                 tabIndex="0"
-                aria-label={isHovered && hoveredCountryName ? hoveredCountryName : (feature.properties.NAME || countryId)}
+                aria-label={feature.properties.NAME || countryId}
                 onClick={(e) => {
                     e.stopPropagation();
                     onCountrySelect(countryId);
@@ -191,15 +212,35 @@ const Globe = ({ data, geoJson, category, onCountrySelect }) => {
                         onCountrySelect(countryId);
                     }
                 }}
-                onFocus={() => handleMouseEnter(countryId)}
+                onFocus={() => handleMouseEnter(countryId, feature.properties.NAME)}
                 onBlur={handleMouseLeave}
-                onMouseEnter={() => handleMouseEnter(countryId)}
+                onMouseEnter={() => handleMouseEnter(countryId, feature.properties.NAME)}
                 onMouseLeave={handleMouseLeave}
             >
             </path>
         );
     });
-  }, [geoJson, pathStrings, dataMap, category, colorScale, onCountrySelect, hoveredCountryId, hoveredCountryName, handleMouseEnter, handleMouseLeave]);
+  }, [geoJson, pathStrings, dataMap, category, colorScale, onCountrySelect, handleMouseEnter, handleMouseLeave]);
+
+  // Separate Highlight Path
+  const highlightPath = useMemo(() => {
+      if (!hoveredCountryId || !pathGenerator) return null;
+      const feature = featureMap.get(hoveredCountryId);
+      if (!feature) return null;
+
+      const d = pathGenerator(feature);
+      if (!d) return null;
+
+      return (
+          <path
+              d={d}
+              fill="none"
+              stroke="#ffffff"
+              strokeWidth="1.5"
+              className="pointer-events-none" // Let events pass through to base path
+          />
+      );
+  }, [hoveredCountryId, pathGenerator, featureMap]);
 
   if (!data || !geoJson || !width) return <div ref={containerRef} className="w-full h-full bg-slate-100" />;
 
@@ -243,6 +284,9 @@ const Globe = ({ data, geoJson, category, onCountrySelect }) => {
             {/* 3. Landmasses */}
             {paths}
 
+            {/* 3.5 Highlight Overlay */}
+            {highlightPath}
+
             {/* 4. Shading Overlay (on top of land) */}
             <path 
                 d={pathGenerator({type: "Sphere"})} 
@@ -252,24 +296,12 @@ const Globe = ({ data, geoJson, category, onCountrySelect }) => {
           </g>
        </svg>
        
-       {/* Tooltip for hovered country */}
-       {hoveredCountryName && (
-           <div className="absolute top-4 right-4 bg-white/90 text-slate-800 px-4 py-3 rounded-xl border border-slate-200 shadow-xl pointer-events-none backdrop-blur-md min-w-[200px]">
-               <div className="font-bold text-lg mb-1 text-blue-600">
-                   {hoveredCountryName}
-               </div>
-               {hoveredValue !== null ? (
-                   <div className="flex items-baseline gap-2">
-                       <span className="text-2xl font-mono font-bold text-slate-800">{hoveredValue.toFixed(2)}</span>
-                       <span className="text-sm text-slate-500">
-                           {category === 'Per Capita' ? 'tCO₂/hab' : 'MtCO₂'}
-                       </span>
-                   </div>
-               ) : (
-                   <div className="text-sm text-slate-400 italic">{t('noData')}</div>
-               )}
-           </div>
-       )}
+       <GlobeTooltip
+          countryName={hoveredCountryName}
+          value={hoveredValue}
+          category={category}
+       />
+
      <GlobeLegend />
   </div>
   );
@@ -278,13 +310,13 @@ const Globe = ({ data, geoJson, category, onCountrySelect }) => {
 Globe.propTypes = {
   data: PropTypes.arrayOf(PropTypes.shape({
     "ISO 3166-1 alpha-3": PropTypes.string,
-    // Dynamic access for category, so we can't be too strict here without listing all possible categories
   })).isRequired,
   geoJson: PropTypes.shape({
     type: PropTypes.string,
     features: PropTypes.arrayOf(PropTypes.object)
   }),
   category: PropTypes.string.isRequired,
+  maxVal: PropTypes.number,
   onCountrySelect: PropTypes.func.isRequired,
 };
 

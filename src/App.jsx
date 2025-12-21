@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import * as d3 from 'd3';
 import Globe from './components/Globe';
 import TopCountriesChart from './components/TopCountriesChart';
 import Header from './components/layout/Header';
@@ -13,10 +14,24 @@ function AppContent() {
   const { emissions, geoJson, perCapita, loading } = useData();
   const [year, setYear] = useState(null);
   const [selectedCountry, setSelectedCountry] = useState(null);
+
+  // Optimization: Calculate global max values once to ensure stable color scale
+  const maxEmissions = useMemo(() => {
+    if (!emissions) return 100;
+    return d3.max(emissions, d => parseFloat(d.Total) || 0) || 100;
+  }, [emissions]);
+
+  const maxPerCapita = useMemo(() => {
+    if (!perCapita) return 10;
+    return d3.max(perCapita, d => parseFloat(d['Per Capita']) || 0) || 10;
+  }, [perCapita]);
+
   const [displayCountry, setDisplayCountry] = useState(null);
   const [selectedCountryName, setSelectedCountryName] = useState('');
   const [isPlaying, setIsPlaying] = useState(false);
   const [category, setCategory] = useState('Total'); // 'Total' or 'Per Capita'
+
+  const currentMaxVal = category === 'Per Capita' ? maxPerCapita : maxEmissions;
   const { t, language } = useLanguage();
 
   // Animation loop
@@ -164,6 +179,7 @@ function AppContent() {
               data={currentYearData} 
               geoJson={geoJson} 
               category={category === 'Per Capita' ? 'Total' : category}
+              maxVal={currentMaxVal}
               onCountrySelect={setSelectedCountry}
            />
            

@@ -40,14 +40,13 @@ const CountryChart = ({ countryCode, emissionsData }) => {
     };
 
     updateDimensions();
-    window.addEventListener('resize', updateDimensions);
     
-    // Also use ResizeObserver for more robust detection
+    // Optimization: Use ResizeObserver only, removing redundant window resize listener
+    // ResizeObserver is more efficient as it monitors the specific element size
     const resizeObserver = new ResizeObserver(updateDimensions);
     resizeObserver.observe(containerRef.current);
 
     return () => {
-      window.removeEventListener('resize', updateDimensions);
       resizeObserver.disconnect();
     };
   }, [containerRef.current]);
