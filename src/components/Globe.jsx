@@ -180,22 +180,31 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
       setHoveredCountryId(null);
   }, []);
 
+  // Optimization: Pre-calculate colors to separate style from geometry.
+  // This ensures that when dragging/zooming (changing pathStrings), we don't re-calculate
+  // lookups and color scales (O(N) operations).
+  const colors = useMemo(() => {
+    if (!geoJson || !dataMap) return [];
+    return geoJson.features.map(feature => {
+        const countryId = feature.properties.A3 || feature.id;
+        const countryData = dataMap.get(countryId);
+        // dataMap values are already typed by d3.autoType (numbers or null)
+        const value = countryData ? countryData[category] : 0;
+        return (value > 0) ? colorScale(value) : '#475569';
+    });
+  }, [geoJson, dataMap, category, colorScale]);
+
   // Base paths - Does NOT depend on hoveredCountryId anymore
   // This ensures the main globe doesn't re-render 200 paths when one is hovered
   const paths = useMemo(() => {
     if (!geoJson || !pathStrings.length) return [];
     return geoJson.features.map((feature, i) => {
         const countryId = feature.properties.A3 || feature.id;
-        const countryData = dataMap.get(countryId);
-        const value = countryData ? parseFloat(countryData[category]) : 0;
-        // Use gray for countries with no data
-        const fillColor = value > 0 ? colorScale(value) : '#475569';
-        
         return (
             <path
                 key={countryId || i}
                 d={pathStrings[i]}
-                fill={fillColor}
+                fill={colors[i]}
                 stroke="#0f172a" // Fixed stroke for base layer
                 strokeWidth="0.5"
                 className="transition-colors duration-300 hover:opacity-80 cursor-pointer focus:outline-none"
@@ -220,7 +229,7 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
             </path>
         );
     });
-  }, [geoJson, pathStrings, dataMap, category, colorScale, onCountrySelect, handleMouseEnter, handleMouseLeave]);
+  }, [geoJson, pathStrings, colors, onCountrySelect, handleMouseEnter, handleMouseLeave]);
 
   // Separate Highlight Path
   const highlightPath = useMemo(() => {
