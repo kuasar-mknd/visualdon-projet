@@ -5,7 +5,7 @@ const Footer = () => {
   const { t } = useLanguage();
 
   return (
-    <footer className="mt-12 text-center text-slate-500 text-sm pb-8 flex flex-col md:flex-row items-center justify-center gap-6">
+    <footer className="mt-12 text-center text-slate-600 text-sm pb-8 flex flex-col md:flex-row items-center justify-center gap-6">
       <p>{t('source')}</p>
       <a 
         href="https://github.com/kuasar-mknd/visualdon-projet" 

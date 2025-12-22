@@ -91,6 +91,14 @@ const CountryChart = ({ countryCode, emissionsData }) => {
     );
   }
 
+  if (emissionData.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full text-slate-500">
+        <p className="text-lg">{t('noData')}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full h-full flex flex-col">
       {/* View Mode Toggle */}
