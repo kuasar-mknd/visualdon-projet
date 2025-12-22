@@ -171,22 +171,60 @@ async function getZenodoData() {
 }
 
 /**
+ * Parse CSV line complying with RFC 4180
+ * Replaces vulnerable regex-based splitting
+ */
+function parseCSVLine(text) {
+  const result = [];
+  let curVal = '';
+  let inQuote = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+
+    if (inQuote) {
+      if (char === '"') {
+        if (i + 1 < text.length && text[i + 1] === '"') {
+          curVal += '"';
+          i++;
+        } else {
+          inQuote = false;
+        }
+      } else {
+        curVal += char;
+      }
+    } else {
+      if (char === '"') {
+        inQuote = true;
+      } else if (char === ',') {
+        result.push(curVal);
+        curVal = '';
+      } else {
+        curVal += char;
+      }
+    }
+  }
+  result.push(curVal);
+  return result;
+}
+
+/**
  * Parse CSV into array of objects
  */
 function parseCSV(csvContent) {
   const lines = csvContent.trim().split(/\r?\n/);
-  // Split by comma but ignore commas inside quotes
-  const splitRegex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
+  if (lines.length === 0) return [];
 
-  const headers = lines[0].split(splitRegex).map(h => h.trim().replace(/^"|"$/g, ''));
+  const headers = parseCSVLine(lines[0]).map(h => h.trim());
   
   const data = [];
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line) continue;
 
-    const values = line.split(splitRegex).map(v => v.trim().replace(/^"|"$/g, ''));
+    const values = parseCSVLine(line).map(v => v.trim());
     const row = {};
+
     headers.forEach((header, index) => {
       // Prevent prototype pollution
       if (header === '__proto__' || header === 'constructor' || header === 'prototype') {
