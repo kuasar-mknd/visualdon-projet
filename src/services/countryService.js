@@ -1,5 +1,6 @@
 const CACHE_KEY = 'visualdon_country_cache';
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
+const MAX_CACHE_SIZE = 250; // Limit cache to ~250 countries to prevent localStorage exhaustion
 
 // Optimization: In-memory cache to avoid frequent synchronous localStorage reads/parsing
 // This significantly reduces main-thread blocking during animations where fetchCountryDetails is called repeatedly.
@@ -24,6 +25,18 @@ const getCache = () => {
 };
 
 const setCache = (cache) => {
+  // Security Enhancement: Prevent unlimited growth of localStorage (DoS risk)
+  const keys = Object.keys(cache);
+  if (keys.length > MAX_CACHE_SIZE) {
+    // Sort keys by timestamp (oldest first) to implement LRU-like eviction
+    // Note: This is O(N log N) but N is small (250), so performance impact is negligible compared to network request
+    const sortedKeys = keys.sort((a, b) => (cache[a].timestamp || 0) - (cache[b].timestamp || 0));
+
+    // Remove oldest entries to bring size down to limit
+    const keysToRemove = sortedKeys.slice(0, keys.length - MAX_CACHE_SIZE);
+    keysToRemove.forEach(key => delete cache[key]);
+  }
+
   memoryCache = cache;
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
@@ -35,6 +48,14 @@ const setCache = (cache) => {
 export const fetchCountryDetails = async (code, language) => {
   if (!code) return null;
   
+  // Security Enhancement: Validate input format
+  // Expected: ISO 3166-1 alpha-2 or alpha-3 code (2-3 letters/digits)
+  // This prevents URL injection and cache pollution with garbage keys
+  if (!/^[a-zA-Z0-9]{2,3}$/.test(code)) {
+    console.warn(`Security: Invalid country code format rejected: ${code}`);
+    return null;
+  }
+
   // Normalize code to 2 chars if possible, but API supports 3 chars too.
   // Our data uses 3 char codes (ISO 3166-1 alpha-3).
   // restcountries supports alpha codes.
