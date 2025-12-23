@@ -127,13 +127,6 @@ function AppContent() {
     setSelectedCountry(null);
   }, []);
 
-  // Implicitly stable because useState setter is stable, but for clarity/consistency
-  // and in case logic is added later.
-  // Although passing setSelectedCountry directly is fine, wrapping it doesn't hurt.
-  // More importantly, we should REMOVE `year={year}` from Globe props if it's not used
-  // to prevent re-renders on every tick.
-
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-transparent text-slate-800" role="status" aria-live="polite">
@@ -167,6 +160,7 @@ function AppContent() {
                 data={currentYearData}
                 year={year} 
                 category={category === 'Per Capita' ? 'Total' : category} 
+                isPlaying={isPlaying}
                 onCountrySelect={setSelectedCountry}
              />
           </div>

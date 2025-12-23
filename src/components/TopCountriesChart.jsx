@@ -4,7 +4,7 @@ import * as d3 from 'd3';
 import { useLanguage } from '../context/LanguageContext';
 import { fetchCountryDetails } from '../services/countryService';
 
-const TopCountriesChart = ({ data, year, category, onCountrySelect }) => {
+const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect }) => {
   const svgRef = useRef(null);
   const { t, language } = useLanguage();
   const [translatedNames, setTranslatedNames] = useState({});
@@ -15,7 +15,6 @@ const TopCountriesChart = ({ data, year, category, onCountrySelect }) => {
   }, [language]);
 
   // Optimization: Memoize the filtered and sorted topData calculation
-  // This prevents re-calculation on every render and ensures consistency
   const topData = useMemo(() => {
     if (!data) return [];
     
@@ -27,15 +26,12 @@ const TopCountriesChart = ({ data, year, category, onCountrySelect }) => {
 
   // Fetch translated country names when topData changes
   useEffect(() => {
-    // Identify which countries need translation (not already in cache)
     const neededCodes = topData
       .map(d => d["ISO 3166-1 alpha-3"])
       .filter(code => !translatedNames[code]);
 
-    // Optimization: If all needed codes are already translated, skip processing and re-render
     if (neededCodes.length === 0) return;
 
-    // Fetch missing translations
     const fetchTranslations = async () => {
       const newTranslations = {};
       let hasNewData = false;
@@ -50,7 +46,6 @@ const TopCountriesChart = ({ data, year, category, onCountrySelect }) => {
         })
       );
 
-      // Only trigger re-render if we actually fetched new data
       if (hasNewData) {
         setTranslatedNames(prev => ({
           ...prev,
@@ -66,18 +61,16 @@ const TopCountriesChart = ({ data, year, category, onCountrySelect }) => {
     if (!data || !svgRef.current) return;
 
     const width = svgRef.current.clientWidth;
-    const height = svgRef.current.clientHeight || 400; // Use actual height
-    const margin = {top: 40, right: 80, bottom: 40, left: 140}; // Increased bottom margin
+    const height = svgRef.current.clientHeight || 400;
+    const margin = {top: 40, right: 80, bottom: 40, left: 140};
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
-    // 2. Setup SVG
     const svg = d3.select(svgRef.current);
 
     svg.attr("role", "graphics-document")
        .attr("aria-label", `${t('top10')} (${year})`);
 
-    // Add accessible description if not present
     if (svg.select("title").empty()) {
         svg.append("title").text(`${t('top10')} (${year})`);
         svg.append("desc").text(t('subtitle'));
@@ -85,12 +78,10 @@ const TopCountriesChart = ({ data, year, category, onCountrySelect }) => {
         svg.select("title").text(`${t('top10')} (${year})`);
     }
     
-    // Ensure SVG exists and has correct dimensions
     let g = svg.select(".chart-group");
     if (g.empty()) {
         svg.attr("width", width).attr("height", height);
         
-        // Add Gradients
         const defs = svg.append("defs");
         const gradient = defs.append("linearGradient")
             .attr("id", "barGradient")
@@ -99,14 +90,13 @@ const TopCountriesChart = ({ data, year, category, onCountrySelect }) => {
             .attr("x2", "100%")
             .attr("y2", "0%");
         
-        gradient.append("stop").attr("offset", "0%").attr("stop-color", "#3b82f6"); // Blue-500
-        gradient.append("stop").attr("offset", "100%").attr("stop-color", "#10b981"); // Emerald-500
+        gradient.append("stop").attr("offset", "0%").attr("stop-color", "#3b82f6");
+        gradient.append("stop").attr("offset", "100%").attr("stop-color", "#10b981");
 
         g = svg.append("g")
             .attr("class", "chart-group")
             .attr("transform", `translate(${margin.left},${margin.top})`);
             
-        // Add Title
         svg.append("text")
            .attr("class", "chart-title")
            .attr("x", width / 2)
@@ -115,14 +105,12 @@ const TopCountriesChart = ({ data, year, category, onCountrySelect }) => {
            .style("font-size", "16px")
            .style("font-weight", "600")
            .style("fill", "#334155")
-           .attr("aria-hidden", "true"); // Slate-700
+           .attr("aria-hidden", "true");
     }
 
-    // Update Title
     svg.select(".chart-title")
        .text(`${t('top10')} (${year}) - ${category === 'Total' ? t('total') : t('perCapita')}`);
 
-    // Check if data is empty
     if (topData.length === 0) {
         g.selectAll("*").remove();
         g.append("text")
@@ -130,47 +118,43 @@ const TopCountriesChart = ({ data, year, category, onCountrySelect }) => {
          .attr("x", innerWidth / 2)
          .attr("y", innerHeight / 2)
          .attr("text-anchor", "middle")
-         .attr("fill", "#64748b") // Slate-500 for better contrast
+         .attr("fill", "#64748b")
          .text(t('noData'));
         return;
     }
 
-    // Remove no data message if data exists
     g.selectAll(".no-data-message").remove();
 
-    // 3. Scales
     const x = d3.scaleLinear()
         .domain([0, d3.max(topData, d => parseFloat(d[category])) || 0])
         .range([0, innerWidth]);
 
     const y = d3.scaleBand()
-        .domain(topData.map(d => d["ISO 3166-1 alpha-3"])) // Use ID for tracking
+        .domain(topData.map(d => d["ISO 3166-1 alpha-3"]))
         .range([0, innerHeight])
         .padding(0.2);
 
-    // 4. Drawing Bars (Join Pattern)
-    const tTransition = svg.transition().duration(750).ease(d3.easeCubicOut);
+    // Optimization: Adjust transition duration based on playback state
+    // When playing, we need faster transitions (200ms) to match the tick rate and avoid "lag"
+    // When paused, we use a smoother, longer transition (750ms)
+    const transitionDuration = isPlaying ? 200 : 750;
+    const tTransition = svg.transition().duration(transitionDuration).ease(d3.easeCubicOut);
 
-    // Bind data using ISO code as key for object constancy
     const bars = g.selectAll(".bar-group")
         .data(topData, d => d["ISO 3166-1 alpha-3"]);
 
-    // EXIT
     bars.exit()
         .transition(tTransition)
         .style("opacity", 0)
         .attr("transform", `translate(0, ${innerHeight})`)
         .remove();
 
-    // Shared interaction handlers
     const handleInteractionStart = function() {
-        // Fade out all groups
         g.selectAll(".bar-group")
          .transition()
          .duration(200)
          .style("opacity", 0.5);
 
-        // Highlight this group
         d3.select(this)
           .transition()
           .duration(200)
@@ -178,14 +162,12 @@ const TopCountriesChart = ({ data, year, category, onCountrySelect }) => {
     };
 
     const handleInteractionEnd = function() {
-        // Restore all groups
         g.selectAll(".bar-group")
          .transition()
          .duration(200)
          .style("opacity", 1);
     };
 
-    // ENTER
     const enter = bars.enter()
         .append("g")
         .attr("class", "bar-group")
@@ -219,7 +201,7 @@ const TopCountriesChart = ({ data, year, category, onCountrySelect }) => {
         .attr("height", y.bandwidth())
         .attr("rx", 4)
         .attr("fill", "url(#barGradient)")
-        .attr("width", 0); // Start width 0
+        .attr("width", 0);
 
     enter.append("text")
         .attr("class", "country-label")
@@ -227,22 +209,21 @@ const TopCountriesChart = ({ data, year, category, onCountrySelect }) => {
         .attr("y", y.bandwidth() / 2)
         .attr("dy", "0.35em")
         .attr("text-anchor", "end")
-        .attr("fill", "#475569") // Slate-600
+        .attr("fill", "#475569")
         .style("font-size", "13px")
         .style("font-weight", "600")
         .text(d => translatedNames[d["ISO 3166-1 alpha-3"]] || d.Country);
 
     enter.append("text")
         .attr("class", "value-label")
-        .attr("x", 5) // Initial position
+        .attr("x", 5)
         .attr("y", y.bandwidth() / 2)
         .attr("dy", "0.35em")
-        .attr("fill", "#1e293b") // Slate-800
+        .attr("fill", "#1e293b")
         .style("font-size", "12px")
         .style("font-weight", "bold")
         .style("opacity", 0);
 
-    // UPDATE (Merge Enter + Update)
     const update = enter.merge(bars);
 
     update.transition(tTransition)
@@ -255,9 +236,8 @@ const TopCountriesChart = ({ data, year, category, onCountrySelect }) => {
         .attr("height", y.bandwidth());
 
     update.select(".country-label")
-        .text(d => translatedNames[d["ISO 3166-1 alpha-3"]] || d.Country); // Update with translated name
+        .text(d => translatedNames[d["ISO 3166-1 alpha-3"]] || d.Country);
 
-    // Update accessible labels
     update.attr("aria-label", d => {
         const name = translatedNames[d["ISO 3166-1 alpha-3"]] || d.Country;
         const val = parseFloat(d[category]).toFixed(1);
@@ -275,7 +255,7 @@ const TopCountriesChart = ({ data, year, category, onCountrySelect }) => {
             };
         });
 
-  }, [data, topData, year, category, t, translatedNames, onCountrySelect]); // Added topData to dependencies
+  }, [data, topData, year, category, t, translatedNames, isPlaying, onCountrySelect]);
 
   return <svg ref={svgRef} className="w-full h-full rounded-lg" />;
 };
@@ -284,11 +264,16 @@ TopCountriesChart.propTypes = {
   data: PropTypes.arrayOf(PropTypes.shape({
     Country: PropTypes.string,
     "ISO 3166-1 alpha-3": PropTypes.string,
-    // Dynamic access for category, so we can't be too strict here without listing all possible categories
   })).isRequired,
   year: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   category: PropTypes.string.isRequired,
+  isPlaying: PropTypes.bool,
   onCountrySelect: PropTypes.func,
+};
+
+TopCountriesChart.defaultProps = {
+  isPlaying: false,
+  onCountrySelect: () => {},
 };
 
 export default React.memo(TopCountriesChart);
