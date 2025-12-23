@@ -53,8 +53,8 @@ const BubbleChart = ({
         .call(g => g.selectAll("text")
             .attr("fill", "#64748b")
             .attr("font-size", "11px"))
-        .call(g => g.selectAll("line").attr("stroke", "#cbd5e1")) 
-        .call(g => g.select(".domain").attr("stroke", "#cbd5e1"));
+        .call(g => g.selectAll("line").attr("stroke", "#94a3b8"))
+        .call(g => g.select(".domain").attr("stroke", "#94a3b8"));
 
     const yAxis = d3.axisLeft(yScale).ticks(5);
     const yAxisGroup = svg.append("g")
@@ -63,10 +63,10 @@ const BubbleChart = ({
         .style("display", split ? "none" : "block") 
         .call(yAxis)
         .call(g => g.selectAll("text")
-            .attr("fill", "#cbd5e1")
+            .attr("fill", "#64748b")
             .attr("font-size", "11px"))
-        .call(g => g.selectAll("line").attr("stroke", "#475569"))
-        .call(g => g.select(".domain").attr("stroke", "#475569"));
+        .call(g => g.selectAll("line").attr("stroke", "#94a3b8"))
+        .call(g => g.select(".domain").attr("stroke", "#94a3b8"));
 
     // Labels
     const yAxisLabel = svg.append("text")
@@ -75,7 +75,7 @@ const BubbleChart = ({
         .attr("x", -(height / 2))
         .attr("y", padding.left - 45)
         .attr("text-anchor", "middle")
-        .attr("fill", "#cbd5e1")
+        .attr("fill", "#475569")
         .attr("font-size", "13px")
         .attr("font-weight", "500")
         .text("Émissions (MtCO₂)");
@@ -84,7 +84,7 @@ const BubbleChart = ({
         .attr("x", width / 2)
         .attr("y", height - 15)
         .attr("text-anchor", "middle")
-        .attr("fill", "#cbd5e1")
+        .attr("fill", "#475569")
         .attr("font-size", "13px")
         .attr("font-weight", "500")
         .text("Année");
@@ -192,17 +192,26 @@ const BubbleChart = ({
         const legendRow = legend.append("g")
             .attr("transform", `translate(0, ${i * 28})`)
             .style("cursor", "pointer")
-            .on("mouseover", function() {
+            .attr("tabindex", "0")
+            .attr("role", "button")
+            .attr("aria-label", t(`sectors.${sector}`) || sector)
+            .on("mouseover focus", function() {
                 bubbles.selectAll("circle")
                     .transition()
                     .duration(200)
                     .attr("opacity", d => d.sector === sector ? 1 : 0.2);
             })
-            .on("mouseout", function() {
+            .on("mouseout blur", function() {
                 bubbles.selectAll("circle")
                     .transition()
                     .duration(200)
                     .attr("opacity", 0.7);
+            })
+            .on("keydown", function(event) {
+                if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    // No persistent state to toggle, but prevents scrolling
+                }
             });
 
         legendRow.append("circle")
@@ -215,7 +224,7 @@ const BubbleChart = ({
             .attr("x", 22)
             .attr("y", 4)
             .text(t(`sectors.${sector}`) || sector)
-            .attr("fill", "#cbd5e1")
+            .attr("fill", "#475569")
             .style("font-size", "13px")
             .style("font-weight", "500");
     });

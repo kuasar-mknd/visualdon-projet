@@ -4,7 +4,7 @@ import * as d3 from 'd3';
 import { useLanguage } from '../context/LanguageContext';
 import { fetchCountryDetails } from '../services/countryService';
 
-const TopCountriesChart = ({ data, year, category, isPlaying }) => {
+const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect }) => {
   const svgRef = useRef(null);
   const { t, language } = useLanguage();
   const [translatedNames, setTranslatedNames] = useState({});
@@ -185,7 +185,16 @@ const TopCountriesChart = ({ data, year, category, isPlaying }) => {
         .on("mouseover", handleInteractionStart)
         .on("mouseout", handleInteractionEnd)
         .on("focus", handleInteractionStart)
-        .on("blur", handleInteractionEnd);
+        .on("blur", handleInteractionEnd)
+        .on("click", (event, d) => {
+          if (onCountrySelect) onCountrySelect(d["ISO 3166-1 alpha-3"]);
+        })
+        .on("keydown", (event, d) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            if (onCountrySelect) onCountrySelect(d["ISO 3166-1 alpha-3"]);
+          }
+        });
 
     enter.append("rect")
         .attr("class", "bar-rect")
@@ -246,7 +255,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying }) => {
             };
         });
 
-  }, [data, topData, year, category, t, translatedNames, isPlaying]);
+  }, [data, topData, year, category, t, translatedNames, isPlaying, onCountrySelect]);
 
   return <svg ref={svgRef} className="w-full h-full rounded-lg" />;
 };
@@ -259,10 +268,12 @@ TopCountriesChart.propTypes = {
   year: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   category: PropTypes.string.isRequired,
   isPlaying: PropTypes.bool,
+  onCountrySelect: PropTypes.func,
 };
 
 TopCountriesChart.defaultProps = {
-  isPlaying: false
+  isPlaying: false,
+  onCountrySelect: () => {},
 };
 
 export default React.memo(TopCountriesChart);
