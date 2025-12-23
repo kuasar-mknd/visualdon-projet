@@ -188,7 +188,6 @@ function AppContent() {
               selectedCountryName={selectedCountryName}
               displayCountry={displayCountry}
               onClose={handleCloseOverlay}
-              year={year}
               emissions={emissions}
            />
         </div>
