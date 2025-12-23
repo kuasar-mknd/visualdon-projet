@@ -17,12 +17,56 @@ const PauseIcon = () => (
 const Controls = ({ isPlaying, setIsPlaying, category, setCategory, year, setYear, yearRange }) => {
   const { t } = useLanguage();
 
+  // Keyboard shortcuts
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Ignore if user is interacting with an input, select, or textarea
+      if (['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target.tagName)) {
+        return;
+      }
+
+      // Ignore if a modal/dialog is open (e.g. CountryDetailsOverlay)
+      if (document.querySelector('[role="dialog"]')) {
+        return;
+      }
+
+      switch (e.code) {
+        case 'Space':
+          // Prevent default scroll behavior, but only if not on a button (native behavior)
+          if (e.target.tagName !== 'BUTTON') {
+            e.preventDefault();
+            setIsPlaying(prev => !prev);
+          }
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          setYear(prev => {
+             const current = prev || yearRange.min;
+             return Math.max(yearRange.min, current - 1);
+          });
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          setYear(prev => {
+             const current = prev || yearRange.min;
+             return Math.min(yearRange.max, current + 1);
+          });
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [setIsPlaying, setYear, yearRange]);
+
   return (
     <div className="glass-panel-light p-4 rounded-2xl shrink-0">
       <div className="flex gap-3 mb-4">
         <button
           onClick={() => setIsPlaying(!isPlaying)}
           aria-label={isPlaying ? t('aria.pause') : t('aria.play')}
+          aria-keyshortcuts="Space"
+          title={`${isPlaying ? t('pause') : t('play')} (Space)`}
           className={`flex-1 py-3 px-6 rounded-xl font-semibold tracking-wide transition-all duration-300 shadow-sm hover:shadow-md focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none flex items-center justify-center gap-2 ${
             isPlaying 
               ? 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100' 
@@ -62,7 +106,8 @@ const Controls = ({ isPlaying, setIsPlaying, category, setCategory, year, setYea
           disabled={!year}
           onChange={(e) => setYear(parseInt(e.target.value))}
           aria-label={t('aria.selectYear')}
-          title={t('aria.selectYear')}
+          aria-keyshortcuts="ArrowLeft ArrowRight"
+          title={`${t('aria.selectYear')} (←/→)`}
           className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
         />
         <div className="flex justify-between items-center text-[10px] font-mono text-slate-500 mt-2">
