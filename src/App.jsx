@@ -167,6 +167,7 @@ function AppContent() {
                 data={currentYearData}
                 year={year} 
                 category={category === 'Per Capita' ? 'Total' : category} 
+                onCountrySelect={setSelectedCountry}
              />
           </div>
 
