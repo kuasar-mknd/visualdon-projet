@@ -167,6 +167,7 @@ function AppContent() {
                 data={currentYearData}
                 year={year} 
                 category={category === 'Per Capita' ? 'Total' : category} 
+                onCountrySelect={setSelectedCountry}
              />
           </div>
 
@@ -188,7 +189,6 @@ function AppContent() {
               selectedCountryName={selectedCountryName}
               displayCountry={displayCountry}
               onClose={handleCloseOverlay}
-              year={year}
               emissions={emissions}
            />
         </div>

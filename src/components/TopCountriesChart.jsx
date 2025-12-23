@@ -4,7 +4,7 @@ import * as d3 from 'd3';
 import { useLanguage } from '../context/LanguageContext';
 import { fetchCountryDetails } from '../services/countryService';
 
-const TopCountriesChart = ({ data, year, category }) => {
+const TopCountriesChart = ({ data, year, category, onCountrySelect }) => {
   const svgRef = useRef(null);
   const { t, language } = useLanguage();
   const [translatedNames, setTranslatedNames] = useState({});
@@ -126,13 +126,17 @@ const TopCountriesChart = ({ data, year, category }) => {
     if (topData.length === 0) {
         g.selectAll("*").remove();
         g.append("text")
+         .attr("class", "no-data-message")
          .attr("x", innerWidth / 2)
          .attr("y", innerHeight / 2)
          .attr("text-anchor", "middle")
-         .attr("fill", "#94a3b8")
+         .attr("fill", "#64748b") // Slate-500 for better contrast
          .text(t('noData'));
         return;
     }
+
+    // Remove no data message if data exists
+    g.selectAll(".no-data-message").remove();
 
     // 3. Scales
     const x = d3.scaleLinear()
@@ -158,18 +162,56 @@ const TopCountriesChart = ({ data, year, category }) => {
         .attr("transform", `translate(0, ${innerHeight})`)
         .remove();
 
+    // Shared interaction handlers
+    const handleInteractionStart = function() {
+        // Fade out all groups
+        g.selectAll(".bar-group")
+         .transition()
+         .duration(200)
+         .style("opacity", 0.5);
+
+        // Highlight this group
+        d3.select(this)
+          .transition()
+          .duration(200)
+          .style("opacity", 1);
+    };
+
+    const handleInteractionEnd = function() {
+        // Restore all groups
+        g.selectAll(".bar-group")
+         .transition()
+         .duration(200)
+         .style("opacity", 1);
+    };
+
     // ENTER
     const enter = bars.enter()
         .append("g")
         .attr("class", "bar-group")
         .attr("transform", d => `translate(0, ${y(d["ISO 3166-1 alpha-3"])})`)
         .style("opacity", 0)
+        .style("cursor", "pointer")
+        .style("outline", "none")
         .attr("tabindex", "0")
         .attr("role", "listitem")
         .attr("aria-label", d => {
             const name = translatedNames[d["ISO 3166-1 alpha-3"]] || d.Country;
             const val = parseFloat(d[category]).toFixed(1);
             return `${name}: ${val}`;
+        })
+        .on("mouseover", handleInteractionStart)
+        .on("mouseout", handleInteractionEnd)
+        .on("focus", handleInteractionStart)
+        .on("blur", handleInteractionEnd)
+        .on("click", (event, d) => {
+          if (onCountrySelect) onCountrySelect(d["ISO 3166-1 alpha-3"]);
+        })
+        .on("keydown", (event, d) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            if (onCountrySelect) onCountrySelect(d["ISO 3166-1 alpha-3"]);
+          }
         });
 
     enter.append("rect")
@@ -233,7 +275,7 @@ const TopCountriesChart = ({ data, year, category }) => {
             };
         });
 
-  }, [data, topData, year, category, t, translatedNames]); // Added topData to dependencies
+  }, [data, topData, year, category, t, translatedNames, onCountrySelect]); // Added topData to dependencies
 
   return <svg ref={svgRef} className="w-full h-full rounded-lg" />;
 };
@@ -246,6 +288,7 @@ TopCountriesChart.propTypes = {
   })).isRequired,
   year: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   category: PropTypes.string.isRequired,
+  onCountrySelect: PropTypes.func,
 };
 
 export default React.memo(TopCountriesChart);

@@ -24,7 +24,7 @@ const CountryChart = ({ countryCode, emissionsData }) => {
   const [split, setSplit] = useState(false);
   const [viewMode, setViewMode] = useState('bubbles'); // 'bubbles' or 'lines'
 
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [dimensions, setDimensions] = useState({ width: 500, height: 500 });
 
   // Handle Resize
   useEffect(() => {
@@ -33,7 +33,7 @@ const CountryChart = ({ countryCode, emissionsData }) => {
     const updateDimensions = () => {
        if (containerRef.current) {
           setDimensions({
-            width: containerRef.current.clientWidth,
+            width: containerRef.current.clientWidth || 500,
             height: containerRef.current.clientHeight || 500
           });
        }
@@ -87,6 +87,14 @@ const CountryChart = ({ countryCode, emissionsData }) => {
     return (
       <div className="flex items-center justify-center h-full text-slate-400">
         <p className="text-lg">{t('chart.selectCountryPrompt')}</p>
+      </div>
+    );
+  }
+
+  if (emissionData.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full text-slate-500">
+        <p className="text-lg">{t('noData')}</p>
       </div>
     );
   }

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import CountryChart from '../CountryChart';
 import { useLanguage } from '../../context/LanguageContext';
 
-const CountryDetailsOverlay = ({ selectedCountry, selectedCountryName, displayCountry, onClose, year, emissions }) => {
+const CountryDetailsOverlay = ({ selectedCountry, selectedCountryName, displayCountry, onClose, emissions }) => {
   const { t } = useLanguage();
 
   const closeButtonRef = useRef(null);
@@ -69,7 +69,6 @@ const CountryDetailsOverlay = ({ selectedCountry, selectedCountryName, displayCo
         <div className="flex-1 px-6 pb-6 overflow-auto">
             <CountryChart 
                 countryCode={displayCountry} 
-                year={year} 
                 emissionsData={emissions}
             />
         </div>
@@ -82,8 +81,9 @@ CountryDetailsOverlay.propTypes = {
   selectedCountryName: PropTypes.string,
   displayCountry: PropTypes.string,
   onClose: PropTypes.func.isRequired,
-  year: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   emissions: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 
-export default CountryDetailsOverlay;
+// Optimization: Memoize to prevent re-renders when parent re-renders (animation loop)
+// especially since this component is often hidden but still in the DOM tree.
+export default React.memo(CountryDetailsOverlay);
