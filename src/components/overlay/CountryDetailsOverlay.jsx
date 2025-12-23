@@ -84,4 +84,6 @@ CountryDetailsOverlay.propTypes = {
   emissions: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 
+// Optimization: Memoize to prevent re-renders when parent re-renders (animation loop)
+// especially since this component is often hidden but still in the DOM tree.
 export default React.memo(CountryDetailsOverlay);

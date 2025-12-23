@@ -36,8 +36,20 @@ function fetchJSON(url) {
         console.warn(`⚠️  Warning: Expected application/json but got ${contentType}`);
       }
 
+      const MAX_SIZE = 10 * 1024 * 1024; // 10MB limit
+      let length = 0;
       let data = '';
-      res.on('data', chunk => data += chunk);
+
+      res.on('data', chunk => {
+        length += chunk.length;
+        if (length > MAX_SIZE) {
+          res.destroy();
+          reject(new Error('Response too large (exceeded 10MB)'));
+          return;
+        }
+        data += chunk;
+      });
+
       res.on('end', () => {
         if (res.statusCode !== 200) {
           reject(new Error(`API Error: ${res.statusCode}`));
@@ -171,21 +183,55 @@ async function getZenodoData() {
 }
 
 /**
+ * Parse a single CSV line with support for quoted fields and escaped quotes.
+ * This replaces the regex-based split to avoid ReDoS vulnerabilities.
+ * @param {string} line - The CSV line to parse
+ * @returns {string[]} Array of field values
+ */
+function parseCSVLine(line) {
+  const result = [];
+  let currentField = '';
+  let insideQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+
+    if (char === '"') {
+      if (insideQuotes && line[i + 1] === '"') {
+        // Escaped quote: "" becomes "
+        currentField += '"';
+        i++; // Skip the next quote
+      } else {
+        // Toggle quote state
+        insideQuotes = !insideQuotes;
+      }
+    } else if (char === ',' && !insideQuotes) {
+      // End of field
+      result.push(currentField.trim());
+      currentField = '';
+    } else {
+      currentField += char;
+    }
+  }
+  result.push(currentField.trim());
+  return result;
+}
+
+/**
  * Parse CSV into array of objects
  */
 function parseCSV(csvContent) {
   const lines = csvContent.trim().split(/\r?\n/);
-  // Split by comma but ignore commas inside quotes
-  const splitRegex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
 
-  const headers = lines[0].split(splitRegex).map(h => h.trim().replace(/^"|"$/g, ''));
+  // Security Enhancement: Use state-machine parser instead of Regex to prevent ReDoS
+  const headers = parseCSVLine(lines[0]);
   
   const data = [];
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line) continue;
 
-    const values = line.split(splitRegex).map(v => v.trim().replace(/^"|"$/g, ''));
+    const values = parseCSVLine(line);
     const row = {};
     headers.forEach((header, index) => {
       // Prevent prototype pollution
