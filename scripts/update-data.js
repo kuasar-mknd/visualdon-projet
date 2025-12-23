@@ -183,6 +183,7 @@ async function getZenodoData() {
 }
 
 /**
+/**
  * Parse a single CSV line with support for quoted fields and escaped quotes.
  * This replaces the regex-based split to avoid ReDoS vulnerabilities.
  * @param {string} line - The CSV line to parse
@@ -222,6 +223,7 @@ function parseCSVLine(line) {
  */
 function parseCSV(csvContent) {
   const lines = csvContent.trim().split(/\r?\n/);
+  if (lines.length === 0) return [];
 
   // Security Enhancement: Use state-machine parser instead of Regex to prevent ReDoS
   const headers = parseCSVLine(lines[0]);
@@ -233,6 +235,7 @@ function parseCSV(csvContent) {
 
     const values = parseCSVLine(line);
     const row = {};
+
     headers.forEach((header, index) => {
       // Prevent prototype pollution
       if (header === '__proto__' || header === 'constructor' || header === 'prototype') {
