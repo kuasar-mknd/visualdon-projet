@@ -36,8 +36,20 @@ function fetchJSON(url) {
         console.warn(`⚠️  Warning: Expected application/json but got ${contentType}`);
       }
 
+      const MAX_SIZE = 10 * 1024 * 1024; // 10MB limit
+      let length = 0;
       let data = '';
-      res.on('data', chunk => data += chunk);
+
+      res.on('data', chunk => {
+        length += chunk.length;
+        if (length > MAX_SIZE) {
+          res.destroy();
+          reject(new Error('Response too large (exceeded 10MB)'));
+          return;
+        }
+        data += chunk;
+      });
+
       res.on('end', () => {
         if (res.statusCode !== 200) {
           reject(new Error(`API Error: ${res.statusCode}`));

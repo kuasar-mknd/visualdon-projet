@@ -15,7 +15,17 @@ const getCache = () => {
       memoryCache = {};
       return memoryCache;
     }
-    memoryCache = JSON.parse(cache);
+
+    const parsed = JSON.parse(cache);
+    // Security Enhancement: Validate that parsed cache is actually an object
+    // to prevent crashes if localStorage contains "null" or other non-object JSON values
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      console.warn("Invalid cache structure detected, resetting cache");
+      memoryCache = {};
+      return memoryCache;
+    }
+
+    memoryCache = parsed;
     return memoryCache;
   } catch (e) {
     console.error("Error reading cache", e);
@@ -82,7 +92,18 @@ export const fetchCountryDetails = async (code, language) => {
     if (!response.ok) throw new Error('Network response was not ok');
     
     const data = await response.json();
+
+    // Security Enhancement: Validate API response structure before using it
+    if (!Array.isArray(data) || data.length === 0) {
+      throw new Error('Invalid API response format');
+    }
+
     const countryData = data[0]; // API returns array
+
+    // Validate country data shape
+    if (!countryData || !countryData.name) {
+      throw new Error('Missing country name data in response');
+    }
 
     // Update cache
     cache[code] = {
