@@ -24,7 +24,7 @@ const Header = ({ year }) => {
           </button>
           <div className="text-right bg-white/50 px-4 py-1.5 rounded-xl border border-slate-100 shadow-sm">
               <div className="text-3xl font-mono font-bold text-blue-600 leading-none">{year || '...'}</div>
-              <div className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold leading-none">{t('year')}</div>
+              <div className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold leading-none">{t('year')}</div>
           </div>
       </div>
     </header>

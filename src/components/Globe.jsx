@@ -112,12 +112,14 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
         if (event.type.startsWith('touch') && (!event.touches || event.touches.length === 1)) return true;
         return false;
       })
+      .on("start", () => svg.style("cursor", "grabbing"))
       .on("drag", (event) => {
         setRotation(curr => {
             const sensitivity = 0.25;
             return [curr[0] + event.dx * sensitivity, curr[1] - event.dy * sensitivity];
         });
-      });
+      })
+      .on("end", () => svg.style("cursor", "grab"));
       
     // Initialize zoom transform to match current scale
     svg.call(zoom.transform, d3.zoomIdentity.scale(scale / 250));
@@ -245,7 +247,8 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
               d={d}
               fill="none"
               stroke="#ffffff"
-              strokeWidth="1.5"
+              strokeWidth="2"
+              filter="url(#highlight-glow)"
               className="pointer-events-none" // Let events pass through to base path
           />
       );
@@ -254,7 +257,7 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
   if (!data || !geoJson || !width) return <div ref={containerRef} className="w-full h-full bg-slate-100" />;
 
   return (
-    <div ref={containerRef} className="w-full h-full relative bg-slate-50 overflow-hidden">
+    <div ref={containerRef} className="w-full h-full relative bg-slate-50 overflow-hidden cursor-grab active:cursor-grabbing">
        <svg ref={svgRef} width={width} height={height} style={{background: 'radial-gradient(circle at 50% 50%, #f8fafc 0%, #e2e8f0 100%)'}}>
           <defs>
             {/* Ocean Gradient - gives depth to the water */}
@@ -270,6 +273,12 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
                     <feMergeNode in="coloredBlur"/>
                     <feMergeNode in="SourceGraphic"/>
                 </feMerge>
+            </filter>
+
+            {/* Highlight Glow - makes focused country pop against any background */}
+            <filter id="highlight-glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feDropShadow dx="0" dy="0" stdDeviation="2" floodColor="white" floodOpacity="0.8"/>
+                <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="black" floodOpacity="0.4"/>
             </filter>
 
             {/* Sphere Shading - inner shadow to make it look round */}

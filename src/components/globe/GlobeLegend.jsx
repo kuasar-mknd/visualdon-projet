@@ -26,7 +26,7 @@ const GlobeLegend = () => {
                  </div>
                  <div className="flex items-center gap-3 pt-1 border-t border-slate-200 mt-1" role="listitem">
                      <div className="w-3 h-3 rounded-full bg-slate-300" aria-hidden="true"></div>
-                     <span className="text-slate-400">{t('noData')}</span>
+                     <span className="text-slate-600">{t('noData')}</span>
                  </div>
              </div>
          </div>
