@@ -1,10 +1,18 @@
 import { useState, useEffect } from 'react';
 import * as d3 from 'd3';
 
+// Helper to fetch with timeout
+function fetchWithTimeout(promise, ms = 10000) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out')), ms))
+  ]);
+}
+
 // Helper to safely parse CSV without using new Function (eval) which violates CSP
 // d3.csv uses d3-dsv's objectConverter which uses new Function
 async function safeCsv(url, rowConverter) {
-  const text = await d3.text(url);
+  const text = await fetchWithTimeout(d3.text(url));
   const rows = d3.csvParseRows(text);
 
   if (rows.length === 0) return [];
@@ -45,7 +53,7 @@ export function useData() {
         // First load the manifest to get current filenames
         // Use a cache-busting strategy or check if we can rely on browser caching.
         // For now, we fetch manifest.json.
-        const manifest = await d3.json('/data/manifest.json');
+        const manifest = await fetchWithTimeout(d3.json('/data/manifest.json'));
         if (!manifest || !manifest.emissions || !manifest.perCapita) {
           throw new Error('Invalid manifest');
         }
@@ -53,9 +61,14 @@ export function useData() {
         // Parallelize fetching
         const [emissions, geoJson, perCapita] = await Promise.all([
           safeCsv(`/data/${manifest.emissions}`, d3.autoType),
-          d3.json('/data/countries-coastline-10km.geo.json'),
+          fetchWithTimeout(d3.json('/data/countries-coastline-10km.geo.json')),
           safeCsv(`/data/${manifest.perCapita}`, d3.autoType),
         ]);
+
+        // Security Enhancement: Validate GeoJSON structure
+        if (!geoJson || geoJson.type !== 'FeatureCollection' || !Array.isArray(geoJson.features)) {
+          throw new Error('Invalid GeoJSON data');
+        }
 
         setData({
           emissions,
