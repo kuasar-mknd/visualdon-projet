@@ -79,18 +79,20 @@ function AppContent() {
   const groupDataByYear = useCallback((data) => {
     if (!data) return new Map();
 
-    const map = new Map();
+    const grouped = new Map();
     // Single pass to group by year and exclude WLD
     for (const d of data) {
       if (d["ISO 3166-1 alpha-3"] === "WLD") continue;
       
       const year = d.Year;
-      if (!map.has(year)) {
-        map.set(year, []);
+      if (!grouped.has(year)) {
+        grouped.set(year, { list: [], map: new Map() });
       }
-      map.get(year).push(d);
+      const entry = grouped.get(year);
+      entry.list.push(d);
+      entry.map.set(d["ISO 3166-1 alpha-3"], d);
     }
-    return map;
+    return grouped;
   }, []);
 
   // Optimization: Pre-group data by year for BOTH datasets once on load.
@@ -102,9 +104,9 @@ function AppContent() {
   const dataByYear = category === 'Per Capita' ? perCapitaByYear : emissionsByYear;
 
   // Memoize filtered data for performance
-  const currentYearData = useMemo(() => {
-      return dataByYear.get(year) || [];
-  }, [dataByYear, year]);
+  // Optimization: Extract pre-indexed structures (O(1)) instead of reconstructing them.
+  const emptyData = useMemo(() => ({ list: [], map: new Map() }), []);
+  const { list: currentYearList, map: currentYearMap } = dataByYear.get(year) || emptyData;
 
   // Update displayCountry when selectedCountry changes to a valid value
   useEffect(() => {
@@ -157,7 +159,7 @@ function AppContent() {
           {/* Top Countries Chart */}
           <div className="glass-panel-light p-4 rounded-2xl flex-1 min-h-0 relative overflow-hidden">
              <TopCountriesChart 
-                data={currentYearData}
+                data={currentYearList}
                 year={year} 
                 category={category === 'Per Capita' ? 'Total' : category} 
                 isPlaying={isPlaying}
@@ -171,7 +173,7 @@ function AppContent() {
         <div className="lg:col-span-8 glass-panel-light rounded-2xl overflow-hidden relative shadow-xl border-white/50">
            {/* Removed year prop as it caused unnecessary re-renders and wasn't used by Globe */}
            <Globe 
-              data={currentYearData} 
+              data={currentYearMap}
               geoJson={geoJson} 
               category={category === 'Per Capita' ? 'Total' : category}
               maxVal={currentMaxVal}

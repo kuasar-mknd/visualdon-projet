@@ -110,6 +110,10 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
 
   const dataMap = useMemo(() => {
     if (!data) return new Map();
+    // Optimization: If data is already a Map (pre-indexed in App), use it directly.
+    // This avoids rebuilding the map every frame during animation (O(N) -> O(1)).
+    if (data instanceof Map) return data;
+
     const map = new Map();
     data.forEach(d => {
         map.set(d["ISO 3166-1 alpha-3"], d);
@@ -285,9 +289,12 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
 };
 
 Globe.propTypes = {
-  data: PropTypes.arrayOf(PropTypes.shape({
-    "ISO 3166-1 alpha-3": PropTypes.string,
-  })).isRequired,
+  data: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.shape({
+      "ISO 3166-1 alpha-3": PropTypes.string,
+    })),
+    PropTypes.instanceOf(Map)
+  ]).isRequired,
   geoJson: PropTypes.shape({
     type: PropTypes.string,
     features: PropTypes.arrayOf(PropTypes.object)
