@@ -133,7 +133,7 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
   const hoveredValue = useMemo(() => {
       if (!hoveredCountryId) return null;
       const countryData = dataMap.get(hoveredCountryId);
-      return countryData ? parseFloat(countryData[category]) : null;
+      return countryData ? (countryData[category] || 0) : null;
   }, [hoveredCountryId, dataMap, category]);
 
   const handleMouseEnter = useCallback((countryId, featureName) => {
