@@ -1,52 +1,57 @@
-# API & Data Documentation
+# Data API Documentation
 
 ## Overview
-This application is a **frontend-only** visualization tool. It does not communicate with a traditional backend API for its core functionality during runtime. Instead, it relies on static data files served from the `public/data` directory, managed via a manifest file.
 
-## Data Architecture
+This application is a client-side visualization that consumes static CSV data files. While it does not have a traditional REST API backend, the data files act as the "API" for the application.
 
-### Data Loading Strategy
-To support versioned data without requiring code changes, the application uses a **Manifest-based loading strategy**:
+## Data Endpoints (Static Files)
 
-1.  **Manifest**: The app first fetches `public/data/manifest.json`.
-2.  **Dynamic Resolution**: This JSON file contains the specific filenames for the current dataset version.
-3.  **Data Fetching**: The app then fetches the CSV files specified in the manifest.
+The application fetches data from the `public/data/` directory.
 
-### Data Files (`public/data/`)
+### 1. Global CO2 Emissions
+- **Path**: `/data/global_emissions.csv` (or similar versioned filename via `manifest.json`)
+- **Format**: CSV
+- **Description**: Contains annual global CO2 emissions data.
+- **Columns**:
+    - `Year`: Integer (1750-Present)
+    - `Global`: Float (Total emissions in MtCO2)
+    - `Coal`, `Oil`, `Gas`, `Cement`, `Flaring`, `Other`: Float (Breakdown by source)
 
-- **`manifest.json`**:
+### 2. Country Emissions
+- **Path**: `/data/country_emissions.csv`
+- **Format**: CSV
+- **Description**: Detailed emissions data per country.
+- **Columns**:
+    - `Country Code`: ISO 3166-1 alpha-3 code
+    - `Year`: Integer
+    - `Total`: Float
+    - `Per Capita`: Float
+
+### 3. Data Manifest
+- **Path**: `/data/manifest.json`
+- **Format**: JSON
+- **Description**: Maps logical data keys to actual filenames (which may include hashes or timestamps).
+- **Example**:
   ```json
   {
-    "emissions": "GCB2023v43_MtCO2_flat.csv",
-    "perCapita": "GCB_2023_percapita_flat-clean.csv",
-    "version": "2023",
-    "lastUpdated": "2023-12-05T10:00:00.000Z"
+    "global": "global_emissions.csv",
+    "countries": "country_emissions.csv",
+    "lastUpdated": "2023-10-27T10:00:00Z"
   }
   ```
-- **Emissions Data** (e.g., `GCB2023v43_MtCO2_flat.csv`):
-  - **Source**: Directly from Global Carbon Budget (Zenodo).
-  - **Columns**: `Country`, `ISO 3166-1 alpha-3`, `Year`, `Total`, `Coal`, `Oil`, `Gas`, `Cement`, `Flaring`, `Other`, `Per Capita`.
-- **Per Capita Data** (e.g., `GCB_2023_percapita_flat-clean.csv`):
-  - **Source**: Calculated during the update process.
-  - **Columns**: `Country`, `Year`, `Per Capita`.
 
-## Internal Services
+## Data Update Process
 
-### Country Service (`src/services/countryService.js`)
-A utility service module running in the browser to handle country data normalization and translation.
-- **Functionality**:
-  - Maps ISO codes to Country names.
-  - Provides translations for country names (English/French).
-- **Usage**: Imported directly by React components.
+The data is updated via a Node.js script:
 
-## External Scripts
+```bash
+pnpm run update-data
+```
 
-### Data Update Script (`scripts/update-data.js`)
-This Node.js script is used at **build/maintenance time** to fetch the latest data.
-- **Source**: Fetches from the Global Carbon Budget Zenodo repository using a stable Concept ID.
-- **Execution**: `pnpm run update-data`
-- **Output**:
-  - Downloads the latest CSV files.
-  - Calculates per-capita data if needed.
-  - Generates `manifest.json`.
-  - Updates files in `public/data/`.
+This script:
+1. Fetches the latest "GCP Fossil CO2 emissions" dataset from Zenodo.
+2. Parses and sanitizes the CSV data.
+3. Generates optimized CSV files in `public/data/`.
+4. Updates `public/data/manifest.json`.
+
+See `docs/ARCHITECTURE.md` for more details on the update mechanism.

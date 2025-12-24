@@ -71,6 +71,22 @@ pnpm run update-data
 
 Data updates are also automated via GitHub Actions, running monthly. See [DATA_UPDATE.md](DATA_UPDATE.md) for details.
 
+## 🧪 Testing
+
+While this project does not currently have a unit test suite, it includes verification scripts for critical user flows.
+
+To run the verification checks:
+
+```bash
+# Run linting
+pnpm run lint
+
+# Check for build errors
+pnpm run build
+```
+
+We also use Playwright for visual verification of frontend changes (see `verification/` folder).
+
 ## 🛠️ Technology Stack
 
 - **Frontend**: React 19.2 with hooks

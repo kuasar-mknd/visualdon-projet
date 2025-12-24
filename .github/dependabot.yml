@@ -5,12 +5,11 @@
 
 version: 2
 updates:
-  - package-ecosystem: "npm" # Matches package.json (works for pnpm too)
-    directory: "/" # Location of package manifests
+  - package-ecosystem: "npm" # Matches pnpm as well
+    directory: "/" # Location of package.json
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
-
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

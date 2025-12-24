@@ -23,7 +23,7 @@ The source code is organized as follows:
 - **`context/`**: React Context definitions, primarily for state management that needs to be accessed globally (e.g., LanguageContext).
 - **`hooks/`**: Custom React hooks.
   - **`useData.js`**: A critical hook for fetching, parsing, and managing the emissions data.
-- **`services/`**: logic for external or internal services.
+- **`services/`**: Infrastructure-agnostic logic.
   - **`countryService.js`**: Handles country name translations and mapping.
 - **`App.jsx`**: The main application component that orchestrates the layout and state.
 - **`main.jsx`**: The entry point that mounts the React application.
@@ -38,7 +38,7 @@ Node.js scripts for maintenance tasks.
 
 ## Data Flow
 1.  **Initialization**: On load, `App.jsx` initializes.
-2.  **Data Fetching**: The `useData` hook is triggered. It fetches CSV files from `public/data/` using `d3-fetch` (or similar).
+2.  **Data Fetching**: The `useData` hook is triggered. It reads `public/data/manifest.json` to resolve filenames and then fetches CSV files using `d3-fetch` (wrapped in a safe fetcher).
 3.  **Parsing**: Data is parsed and transformed into a usable format (likely an array of objects).
 4.  **State**: The parsed data is stored in the React state.
 5.  **Rendering**: Components (Charts, Globe) receive data via props and render the visualizations.
