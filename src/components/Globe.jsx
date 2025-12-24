@@ -5,6 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { fetchCountryDetails } from '../services/countryService';
 import GlobeLegend from './globe/GlobeLegend';
 import GlobeTooltip from './globe/GlobeTooltip';
+import { sanitizeString } from '../utils/security';
 
 // Create a custom interpolator for better visibility and meaning
 const customInterpolator = t => {
@@ -141,7 +142,7 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
       if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
       hoverTimeoutRef.current = setTimeout(async () => {
           const name = await fetchCountryDetails(countryId, language);
-          setHoveredCountryName(name || featureName);
+          setHoveredCountryName(sanitizeString(name || featureName));
       }, 150);
   }, [language]);
 

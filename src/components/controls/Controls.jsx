@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useLanguage } from '../../context/LanguageContext';
+import { clamp } from '../../utils/security';
 
 const PlayIcon = () => (
   <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
@@ -104,7 +105,7 @@ const Controls = ({ isPlaying, setIsPlaying, category, setCategory, year, setYea
           max={yearRange.max}
           value={year || yearRange.min}
           disabled={!year}
-          onChange={(e) => setYear(parseInt(e.target.value))}
+          onChange={(e) => setYear(clamp(parseInt(e.target.value), yearRange.min, yearRange.max))}
           aria-label={t('aria.selectYear')}
           aria-keyshortcuts="ArrowLeft ArrowRight"
           title={`${t('aria.selectYear')} (←/→)`}

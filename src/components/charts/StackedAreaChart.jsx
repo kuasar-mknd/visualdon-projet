@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import * as d3 from 'd3';
 import { useLanguage } from '../../context/LanguageContext';
+import { sanitizeString } from '../../utils/security';
 
 const StackedAreaChart = ({ 
   years, 
@@ -85,7 +86,7 @@ const StackedAreaChart = ({
       .style('cursor', 'pointer')
       .attr("tabindex", "0")
       .attr("role", "button")
-      .attr("aria-label", d => t(`sectors.${d.key}`) || d.key)
+      .attr("aria-label", d => sanitizeString(t(`sectors.${d.key}`) || d.key))
       .on('mouseover', handleInteractionStart)
       .on('focus', handleInteractionStart)
       .on('mouseout', handleInteractionEnd)

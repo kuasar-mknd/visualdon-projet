@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import * as d3 from 'd3';
+import { sanitizeString } from '../utils/security';
 
 // Helper to fetch with timeout
 function fetchWithTimeout(promise, ms = 10000) {
@@ -29,7 +30,8 @@ async function safeCsv(url, rowConverter) {
     const obj = {};
     for (let j = 0; j < safeHeaders.length; j++) {
       const { key, index } = safeHeaders[j];
-      obj[key] = row[index];
+      // Security: Sanitize cell values to remove dangerous chars (like HTML tags) from CSV content
+      obj[key] = sanitizeString(row[index]);
     }
     return rowConverter ? rowConverter(obj) : obj;
   });

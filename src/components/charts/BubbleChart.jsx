@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import * as d3 from 'd3';
 import { useLanguage } from '../../context/LanguageContext';
+import { sanitizeString } from '../../utils/security';
 
 const BubbleChart = ({ 
   chartData, 
@@ -134,7 +135,7 @@ const BubbleChart = ({
             .attr("class", "tooltip")
             .attr("transform", `translate(${xScale(d.year)}, ${yScale(d.value) - sizeScale(d.value) - 10})`);
 
-        const text = `${t(`sectors.${d.sector}`)}: ${d.value.toFixed(1)} MtCO₂`;
+        const text = sanitizeString(`${t(`sectors.${d.sector}`)}: ${d.value.toFixed(1)} MtCO₂`);
         const bbox = {width: text.length * 7, height: 20};
 
         tooltip.append("rect")
@@ -178,7 +179,7 @@ const BubbleChart = ({
         .style("cursor", "pointer")
         .attr("tabindex", "0")
         .attr("role", "button")
-        .attr("aria-label", d => `${t(`sectors.${d.sector}`)}: ${d.value.toFixed(1)} MtCO₂`)
+        .attr("aria-label", d => sanitizeString(`${t(`sectors.${d.sector}`)}: ${d.value.toFixed(1)} MtCO₂`))
         .on("mouseover", handleInteractionStart)
         .on("focus", handleInteractionStart)
         .on("mouseout", handleInteractionEnd)
