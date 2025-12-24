@@ -1,6 +1,12 @@
-## 2025-02-16 - Accessible Data Visualization (D3)
-**Learning:** Complex D3 visualizations are often invisible to keyboard users and screen readers. SVG elements are not focusable by default.
-**Action:** Implemented a robust pattern for D3 charts:
-1.  **Structure:** Group interactive elements (like legend items) in `<g>` tags with `role="button"` and `tabindex="0"`.
-2.  **Interaction:** Map `keydown` events (Enter/Space) to mimic `click` behavior.
-3.  **Robustness:** `ResizeObserver` can report 0-width in headless/hidden states, preventing initial render. Always provide a fallback dimension (e.g., `clientWidth || 500`) to ensure the chart renders and becomes accessible even in edge cases.
+# Palette's Journal 🎨
+
+## Philosophy
+"Consistency is Comfort."
+- **Scale:** Fixing one button is nice; fixing all buttons is professional.
+- **Invisibility:** Good UX shouldn't be noticed; it should just feel "right".
+- **Accessibility:** It's not a feature; it's a requirement.
+
+## Learned Patterns (Project Specific)
+- **Status Updates:** Use `role="status"` with `aria-live="polite"` for elements that update automatically (like the Year display) or indicate loading/empty states, to ensure screen readers announce changes without interrupting the user.
+- **External Links:** Always append "(opens in a new tab)" to the `aria-label` of links with `target="_blank"` to warn users of context changes.
+- **Dialog Descriptions:** Ensure modals have `aria-describedby` pointing to a summary or description, even if hidden, to provide context beyond the title.

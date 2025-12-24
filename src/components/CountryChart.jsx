@@ -85,7 +85,11 @@ const CountryChart = ({ countryCode, emissionsData }) => {
 
   if (!countryCode) {
     return (
-      <div className="flex items-center justify-center h-full text-slate-400">
+      <div
+        className="flex items-center justify-center h-full text-slate-400"
+        role="status"
+        aria-live="polite"
+      >
         <p className="text-lg">{t('chart.selectCountryPrompt')}</p>
       </div>
     );
@@ -93,7 +97,11 @@ const CountryChart = ({ countryCode, emissionsData }) => {
 
   if (emissionData.length === 0) {
     return (
-      <div className="flex items-center justify-center h-full text-slate-500">
+      <div
+        className="flex items-center justify-center h-full text-slate-500"
+        role="status"
+        aria-live="polite"
+      >
         <p className="text-lg">{t('noData')}</p>
       </div>
     );
