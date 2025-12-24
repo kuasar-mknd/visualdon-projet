@@ -138,9 +138,16 @@ function AppContent() {
 
   return (
     <div className="min-h-screen text-slate-800 p-2 md:p-4 font-sans selection:bg-blue-100 selection:text-blue-900 overflow-hidden">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only absolute top-4 left-4 z-[100] px-4 py-2 bg-blue-600 text-white font-bold rounded-lg shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-300 transition-transform"
+      >
+        {t('aria.skipToContent')}
+      </a>
+
       <Header year={year} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-[calc(100vh-140px)]">
+      <div id="main-content" tabIndex="-1" className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-[calc(100vh-140px)] outline-none">
         {/* Left Column: Controls & Charts */}
         <div className="lg:col-span-4 space-y-4 flex flex-col h-full">
           
