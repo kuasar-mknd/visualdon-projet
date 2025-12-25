@@ -54,11 +54,6 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
     return d3.geoPath().projection(projection);
   }, [projection]);
 
-  const pathStrings = useMemo(() => {
-    if (!geoJson || !pathGenerator) return [];
-    return geoJson.features.map(feature => pathGenerator(feature));
-  }, [geoJson, pathGenerator]);
-
   const colorScale = useMemo(() => {
     const max = maxVal || 100;
     return d3.scaleSequentialLog(customInterpolator)
@@ -110,6 +105,10 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
 
   const dataMap = useMemo(() => {
     if (!data) return new Map();
+    // Optimization: If data is already a Map (pre-indexed in App), use it directly.
+    // This avoids rebuilding the map every frame during animation (O(N) -> O(1)).
+    if (data instanceof Map) return data;
+
     const map = new Map();
     data.forEach(d => {
         map.set(d["ISO 3166-1 alpha-3"], d);
@@ -129,7 +128,7 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
   const hoveredValue = useMemo(() => {
       if (!hoveredCountryId) return null;
       const countryData = dataMap.get(hoveredCountryId);
-      return countryData ? parseFloat(countryData[category]) : null;
+      return countryData ? (countryData[category] || 0) : null;
   }, [hoveredCountryId, dataMap, category]);
 
   const handleMouseEnter = useCallback((countryId, featureName) => {
@@ -146,16 +145,6 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
       setHoveredCountryName(null);
       setHoveredCountryId(null);
   }, []);
-
-  const colors = useMemo(() => {
-    if (!geoJson || !dataMap) return [];
-    return geoJson.features.map(feature => {
-        const countryId = feature.properties.A3 || feature.id;
-        const countryData = dataMap.get(countryId);
-        const value = countryData ? countryData[category] : 0;
-        return (value > 0) ? colorScale(value) : '#475569';
-    });
-  }, [geoJson, dataMap, category, colorScale]);
 
   // Optimization: Event handlers for paths are now stable using data attributes
   const handlePathFocus = useCallback((e) => {
@@ -177,18 +166,19 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
     }
   }, [onCountrySelect]);
 
+  // Optimization: Render static paths once. Attributes 'd' and 'fill' are updated via D3 effects.
+  // This avoids O(N) React diffing and DOM operations on every frame during drag or animation.
   const paths = useMemo(() => {
-    if (!geoJson || !pathStrings.length) return [];
+    if (!geoJson) return [];
     return geoJson.features.map((feature, i) => {
         const countryId = feature.properties.A3 || feature.id;
         return (
             <path
                 key={countryId || i}
-                d={pathStrings[i]}
-                fill={colors[i]}
+                // Initial empty attributes; populated by D3 effects
                 stroke="#0f172a"
                 strokeWidth="0.5"
-                className="transition-colors duration-300 hover:opacity-80 cursor-pointer focus:outline-none"
+                className="country-path transition-colors duration-300 hover:opacity-80 cursor-pointer focus:outline-none"
                 role="button"
                 tabIndex="0"
                 aria-label={feature.properties.NAME || countryId}
@@ -204,7 +194,33 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
             </path>
         );
     });
-  }, [geoJson, pathStrings, colors, handlePathClick, handlePathKeyDown, handlePathFocus, handleMouseLeave]);
+  }, [geoJson, handlePathClick, handlePathKeyDown, handlePathFocus, handleMouseLeave]);
+
+  // Effect: Update 'd' attribute (Rotation/Zoom) directly via D3
+  // Bypasses React render cycle for high-frequency updates
+  useEffect(() => {
+      if (!geoJson || !pathGenerator || !svgRef.current) return;
+      d3.select(svgRef.current)
+        .selectAll("path.country-path")
+        .data(geoJson.features)
+        .attr("d", pathGenerator);
+  }, [geoJson, pathGenerator]);
+
+  // Effect: Update 'fill' attribute (Data/Animation) directly via D3
+  // Bypasses React render cycle for high-frequency updates
+  useEffect(() => {
+      if (!geoJson || !dataMap || !svgRef.current) return;
+
+      d3.select(svgRef.current)
+        .selectAll("path.country-path")
+        .data(geoJson.features)
+        .attr("fill", d => {
+            const countryId = d.properties.A3 || d.id;
+            const countryData = dataMap.get(countryId);
+            const value = countryData ? countryData[category] : 0;
+            return (value > 0) ? colorScale(value) : '#475569';
+        });
+  }, [geoJson, dataMap, category, colorScale]);
 
   const highlightPath = useMemo(() => {
       if (!hoveredCountryId || !pathGenerator) return null;
@@ -285,9 +301,12 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
 };
 
 Globe.propTypes = {
-  data: PropTypes.arrayOf(PropTypes.shape({
-    "ISO 3166-1 alpha-3": PropTypes.string,
-  })).isRequired,
+  data: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.shape({
+      "ISO 3166-1 alpha-3": PropTypes.string,
+    })),
+    PropTypes.instanceOf(Map)
+  ]).isRequired,
   geoJson: PropTypes.shape({
     type: PropTypes.string,
     features: PropTypes.arrayOf(PropTypes.object)

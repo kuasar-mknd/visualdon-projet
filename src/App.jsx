@@ -18,12 +18,12 @@ function AppContent() {
   // Optimization: Calculate global max values once to ensure stable color scale
   const maxEmissions = useMemo(() => {
     if (!emissions) return 100;
-    return d3.max(emissions, d => parseFloat(d.Total) || 0) || 100;
+    return d3.max(emissions, d => d.Total || 0) || 100;
   }, [emissions]);
 
   const maxPerCapita = useMemo(() => {
     if (!perCapita) return 10;
-    return d3.max(perCapita, d => parseFloat(d['Per Capita']) || 0) || 10;
+    return d3.max(perCapita, d => d['Per Capita'] || 0) || 10;
   }, [perCapita]);
 
   const [displayCountry, setDisplayCountry] = useState(null);
@@ -79,18 +79,20 @@ function AppContent() {
   const groupDataByYear = useCallback((data) => {
     if (!data) return new Map();
 
-    const map = new Map();
+    const grouped = new Map();
     // Single pass to group by year and exclude WLD
     for (const d of data) {
       if (d["ISO 3166-1 alpha-3"] === "WLD") continue;
       
       const year = d.Year;
-      if (!map.has(year)) {
-        map.set(year, []);
+      if (!grouped.has(year)) {
+        grouped.set(year, { list: [], map: new Map() });
       }
-      map.get(year).push(d);
+      const entry = grouped.get(year);
+      entry.list.push(d);
+      entry.map.set(d["ISO 3166-1 alpha-3"], d);
     }
-    return map;
+    return grouped;
   }, []);
 
   // Optimization: Pre-group data by year for BOTH datasets once on load.
@@ -102,9 +104,9 @@ function AppContent() {
   const dataByYear = category === 'Per Capita' ? perCapitaByYear : emissionsByYear;
 
   // Memoize filtered data for performance
-  const currentYearData = useMemo(() => {
-      return dataByYear.get(year) || [];
-  }, [dataByYear, year]);
+  // Optimization: Extract pre-indexed structures (O(1)) instead of reconstructing them.
+  const emptyData = useMemo(() => ({ list: [], map: new Map() }), []);
+  const { list: currentYearList, map: currentYearMap } = dataByYear.get(year) || emptyData;
 
   // Update displayCountry when selectedCountry changes to a valid value
   useEffect(() => {
@@ -138,9 +140,16 @@ function AppContent() {
 
   return (
     <div className="min-h-screen text-slate-800 p-2 md:p-4 font-sans selection:bg-blue-100 selection:text-blue-900 overflow-hidden">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only absolute top-4 left-4 z-[100] px-4 py-2 bg-blue-600 text-white font-bold rounded-lg shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-300 transition-transform"
+      >
+        {t('aria.skipToContent')}
+      </a>
+
       <Header year={year} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-[calc(100vh-140px)]">
+      <div id="main-content" tabIndex="-1" className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-[calc(100vh-140px)] outline-none">
         {/* Left Column: Controls & Charts */}
         <div className="lg:col-span-4 space-y-4 flex flex-col h-full">
           
@@ -157,7 +166,7 @@ function AppContent() {
           {/* Top Countries Chart */}
           <div className="glass-panel-light p-4 rounded-2xl flex-1 min-h-0 relative overflow-hidden">
              <TopCountriesChart 
-                data={currentYearData}
+                data={currentYearList}
                 year={year} 
                 category={category === 'Per Capita' ? 'Total' : category} 
                 isPlaying={isPlaying}
@@ -171,7 +180,7 @@ function AppContent() {
         <div className="lg:col-span-8 glass-panel-light rounded-2xl overflow-hidden relative shadow-xl border-white/50">
            {/* Removed year prop as it caused unnecessary re-renders and wasn't used by Globe */}
            <Globe 
-              data={currentYearData} 
+              data={currentYearMap}
               geoJson={geoJson} 
               category={category === 'Per Capita' ? 'Total' : category}
               maxVal={currentMaxVal}

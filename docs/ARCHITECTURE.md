@@ -25,6 +25,7 @@ The source code is organized as follows:
   - **`useData.js`**: A critical hook for fetching, parsing, and managing the emissions data.
 - **`services/`**: Infrastructure-agnostic logic.
   - **`countryService.js`**: Handles country name translations and mapping.
+- **`utils/`**: Shared utility functions (e.g., security helpers).
 - **`App.jsx`**: The main application component that orchestrates the layout and state.
 - **`main.jsx`**: The entry point that mounts the React application.
 

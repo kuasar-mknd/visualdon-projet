@@ -43,11 +43,18 @@ const CountryChart = ({ countryCode, emissionsData }) => {
     
     // Optimization: Use ResizeObserver only, removing redundant window resize listener
     // ResizeObserver is more efficient as it monitors the specific element size
-    const resizeObserver = new ResizeObserver(updateDimensions);
+    // Added debounce to prevent excessive updates during resizing
+    let timeoutId;
+    const resizeObserver = new ResizeObserver(() => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(updateDimensions, 100);
+    });
+
     resizeObserver.observe(containerRef.current);
 
     return () => {
       resizeObserver.disconnect();
+      clearTimeout(timeoutId);
     };
   }, [containerRef.current]);
 
@@ -85,7 +92,11 @@ const CountryChart = ({ countryCode, emissionsData }) => {
 
   if (!countryCode) {
     return (
-      <div className="flex items-center justify-center h-full text-slate-400">
+      <div
+        className="flex items-center justify-center h-full text-slate-400"
+        role="status"
+        aria-live="polite"
+      >
         <p className="text-lg">{t('chart.selectCountryPrompt')}</p>
       </div>
     );
@@ -93,7 +104,11 @@ const CountryChart = ({ countryCode, emissionsData }) => {
 
   if (emissionData.length === 0) {
     return (
-      <div className="flex items-center justify-center h-full text-slate-500">
+      <div
+        className="flex items-center justify-center h-full text-slate-500"
+        role="status"
+        aria-live="polite"
+      >
         <p className="text-lg">{t('noData')}</p>
       </div>
     );

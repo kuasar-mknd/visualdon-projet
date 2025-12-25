@@ -36,5 +36,3 @@ jobs:
 
       - name: Build
         run: pnpm run build
-
-    # Note: No test script defined in package.json, so skipping test step.

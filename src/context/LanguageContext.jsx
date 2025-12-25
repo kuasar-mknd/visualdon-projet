@@ -40,7 +40,8 @@ export const translations = {
       selectCategory: "Select emission category",
       selectYear: "Select year",
       toggleLanguage: "Switch language",
-      closeOverlay: "Close details"
+      closeOverlay: "Close details",
+      skipToContent: "Skip to main content"
     },
     chart: {
       selectCountryPrompt: "Select a country to view details",
@@ -87,7 +88,8 @@ export const translations = {
       selectCategory: "Sélectionner la catégorie d'émission",
       selectYear: "Sélectionner l'année",
       toggleLanguage: "Changer de langue",
-      closeOverlay: "Fermer les détails"
+      closeOverlay: "Fermer les détails",
+      skipToContent: "Aller au contenu principal"
     },
     chart: {
       selectCountryPrompt: "Sélectionnez un pays pour voir les détails",
