@@ -20,39 +20,47 @@ const customInterpolator = t => {
 const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
   const containerRef = useRef(null);
   const svgRef = useRef(null);
-  const [width, setWidth] = useState(0);
-  const [height, setHeight] = useState(0);
-  const [rotation, setRotation] = useState([0, 0]);
-  const [scale, setScale] = useState(250); // Initial scale
+
+  // Optimization: Use Refs for mutable state that updates frequently (animation/interaction)
+  // to avoid React re-renders on every frame.
+  const widthRef = useRef(0);
+  const heightRef = useRef(0);
+  const projectionRef = useRef(d3.geoOrthographic());
+  const pathGeneratorRef = useRef(d3.geoPath().projection(projectionRef.current));
+  const rotationRef = useRef([0, 0]);
+  const scaleRef = useRef(250);
+  const hoveredCountryIdRef = useRef(null); // Ref to access current hover state in drag loop
+
+  // Force update only when dimensions change significantly
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+
   const [hoveredCountryName, setHoveredCountryName] = useState(null);
   const [hoveredCountryId, setHoveredCountryId] = useState(null);
   const hoverTimeoutRef = useRef(null);
   const { language } = useLanguage();
+
+  // Sync ref with state
+  useEffect(() => {
+    hoveredCountryIdRef.current = hoveredCountryId;
+  }, [hoveredCountryId]);
 
   // Resize observer
   useEffect(() => {
     if (!containerRef.current) return;
     const resizeObserver = new ResizeObserver(entries => {
       for (let entry of entries) {
-        setWidth(entry.contentRect.width);
-        setHeight(entry.contentRect.height);
+        const { width, height } = entry.contentRect;
+        widthRef.current = width;
+        heightRef.current = height;
+        setDimensions({ width, height });
+
+        // Update projection center immediately
+        projectionRef.current.translate([width / 2, height / 2]);
       }
     });
     resizeObserver.observe(containerRef.current);
     return () => resizeObserver.disconnect();
   }, []);
-
-  // Projection
-  const projection = useMemo(() => {
-    return d3.geoOrthographic()
-      .scale(scale)
-      .translate([width / 2, height / 2])
-      .rotate(rotation);
-  }, [width, height, rotation, scale]);
-
-  const pathGenerator = useMemo(() => {
-    return d3.geoPath().projection(projection);
-  }, [projection]);
 
   const colorScale = useMemo(() => {
     const max = maxVal || 100;
@@ -61,60 +69,25 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
         .clamp(true);
   }, [maxVal]);
 
-  // Drag & Zoom handling
+  // Update projection setup (rotation/scale)
+  // This is called initially and when dimensions change, but NOT during drag
   useEffect(() => {
-    if (!svgRef.current) return;
+     if (dimensions.width === 0) return;
 
-    const svg = d3.select(svgRef.current);
-    
-    const zoom = d3.zoom()
-      .scaleExtent([1, 5])
-      .filter((event) => {
-        if (event.type === 'wheel') return true;
-        if (event.type.startsWith('touch') && event.touches && event.touches.length >= 2) return true;
-        return false;
-      })
-      .on("zoom", (event) => {
-         if (event.sourceEvent && (event.sourceEvent.type === 'wheel' || 
-             (event.sourceEvent.touches && event.sourceEvent.touches.length >= 2))) {
-           setScale(event.transform.k * 250);
-         }
-      });
-    
-    const drag = d3.drag()
-      .filter((event) => {
-        if (event.type.startsWith('mouse')) return true;
-        if (event.type.startsWith('touch') && (!event.touches || event.touches.length === 1)) return true;
-        return false;
-      })
-      .on("start", () => svg.style("cursor", "grabbing"))
-      .on("drag", (event) => {
-        setRotation(curr => {
-            const sensitivity = 0.25;
-            return [curr[0] + event.dx * sensitivity, curr[1] - event.dy * sensitivity];
-        });
-      })
-      .on("end", () => svg.style("cursor", "grab"));
-      
-    svg.call(zoom.transform, d3.zoomIdentity.scale(scale / 250));
-    svg.call(drag);
-    svg.call(zoom);
-    svg.on("dblclick.zoom", null);
+     projectionRef.current
+        .scale(scaleRef.current)
+        .translate([dimensions.width / 2, dimensions.height / 2])
+        .rotate(rotationRef.current);
 
-  }, [width, height]);  
+     // Initial render of paths
+     if (svgRef.current && geoJson) {
+        d3.select(svgRef.current).selectAll("path.country-path")
+           .attr("d", pathGeneratorRef.current);
 
-  const dataMap = useMemo(() => {
-    if (!data) return new Map();
-    // Optimization: If data is already a Map (pre-indexed in App), use it directly.
-    // This avoids rebuilding the map every frame during animation (O(N) -> O(1)).
-    if (data instanceof Map) return data;
-
-    const map = new Map();
-    data.forEach(d => {
-        map.set(d["ISO 3166-1 alpha-3"], d);
-    });
-    return map;
-  }, [data]);
+        d3.select(svgRef.current).selectAll("path.sphere-path")
+           .attr("d", pathGeneratorRef.current({type: "Sphere"}));
+     }
+  }, [dimensions, geoJson]);
 
   const featureMap = useMemo(() => {
       if (!geoJson) return new Map();
@@ -124,6 +97,71 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
       });
       return map;
   }, [geoJson]);
+
+  // Drag & Zoom handling - D3 Controlled
+  useEffect(() => {
+    if (!svgRef.current) return;
+
+    const svg = d3.select(svgRef.current);
+    
+    // Update function for high-performance rendering loop
+    const updateGlobe = () => {
+        const proj = projectionRef.current;
+        proj.rotate(rotationRef.current).scale(scaleRef.current);
+        const path = pathGeneratorRef.current;
+
+        const selection = d3.select(svgRef.current);
+        selection.selectAll("path.country-path").attr("d", path);
+        selection.selectAll("path.sphere-path").attr("d", path({type: "Sphere"}));
+
+        // Update highlight path if exists
+        const currentHoverId = hoveredCountryIdRef.current;
+        if (currentHoverId) {
+             const feature = featureMap.get(currentHoverId);
+             if (feature) {
+                 selection.select(".highlight-path").attr("d", path(feature));
+             }
+        }
+    };
+
+    const zoom = d3.zoom()
+      .scaleExtent([1, 5])
+      .on("zoom", (event) => {
+         if (event.sourceEvent && (event.sourceEvent.type === 'wheel' || 
+             (event.sourceEvent.touches && event.sourceEvent.touches.length >= 2))) {
+           const newScale = event.transform.k * 250;
+           scaleRef.current = newScale;
+           updateGlobe();
+         }
+      });
+    
+    const drag = d3.drag()
+      .on("start", () => svg.style("cursor", "grabbing"))
+      .on("drag", (event) => {
+        const sensitivity = 0.25;
+        const [r0, r1] = rotationRef.current;
+        rotationRef.current = [r0 + event.dx * sensitivity, r1 - event.dy * sensitivity];
+        updateGlobe();
+      })
+      .on("end", () => svg.style("cursor", "grab"));
+      
+    // Initialize zoom identity
+    svg.call(zoom.transform, d3.zoomIdentity.scale(scaleRef.current / 250));
+    svg.call(drag);
+    svg.call(zoom);
+    svg.on("dblclick.zoom", null);
+
+  }, [dimensions, featureMap]); // Re-bind if dimensions or featureMap changes
+
+  const dataMap = useMemo(() => {
+    if (!data) return new Map();
+    if (data instanceof Map) return data;
+    const map = new Map();
+    data.forEach(d => {
+        map.set(d["ISO 3166-1 alpha-3"], d);
+    });
+    return map;
+  }, [data]);
 
   const hoveredValue = useMemo(() => {
       if (!hoveredCountryId) return null;
@@ -146,7 +184,6 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
       setHoveredCountryId(null);
   }, []);
 
-  // Optimization: Event handlers for paths are now stable using data attributes
   const handlePathFocus = useCallback((e) => {
     const { id, name } = e.currentTarget.dataset;
     handleMouseEnter(id, name);
@@ -166,16 +203,18 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
     }
   }, [onCountrySelect]);
 
-  // Optimization: Render static paths once. Attributes 'd' and 'fill' are updated via D3 effects.
-  // This avoids O(N) React diffing and DOM operations on every frame during drag or animation.
+  // Optimization: Render static paths once. Attributes 'd' are updated via D3 refs.
   const paths = useMemo(() => {
     if (!geoJson) return [];
+    // Note: 'd' attribute is initially empty or set once, then updated by D3 in useEffect/drag
+    // We set an initial 'd' here to avoid FOUC (Flash of Unstyled Content) if possible,
+    // but projectionRef might not be ready. It's safe to let useEffect handle 'd'.
+
     return geoJson.features.map((feature, i) => {
         const countryId = feature.properties.A3 || feature.id;
         return (
             <path
                 key={countryId || i}
-                // Initial empty attributes; populated by D3 effects
                 stroke="#0f172a"
                 strokeWidth="0.5"
                 className="country-path transition-colors duration-300 hover:opacity-80 cursor-pointer focus:outline-none"
@@ -196,18 +235,7 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
     });
   }, [geoJson, handlePathClick, handlePathKeyDown, handlePathFocus, handleMouseLeave]);
 
-  // Effect: Update 'd' attribute (Rotation/Zoom) directly via D3
-  // Bypasses React render cycle for high-frequency updates
-  useEffect(() => {
-      if (!geoJson || !pathGenerator || !svgRef.current) return;
-      d3.select(svgRef.current)
-        .selectAll("path.country-path")
-        .data(geoJson.features)
-        .attr("d", pathGenerator);
-  }, [geoJson, pathGenerator]);
-
   // Effect: Update 'fill' attribute (Data/Animation) directly via D3
-  // Bypasses React render cycle for high-frequency updates
   useEffect(() => {
       if (!geoJson || !dataMap || !svgRef.current) return;
 
@@ -222,31 +250,38 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
         });
   }, [geoJson, dataMap, category, colorScale]);
 
-  const highlightPath = useMemo(() => {
-      if (!hoveredCountryId || !pathGenerator) return null;
+  // Effect: Update Highlight Path Position on Interaction
+  useEffect(() => {
+      if (!hoveredCountryId || !svgRef.current) return;
       const feature = featureMap.get(hoveredCountryId);
-      if (!feature) return null;
+      if (!feature) return;
 
-      const d = pathGenerator(feature);
-      if (!d) return null;
+      // We need to update the highlight path's 'd' attribute using the current projection
+      // which is stored in projectionRef.current (up to date with drag)
+      const d = pathGeneratorRef.current(feature);
+      d3.select(svgRef.current).select(".highlight-path").attr("d", d);
 
+  }, [hoveredCountryId, featureMap, dimensions]); // Trigger when hovered country changes
+
+  const highlightPath = useMemo(() => {
+      if (!hoveredCountryId) return null;
+      // Render an empty path initially; useEffect will set 'd'
       return (
           <path
-              d={d}
+              className="highlight-path pointer-events-none"
               fill="none"
               stroke="#ffffff"
               strokeWidth="2"
               filter="url(#highlight-glow)"
-              className="pointer-events-none"
           />
       );
-  }, [hoveredCountryId, pathGenerator, featureMap]);
+  }, [hoveredCountryId]);
 
-  if (!data || !geoJson || !width) return <div ref={containerRef} className="w-full h-full bg-slate-100" />;
+  if (!data || !geoJson) return <div ref={containerRef} className="w-full h-full bg-slate-100" />;
 
   return (
     <div ref={containerRef} className="w-full h-full relative bg-slate-50 overflow-hidden cursor-grab active:cursor-grabbing">
-       <svg ref={svgRef} width={width} height={height} style={{background: 'radial-gradient(circle at 50% 50%, #f8fafc 0%, #e2e8f0 100%)'}}>
+       <svg ref={svgRef} width={dimensions.width} height={dimensions.height} style={{background: 'radial-gradient(circle at 50% 50%, #f8fafc 0%, #e2e8f0 100%)'}}>
           <defs>
             <radialGradient id="oceanGradient" cx="50%" cy="50%" r="50%">
                 <stop offset="0%" stopColor="#dbeafe" stopOpacity="1" />
@@ -274,15 +309,18 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
 
           <g>
             <path 
-                d={pathGenerator({type: "Sphere"})} 
+                className="sphere-path"
                 fill="url(#oceanGradient)" 
                 stroke="none"
             />
-            <circle cx={width/2} cy={height/2} r={projection.scale()} fill="#60a5fa" opacity="0.1" filter="url(#glow)" />
+            {/* Center glow - static relative to viewport */}
+            <circle cx={dimensions.width/2} cy={dimensions.height/2} r={scaleRef.current} fill="#60a5fa" opacity="0.1" filter="url(#glow)" />
+
             {paths}
             {highlightPath}
+
             <path 
-                d={pathGenerator({type: "Sphere"})} 
+                className="sphere-path"
                 fill="url(#sphereShadow)" 
                 style={{pointerEvents: 'none'}} 
             />

@@ -1,14 +1,16 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
 import * as d3 from 'd3';
-import Globe from './components/Globe';
-import TopCountriesChart from './components/TopCountriesChart';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import Controls from './components/controls/Controls';
-import CountryDetailsOverlay from './components/overlay/CountryDetailsOverlay';
 import { useData } from './hooks/useData';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { fetchCountryDetails } from './services/countryService';
+
+// Lazy load heavy visualization components
+const Globe = React.lazy(() => import('./components/Globe'));
+const TopCountriesChart = React.lazy(() => import('./components/TopCountriesChart'));
+const CountryDetailsOverlay = React.lazy(() => import('./components/overlay/CountryDetailsOverlay'));
 
 function AppContent() {
   const { emissions, geoJson, perCapita, loading } = useData();
@@ -138,6 +140,13 @@ function AppContent() {
     );
   }
 
+  // Loading fallback component
+  const LoadingPlaceholder = () => (
+    <div className="flex items-center justify-center w-full h-full text-slate-400">
+      <div className="animate-pulse">{t('loading')}...</div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen text-slate-800 p-2 md:p-4 font-sans selection:bg-blue-100 selection:text-blue-900 overflow-hidden">
       <a
@@ -165,13 +174,15 @@ function AppContent() {
 
           {/* Top Countries Chart */}
           <div className="glass-panel-light p-4 rounded-2xl flex-1 min-h-0 relative overflow-hidden">
-             <TopCountriesChart 
-                data={currentYearList}
-                year={year} 
-                category={category === 'Per Capita' ? 'Total' : category} 
-                isPlaying={isPlaying}
-                onCountrySelect={setSelectedCountry}
-             />
+             <Suspense fallback={<LoadingPlaceholder />}>
+               <TopCountriesChart
+                  data={currentYearList}
+                  year={year}
+                  category={category === 'Per Capita' ? 'Total' : category}
+                  isPlaying={isPlaying}
+                  onCountrySelect={setSelectedCountry}
+               />
+             </Suspense>
           </div>
 
         </div>
@@ -179,21 +190,23 @@ function AppContent() {
         {/* Middle: Globe */}
         <div className="lg:col-span-8 glass-panel-light rounded-2xl overflow-hidden relative shadow-xl border-white/50">
            {/* Removed year prop as it caused unnecessary re-renders and wasn't used by Globe */}
-           <Globe 
-              data={currentYearMap}
-              geoJson={geoJson} 
-              category={category === 'Per Capita' ? 'Total' : category}
-              maxVal={currentMaxVal}
-              onCountrySelect={setSelectedCountry}
-           />
-           
-           <CountryDetailsOverlay 
-              selectedCountry={selectedCountry}
-              selectedCountryName={selectedCountryName}
-              displayCountry={displayCountry}
-              onClose={handleCloseOverlay}
-              emissions={emissions}
-           />
+           <Suspense fallback={<LoadingPlaceholder />}>
+             <Globe
+                data={currentYearMap}
+                geoJson={geoJson}
+                category={category === 'Per Capita' ? 'Total' : category}
+                maxVal={currentMaxVal}
+                onCountrySelect={setSelectedCountry}
+             />
+
+             <CountryDetailsOverlay
+                selectedCountry={selectedCountry}
+                selectedCountryName={selectedCountryName}
+                displayCountry={displayCountry}
+                onClose={handleCloseOverlay}
+                emissions={emissions}
+             />
+           </Suspense>
         </div>
 
       </div>
