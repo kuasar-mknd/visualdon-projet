@@ -158,7 +158,10 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect })
         d3.select(this)
           .transition()
           .duration(200)
-          .style("opacity", 1);
+          .style("opacity", 1)
+          .select(".bar-rect")
+          .attr("stroke", "#1e293b")
+          .attr("stroke-width", 2);
     };
 
     const handleInteractionEnd = function() {
@@ -166,6 +169,10 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect })
          .transition()
          .duration(200)
          .style("opacity", 1);
+
+        d3.select(this)
+          .select(".bar-rect")
+          .attr("stroke", "none");
     };
 
     const enter = bars.enter()

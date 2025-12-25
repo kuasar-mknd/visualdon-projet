@@ -151,18 +151,29 @@ const StackedAreaChart = ({
         .attr("transform", `translate(0, ${i * 28})`)
         .datum(sector)
         .style("cursor", "pointer")
-        .on("mouseover", function(event, hoveredSector) {
+        .attr("tabindex", "0")
+        .attr("role", "button")
+        .attr("aria-label", t(`sectors.${sector}`) || sector)
+        .on("mouseover focus", function(event, hoveredSector) {
+          // Handle both MouseEvent and FocusEvent (where data is attached to element)
+          const key = hoveredSector || d3.select(this).datum();
           svg.selectAll('.area')
             .transition()
             .duration(200)
-            .attr('opacity', d => d.key === hoveredSector ? 1 : 0.2);
+            .attr('opacity', d => d.key === key ? 1 : 0.2);
         })
-        .on("mouseout", function() {
+        .on("mouseout blur", function() {
           svg.selectAll('.area')
             .transition()
             .duration(200)
             .attr('opacity', 0.8);
-        });
+        })
+        .on("keydown", function(event) {
+             if (event.key === "Enter" || event.key === " ") {
+                 event.preventDefault();
+                 // Visual feedback is handled by focus
+             }
+         });
 
       legendRow.append("rect")
         .attr("width", 16)
