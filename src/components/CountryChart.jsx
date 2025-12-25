@@ -43,11 +43,18 @@ const CountryChart = ({ countryCode, emissionsData }) => {
     
     // Optimization: Use ResizeObserver only, removing redundant window resize listener
     // ResizeObserver is more efficient as it monitors the specific element size
-    const resizeObserver = new ResizeObserver(updateDimensions);
+    // Added debounce to prevent excessive updates during resizing
+    let timeoutId;
+    const resizeObserver = new ResizeObserver(() => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(updateDimensions, 100);
+    });
+
     resizeObserver.observe(containerRef.current);
 
     return () => {
       resizeObserver.disconnect();
+      clearTimeout(timeoutId);
     };
   }, [containerRef.current]);
 
