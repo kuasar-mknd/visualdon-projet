@@ -178,7 +178,7 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
                 // Initial empty attributes; populated by D3 effects
                 stroke="#0f172a"
                 strokeWidth="0.5"
-                className="country-path transition-colors duration-300 hover:opacity-80 cursor-pointer focus:outline-none"
+                className="country-path transition-colors duration-300 hover:opacity-80 cursor-pointer focus:outline-none focus:opacity-100 focus:stroke-white focus:stroke-[1.5px]"
                 role="button"
                 tabIndex="0"
                 aria-label={feature.properties.NAME || countryId}
