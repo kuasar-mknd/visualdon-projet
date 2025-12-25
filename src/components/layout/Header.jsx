@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useLanguage } from '../../context/LanguageContext';
+import YearDisplay from './YearDisplay';
 
 const Header = ({ year }) => {
   const { t, language, toggleLanguage } = useLanguage();
@@ -22,15 +23,8 @@ const Header = ({ year }) => {
           >
               {language === 'en' ? 'FR' : 'EN'}
           </button>
-          <div
-              className="text-right bg-white/50 px-4 py-1.5 rounded-xl border border-slate-100 shadow-sm"
-              role="status"
-              aria-live="polite"
-              aria-atomic="true"
-          >
-              <div className="text-3xl font-mono font-bold text-blue-600 leading-none">{year || '...'}</div>
-              <div className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold leading-none">{t('year')}</div>
-          </div>
+          {/* Optimization: Extracted YearDisplay to isolate re-renders */}
+          <YearDisplay year={year} />
       </div>
     </header>
   );
