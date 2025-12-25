@@ -1,3 +1,5 @@
+import { isValidCountryCode } from '../utils/security';
+
 const CACHE_KEY = 'visualdon_country_cache';
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
 const MAX_CACHE_SIZE = 250; // Limit cache to ~250 countries to prevent localStorage exhaustion
@@ -61,7 +63,7 @@ export const fetchCountryDetails = async (code, language) => {
   // Security Enhancement: Validate input format
   // Expected: ISO 3166-1 alpha-2 or alpha-3 code (2-3 letters/digits)
   // This prevents URL injection and cache pollution with garbage keys
-  if (!/^[a-zA-Z0-9]{2,3}$/.test(code)) {
+  if (!isValidCountryCode(code)) {
     console.warn(`Security: Invalid country code format rejected: ${code}`);
     return null;
   }
