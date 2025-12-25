@@ -49,8 +49,13 @@ const CountryDetailsOverlay = ({ selectedCountry, selectedCountryName, displayCo
       role="dialog"
       aria-modal="true"
       aria-labelledby="overlay-title"
+      aria-describedby="overlay-description"
       className={`absolute bottom-0 left-0 right-0 top-0 bg-white/80 backdrop-blur-xl border-t border-white/50 shadow-2xl transition-all duration-500 ease-in-out overflow-hidden flex flex-col ${selectedCountry ? 'translate-y-0 opacity-100 pointer-events-auto' : 'translate-y-[110%] opacity-0 pointer-events-none invisible'}`}
     >
+        {/* Hidden description for screen readers */}
+        <p id="overlay-description" className="sr-only">
+          {t('aria.overlayDescription') || 'Detailed emissions data for the selected country.'}
+        </p>
         <div className="flex justify-between items-start gap-4 p-6 shrink-0">
             <h2 id="overlay-title" className="text-2xl font-bold text-slate-800 flex items-center gap-4 flex-1 min-w-0">
                 <span className="w-1.5 h-8 bg-blue-500 rounded-full shrink-0 shadow-sm"></span>
