@@ -7,17 +7,23 @@
  */
 
 /**
- * Sanitizes a string to prevent XSS and HTML injection risks when displaying data.
- * Removes < and > characters which are key for HTML tags.
- *
+ * Sanitizes a string to prevent XSS.
+ * Removes HTML tags and unsafe characters.
  * @param {string} str - The string to sanitize.
- * @returns {string} The sanitized string.
+ * @returns {string} - The sanitized string.
  */
 export const sanitizeString = (str) => {
-  if (typeof str !== 'string') return str;
-  // Basic sanitization: remove potential HTML tags to prevent injection if rendered in HTML
-  // This is a minimal sanitizer for display purposes in SVG/HTML text nodes.
-  return str.replace(/[<>]/g, '');
+  if (typeof str !== 'string') return '';
+  return str.replace(/[<>"'&]/g, (char) => {
+    switch (char) {
+      case '<': return '&lt;';
+      case '>': return '&gt;';
+      case '"': return '&quot;';
+      case "'": return '&#39;';
+      case '&': return '&amp;';
+      default: return char;
+    }
+  });
 };
 
 /**

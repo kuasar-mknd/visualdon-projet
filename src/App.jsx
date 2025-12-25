@@ -18,12 +18,12 @@ function AppContent() {
   // Optimization: Calculate global max values once to ensure stable color scale
   const maxEmissions = useMemo(() => {
     if (!emissions) return 100;
-    return d3.max(emissions, d => parseFloat(d.Total) || 0) || 100;
+    return d3.max(emissions, d => d.Total || 0) || 100;
   }, [emissions]);
 
   const maxPerCapita = useMemo(() => {
     if (!perCapita) return 10;
-    return d3.max(perCapita, d => parseFloat(d['Per Capita']) || 0) || 10;
+    return d3.max(perCapita, d => d['Per Capita'] || 0) || 10;
   }, [perCapita]);
 
   const [displayCountry, setDisplayCountry] = useState(null);

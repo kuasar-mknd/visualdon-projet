@@ -20,8 +20,8 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect })
     if (!data) return [];
     
     return data
-      .filter(d => !isNaN(parseFloat(d[category])) && parseFloat(d[category]) > 0)
-      .sort((a, b) => parseFloat(b[category]) - parseFloat(a[category]))
+      .filter(d => (d[category] || 0) > 0)
+      .sort((a, b) => (b[category] || 0) - (a[category] || 0))
       .slice(0, 10);
   }, [data, category]);
 
@@ -127,7 +127,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect })
     g.selectAll(".no-data-message").remove();
 
     const x = d3.scaleLinear()
-        .domain([0, d3.max(topData, d => parseFloat(d[category])) || 0])
+        .domain([0, d3.max(topData, d => d[category] || 0) || 0])
         .range([0, innerWidth]);
 
     const y = d3.scaleBand()
@@ -180,7 +180,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect })
         .attr("role", "listitem")
         .attr("aria-label", d => {
             const name = translatedNames[d["ISO 3166-1 alpha-3"]] || d.Country;
-            const val = parseFloat(d[category]).toFixed(1);
+            const val = (d[category] || 0).toFixed(1);
             return sanitizeString(`${name}: ${val}`);
         })
         .on("mouseover", handleInteractionStart)
@@ -233,7 +233,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect })
 
     update.select(".bar-rect")
         .transition(tTransition)
-        .attr("width", d => x(parseFloat(d[category])))
+        .attr("width", d => x(d[category] || 0))
         .attr("height", y.bandwidth());
 
     update.select(".country-label")
@@ -241,16 +241,16 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect })
 
     update.attr("aria-label", d => {
         const name = translatedNames[d["ISO 3166-1 alpha-3"]] || d.Country;
-        const val = parseFloat(d[category]).toFixed(1);
+        const val = (d[category] || 0).toFixed(1);
         return sanitizeString(`${name}: ${val}`);
     });
 
     update.select(".value-label")
         .transition(tTransition)
-        .attr("x", d => x(parseFloat(d[category])) + 8)
+        .attr("x", d => x(d[category] || 0) + 8)
         .style("opacity", 1)
         .tween("text", function(d) {
-            const i = d3.interpolateNumber(parseFloat(this.textContent) || 0, parseFloat(d[category]));
+            const i = d3.interpolateNumber(parseFloat(this.textContent) || 0, d[category] || 0);
             return function(t) {
                 this.textContent = i(t).toFixed(1);
             };
