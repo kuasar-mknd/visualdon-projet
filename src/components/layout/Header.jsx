@@ -1,13 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useLanguage } from '../../context/LanguageContext';
-import YearDisplay from './YearDisplay';
 
-const Header = ({ year }) => {
+const HeaderStatic = React.memo(() => {
   const { t, language, toggleLanguage } = useLanguage();
 
   return (
-    <header className="mb-4 flex flex-col md:flex-row justify-between items-center gap-4 glass-panel-light p-4 rounded-2xl">
+    <>
       <div>
         <h1 className="text-2xl md:text-3xl font-bold text-slate-800 tracking-tight">
           {t('title')}
@@ -23,15 +22,25 @@ const Header = ({ year }) => {
           >
               {language === 'en' ? 'FR' : 'EN'}
           </button>
-          {/* Optimization: Extracted YearDisplay to isolate re-renders */}
-          <YearDisplay year={year} />
       </div>
+    </>
+  );
+});
+
+HeaderStatic.displayName = 'HeaderStatic';
+
+const Header = ({ children }) => {
+  return (
+    <header className="mb-4 flex flex-col md:flex-row justify-between items-center gap-4 glass-panel-light p-4 rounded-2xl">
+      <HeaderStatic />
+      {/* Dynamic content (YearDisplay) injected here to avoid re-rendering Static parts */}
+      {children}
     </header>
   );
 };
 
 Header.propTypes = {
-  year: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  children: PropTypes.node,
 };
 
 // Optimization: Memoize to prevent re-renders when parent re-renders but props are same.

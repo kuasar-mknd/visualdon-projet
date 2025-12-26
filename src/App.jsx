@@ -2,10 +2,12 @@ import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'reac
 import * as d3 from 'd3';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
+import YearDisplay from './components/layout/YearDisplay';
 import Controls from './components/controls/Controls';
 import { useData } from './hooks/useData';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { fetchCountryDetails } from './services/countryService';
+import LoadingPlaceholder from './components/common/LoadingPlaceholder';
 
 // Lazy load heavy visualization components
 const Globe = React.lazy(() => import('./components/Globe'));
@@ -145,13 +147,6 @@ function AppContent() {
     );
   }
 
-  // Loading fallback component
-  const LoadingPlaceholder = () => (
-    <div className="flex items-center justify-center w-full h-full text-slate-400">
-      <div className="animate-pulse">{t('loading')}...</div>
-    </div>
-  );
-
   return (
     <div className="min-h-screen text-slate-800 p-2 md:p-4 font-sans selection:bg-blue-100 selection:text-blue-900 overflow-hidden">
       <a
@@ -161,7 +156,9 @@ function AppContent() {
         {t('aria.skipToContent')}
       </a>
 
-      <Header year={year} />
+      <Header>
+         <YearDisplay year={year} />
+      </Header>
 
       <div id="main-content" tabIndex="-1" className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-[calc(100vh-140px)] outline-none">
         {/* Left Column: Controls & Charts */}

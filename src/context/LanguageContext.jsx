@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 
 const LanguageContext = createContext();
@@ -106,21 +106,27 @@ export const translations = {
 export const LanguageProvider = ({ children }) => {
   const [language, setLanguage] = useState('fr'); // Default to French as requested
 
-  const toggleLanguage = () => {
+  const toggleLanguage = useCallback(() => {
     setLanguage(prev => prev === 'en' ? 'fr' : 'en');
-  };
+  }, []);
 
-  const t = (key) => {
+  const t = useCallback((key) => {
     const keys = key.split('.');
     let value = translations[language];
     for (const k of keys) {
       value = value?.[k];
     }
     return value || key;
-  };
+  }, [language]);
+
+  const value = useMemo(() => ({
+    language,
+    toggleLanguage,
+    t
+  }), [language, toggleLanguage, t]);
 
   return (
-    <LanguageContext.Provider value={{ language, toggleLanguage, t }}>
+    <LanguageContext.Provider value={value}>
       {children}
     </LanguageContext.Provider>
   );
