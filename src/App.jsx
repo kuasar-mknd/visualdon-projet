@@ -17,10 +17,32 @@ function AppContent() {
   const [year, setYear] = useState(null);
   const [selectedCountry, setSelectedCountry] = useState(null);
 
-  // Optimization: Calculate global max values once to ensure stable color scale
-  const maxEmissions = useMemo(() => {
-    if (!emissions) return 100;
-    return d3.max(emissions, d => d.Total || 0) || 100;
+  // Optimization: Calculate global stats (max emissions & year range) in a single pass O(N)
+  // Replaces separate d3.max and reduce calls (2*O(N))
+  const { yearRange, maxEmissions } = useMemo(() => {
+    if (!emissions || emissions.length === 0) {
+      return { yearRange: { min: 0, max: 0 }, maxEmissions: 100 };
+    }
+
+    let min = Infinity;
+    let max = -Infinity;
+    let maxEm = 0;
+
+    for (const d of emissions) {
+      if (d.Year != null) {
+          if (d.Year < min) min = d.Year;
+          if (d.Year > max) max = d.Year;
+      }
+      const val = d.Total || 0;
+      if (val > maxEm) maxEm = val;
+    }
+
+    if (min === Infinity) return { yearRange: { min: 0, max: 0 }, maxEmissions: 100 };
+
+    return {
+        yearRange: { min, max },
+        maxEmissions: maxEm || 100
+    };
   }, [emissions]);
 
   const maxPerCapita = useMemo(() => {
@@ -51,24 +73,7 @@ function AppContent() {
       }, 200);
     }
     return () => clearInterval(interval);
-  }, [isPlaying]);
-
-  // Calculate year range dynamically from data
-  const yearRange = useMemo(() => {
-    if (!emissions || emissions.length === 0) {
-      return { min: 0, max: 0 };
-    }
-
-    // Optimization: Use reduce instead of map+filter+spread to avoid stack overflow with large datasets
-    // and reduce iterations (O(N) vs 3*O(N))
-    return emissions.reduce((acc, d) => {
-        if (d.Year != null) {
-            if (d.Year < acc.min) acc.min = d.Year;
-            if (d.Year > acc.max) acc.max = d.Year;
-        }
-        return acc;
-    }, { min: Infinity, max: -Infinity });
-  }, [emissions]);
+  }, [isPlaying, yearRange.max]);
 
   // Update year to max available when data loads (if currently at default or old max)
   useEffect(() => {
