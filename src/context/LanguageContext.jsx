@@ -43,6 +43,10 @@ export const translations = {
       closeOverlay: "Close details",
       skipToContent: "Skip to main content"
     },
+    footer: {
+      github: "GitHub",
+      githubAria: "GitHub Repository (opens in a new tab)"
+    },
     chart: {
       selectCountryPrompt: "Select a country to view details",
       selectViewMode: "Select view mode",
@@ -90,6 +94,10 @@ export const translations = {
       toggleLanguage: "Changer de langue",
       closeOverlay: "Fermer les détails",
       skipToContent: "Aller au contenu principal"
+    },
+    footer: {
+      github: "GitHub",
+      githubAria: "Dépôt GitHub (s'ouvre dans un nouvel onglet)"
     },
     chart: {
       selectCountryPrompt: "Sélectionnez un pays pour voir les détails",
