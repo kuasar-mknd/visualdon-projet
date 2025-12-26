@@ -3,8 +3,8 @@
 [![Deployment Status](https://img.shields.io/badge/Cloudflare%20Pages-Deployed-orange?logo=cloudflare)](https://visualdon-projet.pages.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Data Source](https://zenodo.org/badge/DOI/10.5281/zenodo.7215364.svg)](https://doi.org/10.5281/zenodo.7215364)
-[![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react)](https://react.dev)
-[![Vite](https://img.shields.io/badge/Vite-7.2-646CFF?logo=vite)](https://vitejs.dev)
+[![React](https://img.shields.io/badge/React-19.2.3-61DAFB?logo=react)](https://react.dev)
+[![Vite](https://img.shields.io/badge/Vite-7.3.0-646CFF?logo=vite)](https://vitejs.dev)
 
 An interactive 3D globe visualization exploring global CO₂ emissions from 1750 to 2024. Built with React, D3.js, and Three.js, this project transforms complex climate data into an engaging, accessible experience.
 
@@ -116,6 +116,15 @@ Common issues and solutions:
 - **Node version**: This project requires Node.js 20+. Use `node -v` to check your version.
 - **Port already in use**: If `http://localhost:5173` is taken, Vite will automatically try the next available port (e.g., 5174). Check the console output.
 - **Data not loading**: If charts are empty, try running `pnpm run update-data` to fetch the latest dataset.
+
+## ✅ Verification
+
+The project includes a lightweight verification script in the `verification/` directory. This script uses Playwright (Python) to ensure the application loads and renders key components.
+
+```bash
+# Run the verification script (requires Python and Playwright)
+python verification/verify_load.py
+```
 
 ## 🤝 Contributing
 

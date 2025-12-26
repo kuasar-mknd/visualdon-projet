@@ -37,6 +37,10 @@ Static assets that are served directly.
 Node.js scripts for maintenance tasks.
 - **`update-data.js`**: Fetches the latest data from the Global Carbon Project and updates the CSV files in `public/data/`.
 
+### `verification/`
+Contains scripts and artifacts for frontend verification.
+- **`verify_load.py`**: A Playwright (Python) script used to verify that the application loads correctly and renders the main chart components. This serves as a lightweight smoke test for the frontend.
+
 ## Data Flow
 1.  **Initialization**: On load, `App.jsx` initializes.
 2.  **Data Fetching**: The `useData` hook is triggered. It fetches CSV files from `public/data/` using `d3-fetch` (or similar).

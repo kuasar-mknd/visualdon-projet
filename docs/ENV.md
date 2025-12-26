@@ -18,5 +18,6 @@ Since no variables are currently needed, an `.env` file is not required. However
 
 ```bash
 # Example only - no active variables
-# VITE_API_URL=https://api.example.com
+# VITE_API_BASE_URL=https://api.example.com
+# VITE_ENABLE_ANALYTICS=false
 ```
