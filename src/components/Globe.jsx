@@ -47,19 +47,34 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
   // Resize observer
   useEffect(() => {
     if (!containerRef.current) return;
+
+    // Optimization: Debounce resize events to prevent excessive re-renders and projection updates
+    // during window resizing operations.
+    let timeoutId;
+
     const resizeObserver = new ResizeObserver(entries => {
-      for (let entry of entries) {
-        const { width, height } = entry.contentRect;
+      // Get the latest entry
+      const entry = entries[entries.length - 1];
+      const { width, height } = entry.contentRect;
+
+      clearTimeout(timeoutId);
+
+      timeoutId = setTimeout(() => {
         widthRef.current = width;
         heightRef.current = height;
         setDimensions({ width, height });
 
-        // Update projection center immediately
+        // Update projection center when dimensions settle
         projectionRef.current.translate([width / 2, height / 2]);
-      }
+      }, 100);
     });
+
     resizeObserver.observe(containerRef.current);
-    return () => resizeObserver.disconnect();
+
+    return () => {
+      resizeObserver.disconnect();
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   const colorScale = useMemo(() => {
