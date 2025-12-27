@@ -62,7 +62,10 @@ const StackedAreaChart = ({
 
     // Shared handlers
     const handleInteractionStart = function(event, d) {
-        d3.select(this).attr('opacity', 1);
+        d3.select(this)
+          .attr('opacity', 1)
+          .attr('stroke', '#ffffff')
+          .attr('stroke-width', 2);
 
         // Highlight in legend
         svg.selectAll('.legend-row')
@@ -70,7 +73,10 @@ const StackedAreaChart = ({
     };
 
     const handleInteractionEnd = function() {
-        d3.select(this).attr('opacity', 0.8);
+        d3.select(this)
+          .attr('opacity', 0.8)
+          .attr('stroke', 'none');
+
         svg.selectAll('.legend-row').attr('opacity', 1);
     };
 
@@ -82,6 +88,7 @@ const StackedAreaChart = ({
       .attr('fill', d => colorMapping[d.key])
       .attr('d', area)
       .attr('opacity', 0.8)
+      .attr('stroke', 'none')
       .style('cursor', 'pointer')
       .attr("tabindex", "0")
       .attr("role", "button")
@@ -161,12 +168,21 @@ const StackedAreaChart = ({
             .transition()
             .duration(200)
             .attr('opacity', d => d.key === key ? 1 : 0.2);
+
+          // Add focus ring to this legend item
+          d3.select(this).select(".focus-ring")
+            .attr("stroke", "#2563eb")
+            .attr("stroke-width", 2);
         })
         .on("mouseout blur", function() {
           svg.selectAll('.area')
             .transition()
             .duration(200)
             .attr('opacity', 0.8);
+
+          // Remove focus ring
+          d3.select(this).select(".focus-ring")
+            .attr("stroke", "none");
         })
         .on("keydown", function(event) {
              if (event.key === "Enter" || event.key === " ") {
@@ -174,6 +190,17 @@ const StackedAreaChart = ({
                  // Visual feedback is handled by focus
              }
          });
+
+      // Focus ring (invisible by default)
+      legendRow.append("rect")
+        .attr("class", "focus-ring")
+        .attr("x", -4)
+        .attr("y", -4)
+        .attr("width", 24)
+        .attr("height", 24)
+        .attr("rx", 4)
+        .attr("fill", "none")
+        .attr("stroke", "none");
 
       legendRow.append("rect")
         .attr("width", 16)

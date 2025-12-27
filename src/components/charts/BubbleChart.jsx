@@ -125,6 +125,7 @@ const BubbleChart = ({
             .transition()
             .duration(200)
             .attr("opacity", 1)
+            .attr("stroke", "#ffffff") // High contrast stroke
             .attr("stroke-width", 3);
 
         // Remove existing tooltips to prevent duplicates
@@ -157,10 +158,13 @@ const BubbleChart = ({
     };
 
     const handleInteractionEnd = function() {
+        // Revert to original color and width
+        const originalColor = d3.select(this).datum().color;
         d3.select(this)
             .transition()
             .duration(200)
             .attr("opacity", 0.7)
+            .attr("stroke", originalColor)
             .attr("stroke-width", 2);
 
         svg.selectAll(".tooltip").remove();
@@ -200,12 +204,21 @@ const BubbleChart = ({
                     .transition()
                     .duration(200)
                     .attr("opacity", d => d.sector === sector ? 1 : 0.2);
+
+                // Visual focus on legend item
+                d3.select(this).select(".legend-focus-ring")
+                    .attr("stroke", "#2563eb")
+                    .attr("stroke-width", 2);
             })
             .on("mouseout blur", function() {
                 bubbles.selectAll("circle")
                     .transition()
                     .duration(200)
                     .attr("opacity", 0.7);
+
+                // Remove focus ring
+                d3.select(this).select(".legend-focus-ring")
+                    .attr("stroke", "none");
             })
             .on("keydown", function(event) {
                 if (event.key === "Enter" || event.key === " ") {
@@ -213,6 +226,15 @@ const BubbleChart = ({
                     // No persistent state to toggle, but prevents scrolling
                 }
             });
+
+        // Focus ring (transparent by default)
+        legendRow.append("circle")
+            .attr("class", "legend-focus-ring")
+            .attr("cx", 8)
+            .attr("cy", 0)
+            .attr("r", 12)
+            .attr("fill", "none")
+            .attr("stroke", "none");
 
         legendRow.append("circle")
             .attr("cx", 8)
