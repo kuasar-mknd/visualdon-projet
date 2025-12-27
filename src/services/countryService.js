@@ -7,6 +7,7 @@ const MAX_CACHE_SIZE = 250; // Limit cache to ~250 countries to prevent localSto
 // Optimization: In-memory cache to avoid frequent synchronous localStorage reads/parsing
 // This significantly reduces main-thread blocking during animations where fetchCountryDetails is called repeatedly.
 let memoryCache = null;
+let saveTimeout = null;
 
 const getCache = () => {
   if (memoryCache !== null) return memoryCache;
@@ -37,24 +38,31 @@ const getCache = () => {
 };
 
 const setCache = (cache) => {
-  // Security Enhancement: Prevent unlimited growth of localStorage (DoS risk)
-  const keys = Object.keys(cache);
-  if (keys.length > MAX_CACHE_SIZE) {
-    // Sort keys by timestamp (oldest first) to implement LRU-like eviction
-    // Note: This is O(N log N) but N is small (250), so performance impact is negligible compared to network request
-    const sortedKeys = keys.sort((a, b) => (cache[a].timestamp || 0) - (cache[b].timestamp || 0));
-
-    // Remove oldest entries to bring size down to limit
-    const keysToRemove = sortedKeys.slice(0, keys.length - MAX_CACHE_SIZE);
-    keysToRemove.forEach(key => delete cache[key]);
-  }
-
+  // Update memory cache immediately
   memoryCache = cache;
-  try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
-  } catch (e) {
-    console.error("Error writing cache:", e.message);
-  }
+
+  // Optimization: Debounce localStorage writes to prevent blocking the main thread
+  // during high-frequency updates (e.g. iterating over a list of countries)
+  if (saveTimeout) clearTimeout(saveTimeout);
+
+  saveTimeout = setTimeout(() => {
+    try {
+      // Security Enhancement: Prevent unlimited growth of localStorage (DoS risk)
+      const keys = Object.keys(memoryCache);
+      if (keys.length > MAX_CACHE_SIZE) {
+        // Sort keys by timestamp (oldest first) to implement LRU-like eviction
+        const sortedKeys = keys.sort((a, b) => (memoryCache[a].timestamp || 0) - (memoryCache[b].timestamp || 0));
+
+        // Remove oldest entries to bring size down to limit
+        const keysToRemove = sortedKeys.slice(0, keys.length - MAX_CACHE_SIZE);
+        keysToRemove.forEach(key => delete memoryCache[key]);
+      }
+
+      localStorage.setItem(CACHE_KEY, JSON.stringify(memoryCache));
+    } catch (e) {
+      console.error("Error writing cache:", e.message);
+    }
+  }, 1000); // Wait 1 second of inactivity before writing to disk
 };
 
 export const fetchCountryDetails = async (code, language) => {

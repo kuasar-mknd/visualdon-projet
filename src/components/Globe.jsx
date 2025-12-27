@@ -31,6 +31,9 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
   const scaleRef = useRef(250);
   const hoveredCountryIdRef = useRef(null); // Ref to access current hover state in drag loop
 
+  // Optimization: Cache D3 selection to avoid DOM querying on every frame
+  const pathsSelectionRef = useRef(null);
+
   // Force update only when dimensions change significantly
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
@@ -96,7 +99,10 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
 
      // Initial render of paths
      if (svgRef.current && geoJson) {
-        d3.select(svgRef.current).selectAll("path.country-path")
+        // Update cached selection
+        pathsSelectionRef.current = d3.select(svgRef.current).selectAll("path.country-path");
+
+        pathsSelectionRef.current
            .attr("d", pathGeneratorRef.current);
 
         d3.select(svgRef.current).selectAll("path.sphere-path")
@@ -126,7 +132,11 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
         const path = pathGeneratorRef.current;
 
         const selection = d3.select(svgRef.current);
-        selection.selectAll("path.country-path").attr("d", path);
+
+        // Use cached selection if available, else query
+        const paths = pathsSelectionRef.current || selection.selectAll("path.country-path");
+        paths.attr("d", path);
+
         selection.selectAll("path.sphere-path").attr("d", path({type: "Sphere"}));
 
         // Update highlight path if exists
@@ -254,8 +264,11 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
   useEffect(() => {
       if (!geoJson || !dataMap || !svgRef.current) return;
 
-      d3.select(svgRef.current)
-        .selectAll("path.country-path")
+      // Update cached selection to be safe
+      const selection = d3.select(svgRef.current).selectAll("path.country-path");
+      pathsSelectionRef.current = selection;
+
+      selection
         .data(geoJson.features)
         .attr("fill", d => {
             const countryId = d.properties.A3 || d.id;

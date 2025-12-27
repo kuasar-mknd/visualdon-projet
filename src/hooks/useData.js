@@ -21,18 +21,31 @@ async function safeCsv(url, rowConverter) {
   const body = rows.slice(1);
 
   // Optimization: Pre-filter safe headers once instead of checking every key in every row
-  const safeHeaders = header
-    .map((key, index) => ({ key, index }))
-    .filter(({ key }) => key !== '__proto__' && key !== 'constructor' && key !== 'prototype');
+  const safeHeadersIndices = [];
+  const safeHeadersKeys = [];
 
-  const data = body.map(row => {
-    const obj = {};
-    for (let j = 0; j < safeHeaders.length; j++) {
-      const { key, index } = safeHeaders[j];
-      obj[key] = row[index];
+  for (let i = 0; i < header.length; i++) {
+    const key = header[i];
+    if (key !== '__proto__' && key !== 'constructor' && key !== 'prototype') {
+        safeHeadersIndices.push(i);
+        safeHeadersKeys.push(key);
     }
-    return rowConverter ? rowConverter(obj) : obj;
-  });
+  }
+
+  // Optimization: Use a simpler loop to construct objects
+  // avoiding repeated object property access or function calls if possible
+  const data = new Array(body.length);
+  for (let i = 0; i < body.length; i++) {
+      const row = body[i];
+      const obj = {};
+
+      // Fast mapping using pre-calculated indices
+      for (let j = 0; j < safeHeadersIndices.length; j++) {
+          obj[safeHeadersKeys[j]] = row[safeHeadersIndices[j]];
+      }
+
+      data[i] = rowConverter ? rowConverter(obj) : obj;
+  }
 
   // Attach columns property as d3.csv does, in case it's used
   data.columns = header;
