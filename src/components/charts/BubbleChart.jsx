@@ -190,6 +190,7 @@ const BubbleChart = ({
     
     Object.entries(colorMapping).forEach(([sector, color], i) => {
         const legendRow = legend.append("g")
+            .attr("class", "legend-row")
             .attr("transform", `translate(0, ${i * 28})`)
             .style("cursor", "pointer")
             .attr("tabindex", "0")
@@ -214,6 +215,18 @@ const BubbleChart = ({
                 }
             });
 
+        // Focus indicator for legend items
+        legendRow.append("rect")
+            .attr("class", "focus-indicator")
+            .attr("x", -5)
+            .attr("y", -12)
+            .attr("width", 120)
+            .attr("height", 24)
+            .attr("rx", 4)
+            .attr("fill", "none")
+            .attr("stroke", "none")
+            .attr("stroke-width", 2);
+
         legendRow.append("circle")
             .attr("cx", 8)
             .attr("cy", 0)
@@ -227,6 +240,22 @@ const BubbleChart = ({
             .attr("fill", "#475569")
             .style("font-size", "13px")
             .style("font-weight", "500");
+
+        // Add visual focus handling
+        legendRow.on("focus", function() {
+            d3.select(this).select(".focus-indicator").attr("stroke", "#3b82f6");
+            bubbles.selectAll("circle")
+                .transition()
+                .duration(200)
+                .attr("opacity", d => d.sector === sector ? 1 : 0.2);
+        })
+        .on("blur", function() {
+            d3.select(this).select(".focus-indicator").attr("stroke", "none");
+            bubbles.selectAll("circle")
+                .transition()
+                .duration(200)
+                .attr("opacity", 0.7);
+        });
     });
 
     // Simulation

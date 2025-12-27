@@ -217,7 +217,7 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
                 key={countryId || i}
                 stroke="#0f172a"
                 strokeWidth="0.5"
-                className="country-path transition-colors duration-300 hover:opacity-80 cursor-pointer focus:outline-none focus:opacity-100 focus:stroke-white focus:stroke-[1.5px]"
+                className="country-path transition-colors duration-300 hover:opacity-80 cursor-pointer focus:outline-none focus:opacity-100 focus:stroke-white focus:stroke-[2px]"
                 role="button"
                 tabIndex="0"
                 aria-label={feature.properties.NAME || countryId}

@@ -161,7 +161,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect })
           .style("opacity", 1)
           .select(".bar-rect")
           .attr("stroke", "#1e293b")
-          .attr("stroke-width", 2);
+          .attr("stroke-width", 3);
     };
 
     const handleInteractionEnd = function() {

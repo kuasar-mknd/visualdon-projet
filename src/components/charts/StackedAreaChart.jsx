@@ -62,7 +62,10 @@ const StackedAreaChart = ({
 
     // Shared handlers
     const handleInteractionStart = function(event, d) {
-        d3.select(this).attr('opacity', 1);
+        d3.select(this)
+          .attr('opacity', 1)
+          .attr('stroke', '#ffffff')
+          .attr('stroke-width', 2);
 
         // Highlight in legend
         svg.selectAll('.legend-row')
@@ -70,7 +73,9 @@ const StackedAreaChart = ({
     };
 
     const handleInteractionEnd = function() {
-        d3.select(this).attr('opacity', 0.8);
+        d3.select(this)
+          .attr('opacity', 0.8)
+          .attr('stroke', 'none');
         svg.selectAll('.legend-row').attr('opacity', 1);
     };
 
@@ -154,26 +159,24 @@ const StackedAreaChart = ({
         .attr("tabindex", "0")
         .attr("role", "button")
         .attr("aria-label", t(`sectors.${sector}`) || sector)
-        .on("mouseover focus", function(event, hoveredSector) {
-          // Handle both MouseEvent and FocusEvent (where data is attached to element)
-          const key = hoveredSector || d3.select(this).datum();
-          svg.selectAll('.area')
-            .transition()
-            .duration(200)
-            .attr('opacity', d => d.key === key ? 1 : 0.2);
-        })
-        .on("mouseout blur", function() {
-          svg.selectAll('.area')
-            .transition()
-            .duration(200)
-            .attr('opacity', 0.8);
-        })
         .on("keydown", function(event) {
              if (event.key === "Enter" || event.key === " ") {
                  event.preventDefault();
                  // Visual feedback is handled by focus
              }
          });
+
+      // Focus indicator
+      legendRow.append("rect")
+        .attr("class", "focus-indicator")
+        .attr("x", -5)
+        .attr("y", -4)
+        .attr("width", 120)
+        .attr("height", 24)
+        .attr("rx", 4)
+        .attr("fill", "none")
+        .attr("stroke", "none")
+        .attr("stroke-width", 2);
 
       legendRow.append("rect")
         .attr("width", 16)
@@ -188,6 +191,28 @@ const StackedAreaChart = ({
         .attr("fill", "#cbd5e1")
         .style("font-size", "13px")
         .style("font-weight", "500");
+
+      // Interaction listeners must be attached after elements are created to reference them if needed,
+      // but here we attach to the group.
+      legendRow.on("mouseover focus", function(event, hoveredSector) {
+          // Handle both MouseEvent and FocusEvent (where data is attached to element)
+          const key = hoveredSector || d3.select(this).datum();
+
+          d3.select(this).select(".focus-indicator").attr("stroke", "#3b82f6");
+
+          svg.selectAll('.area')
+            .transition()
+            .duration(200)
+            .attr('opacity', d => d.key === key ? 1 : 0.2);
+        })
+        .on("mouseout blur", function() {
+          d3.select(this).select(".focus-indicator").attr("stroke", "none");
+
+          svg.selectAll('.area')
+            .transition()
+            .duration(200)
+            .attr('opacity', 0.8);
+        });
     });
 
   }, [years, emissionData, sectors, width, height, padding, colorMapping, t]);
