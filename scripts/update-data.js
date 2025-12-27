@@ -13,6 +13,7 @@
 import fs from 'fs';
 import path from 'path';
 import https from 'https';
+import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -178,8 +179,46 @@ async function getZenodoData() {
     mtCO2Url: mtCO2File.links.self,
     populationUrl: populationFile.links.self,
     mtCO2Filename: path.basename(mtCO2File.key),
-    populationFilename: path.basename(populationFile.key)
+    populationFilename: path.basename(populationFile.key),
+    mtCO2Checksum: mtCO2File.checksum,
+    populationChecksum: populationFile.checksum
   };
+}
+
+/**
+ * Verify file checksum
+ * @param {string} filePath - Path to file
+ * @param {string} checksum - Expected checksum (e.g., 'md5:12345...')
+ */
+function verifyChecksum(filePath, checksum) {
+  return new Promise((resolve, reject) => {
+    if (!checksum) {
+      console.warn('⚠️  No checksum provided for verification');
+      resolve();
+      return;
+    }
+
+    const [algo, hash] = checksum.split(':');
+    if (!algo || !hash) {
+      reject(new Error(`Invalid checksum format: ${checksum}`));
+      return;
+    }
+
+    const stream = fs.createReadStream(filePath);
+    const hasher = crypto.createHash(algo);
+
+    stream.on('data', data => hasher.update(data));
+    stream.on('end', () => {
+      const calculatedHash = hasher.digest('hex');
+      if (calculatedHash === hash) {
+        console.log(`✓ Integrity check passed (${algo})`);
+        resolve();
+      } else {
+        reject(new Error(`Checksum mismatch! Expected ${hash}, got ${calculatedHash}`));
+      }
+    });
+    stream.on('error', reject);
+  });
 }
 
 /**
@@ -326,7 +365,9 @@ async function updateData() {
     }
 
     await downloadFile(zenodoData.mtCO2Url, mtCO2Temp);
-    console.log(`✓ Downloaded (${(fs.statSync(mtCO2Temp).size / 1024).toFixed(0)} KB)\n`);
+    console.log(`✓ Downloaded (${(fs.statSync(mtCO2Temp).size / 1024).toFixed(0)} KB)`);
+    await verifyChecksum(mtCO2Temp, zenodoData.mtCO2Checksum);
+    console.log('');
     
     console.log(`⬇️  Downloading ${zenodoData.populationFilename}...`);
     const populationTemp = path.join(TEMP_DIR, zenodoData.populationFilename);
@@ -336,7 +377,9 @@ async function updateData() {
     }
 
     await downloadFile(zenodoData.populationUrl, populationTemp);
-    console.log(`✓ Downloaded (${(fs.statSync(populationTemp).size / 1024).toFixed(0)} KB)\n`);
+    console.log(`✓ Downloaded (${(fs.statSync(populationTemp).size / 1024).toFixed(0)} KB)`);
+    await verifyChecksum(populationTemp, zenodoData.populationChecksum);
+    console.log('');
     
     // Parse and process
     console.log('📖 Parsing data...');
