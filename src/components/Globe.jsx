@@ -296,7 +296,14 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
 
   return (
     <div ref={containerRef} className="w-full h-full relative bg-slate-50 overflow-hidden cursor-grab active:cursor-grabbing">
-       <svg ref={svgRef} width={dimensions.width} height={dimensions.height} style={{background: 'radial-gradient(circle at 50% 50%, #f8fafc 0%, #e2e8f0 100%)'}}>
+       <svg
+         ref={svgRef}
+         width={dimensions.width}
+         height={dimensions.height}
+         style={{background: 'radial-gradient(circle at 50% 50%, #f8fafc 0%, #e2e8f0 100%)'}}
+         role="img"
+         aria-label="Interactive 3D Globe showing CO2 emissions by country"
+       >
           <defs>
             <radialGradient id="oceanGradient" cx="50%" cy="50%" r="50%">
                 <stop offset="0%" stopColor="#dbeafe" stopOpacity="1" />

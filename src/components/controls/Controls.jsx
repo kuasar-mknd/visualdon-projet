@@ -118,7 +118,8 @@ const Controls = ({ isPlaying, setIsPlaying, category, setCategory, year, setYea
           value={category}
           onChange={(e) => setCategory(e.target.value)}
           aria-label={t('aria.selectCategory')}
-          className="bg-white border border-slate-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-slate-700 font-medium shadow-sm cursor-pointer hover:border-blue-300 transition-colors text-sm"
+          title={t('aria.selectCategory')}
+          className="bg-white border border-slate-200 rounded-xl px-4 py-2 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 outline-none text-slate-700 font-medium shadow-sm cursor-pointer hover:border-blue-300 transition-colors text-sm"
         >
           <option value="Total">{t('total')}</option>
           <option value="Per Capita">{t('perCapita')}</option>
@@ -134,6 +135,7 @@ const Controls = ({ isPlaying, setIsPlaying, category, setCategory, year, setYea
           disabled={!year}
           onChange={handleYearChange}
           aria-label={t('aria.selectYear')}
+          aria-valuetext={`${t('year')} ${localYear || yearRange.min}`}
           aria-keyshortcuts="ArrowLeft ArrowRight"
           title={`${t('aria.selectYear')} (←/→)`}
           className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
