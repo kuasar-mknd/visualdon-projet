@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
-import * as d3 from 'd3';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import Controls from './components/controls/Controls';
@@ -17,37 +16,75 @@ function AppContent() {
   const [year, setYear] = useState(null);
   const [selectedCountry, setSelectedCountry] = useState(null);
 
-  // Optimization: Calculate global stats (max emissions & year range) in a single pass O(N)
-  // Replaces separate d3.max and reduce calls (2*O(N))
-  const { yearRange, maxEmissions } = useMemo(() => {
-    if (!emissions || emissions.length === 0) {
-      return { yearRange: { min: 0, max: 0 }, maxEmissions: 100 };
+  // Optimization: Consolidated data processing helper (O(N))
+  // Combines grouping, max value calculation, and year range extraction into a single pass.
+  // Reduces iteration overhead significantly compared to multiple separate passes.
+  const processData = (data, valueKey, calculateYearRange = false) => {
+    if (!data || data.length === 0) {
+      return {
+        grouped: new Map(),
+        maxVal: 0,
+        yearRange: { min: 0, max: 0 }
+      };
     }
 
-    let min = Infinity;
-    let max = -Infinity;
-    let maxEm = 0;
+    const grouped = new Map();
+    let minYear = Infinity;
+    let maxYear = -Infinity;
+    let maxVal = 0;
 
-    for (const d of emissions) {
-      if (d.Year != null) {
-          if (d.Year < min) min = d.Year;
-          if (d.Year > max) max = d.Year;
+    for (const d of data) {
+      // Track Max Value (Global) - Includes WLD for scale consistency if present in data
+      const val = d[valueKey] || 0;
+      if (val > maxVal) maxVal = val;
+
+      // Track Year Range (Global)
+      if (calculateYearRange && d.Year != null) {
+        if (d.Year < minYear) minYear = d.Year;
+        if (d.Year > maxYear) maxYear = d.Year;
       }
-      const val = d.Total || 0;
-      if (val > maxEm) maxEm = val;
+
+      // Grouping Logic (Exclude WLD for display)
+      if (d["ISO 3166-1 alpha-3"] === "WLD") continue;
+
+      const year = d.Year;
+      if (!grouped.has(year)) {
+        grouped.set(year, { list: [], map: new Map() });
+      }
+      const entry = grouped.get(year);
+      entry.list.push(d);
+      entry.map.set(d["ISO 3166-1 alpha-3"], d);
     }
 
-    if (min === Infinity) return { yearRange: { min: 0, max: 0 }, maxEmissions: 100 };
+    if (minYear === Infinity) {
+      minYear = 0;
+      maxYear = 0;
+    }
 
     return {
-        yearRange: { min, max },
-        maxEmissions: maxEm || 100
+      grouped,
+      maxVal,
+      yearRange: { min: minYear, max: maxYear }
+    };
+  };
+
+  // Process Emissions Data (Calculate Year Range + Max + Grouping)
+  const { yearRange, maxEmissions, emissionsByYear } = useMemo(() => {
+    const { grouped, maxVal, yearRange } = processData(emissions, 'Total', true);
+    return {
+      emissionsByYear: grouped,
+      maxEmissions: maxVal || 100, // Default fallback
+      yearRange
     };
   }, [emissions]);
 
-  const maxPerCapita = useMemo(() => {
-    if (!perCapita) return 10;
-    return d3.max(perCapita, d => d['Per Capita'] || 0) || 10;
+  // Process Per Capita Data (Calculate Max + Grouping)
+  const { maxPerCapita, perCapitaByYear } = useMemo(() => {
+    const { grouped, maxVal } = processData(perCapita, 'Per Capita', false);
+    return {
+      perCapitaByYear: grouped,
+      maxPerCapita: maxVal || 10 // Default fallback
+    };
   }, [perCapita]);
 
   const [displayCountry, setDisplayCountry] = useState(null);
@@ -81,32 +118,6 @@ function AppContent() {
        setYear(yearRange.max);
     }
   }, [yearRange, year]);
-
-  // Helper to group data by year
-  const groupDataByYear = useCallback((data) => {
-    if (!data) return new Map();
-
-    const grouped = new Map();
-    // Single pass to group by year and exclude WLD
-    for (const d of data) {
-      if (d["ISO 3166-1 alpha-3"] === "WLD") continue;
-      
-      const year = d.Year;
-      if (!grouped.has(year)) {
-        grouped.set(year, { list: [], map: new Map() });
-      }
-      const entry = grouped.get(year);
-      entry.list.push(d);
-      entry.map.set(d["ISO 3166-1 alpha-3"], d);
-    }
-    return grouped;
-  }, []);
-
-  // Optimization: Pre-group data by year for BOTH datasets once on load.
-  // This avoids O(N) iteration every time the user switches categories.
-  // This significantly improves responsiveness when toggling metrics.
-  const emissionsByYear = useMemo(() => groupDataByYear(emissions), [emissions, groupDataByYear]);
-  const perCapitaByYear = useMemo(() => groupDataByYear(perCapita), [perCapita, groupDataByYear]);
 
   const dataByYear = category === 'Per Capita' ? perCapitaByYear : emissionsByYear;
 
