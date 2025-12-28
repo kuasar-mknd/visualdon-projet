@@ -269,7 +269,11 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
   useEffect(() => {
       if (!hoveredCountryId || !svgRef.current) return;
       const feature = featureMap.get(hoveredCountryId);
-      if (!feature) return;
+      if (!feature) {
+          // Hide highlight if no feature found
+           d3.select(svgRef.current).select(".highlight-path").attr("d", null);
+           return;
+      }
 
       // We need to update the highlight path's 'd' attribute using the current projection
       // which is stored in projectionRef.current (up to date with drag)
@@ -278,19 +282,9 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
 
   }, [hoveredCountryId, featureMap, dimensions]); // Trigger when hovered country changes
 
-  const highlightPath = useMemo(() => {
-      if (!hoveredCountryId) return null;
-      // Render an empty path initially; useEffect will set 'd'
-      return (
-          <path
-              className="highlight-path pointer-events-none"
-              fill="none"
-              stroke="#ffffff"
-              strokeWidth="2"
-              filter="url(#highlight-glow)"
-          />
-      );
-  }, [hoveredCountryId]);
+  // Optimization: Removed dynamic React component for Highlight Path.
+  // Instead, we render a static <path> and update it via D3 in useEffect.
+  // This avoids re-creating the React element on every hover change.
 
   if (!data || !geoJson) return <div ref={containerRef} className="w-full h-full bg-slate-100" />;
 
@@ -332,7 +326,15 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
             <circle cx={dimensions.width/2} cy={dimensions.height/2} r={scaleRef.current} fill="#60a5fa" opacity="0.1" filter="url(#glow)" />
 
             {paths}
-            {highlightPath}
+
+            {/* Optimization: Static path element for highlight, controlled by D3 */}
+            <path
+                className="highlight-path pointer-events-none"
+                fill="none"
+                stroke="#ffffff"
+                strokeWidth="2"
+                filter="url(#highlight-glow)"
+            />
 
             <path 
                 className="sphere-path"
