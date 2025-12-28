@@ -1,14 +1,15 @@
 # AI Documentation
 
 ## Overview
-This project **does not** currently utilize any Artificial Intelligence (AI) or Machine Learning (ML) models in its runtime application.
+This project **does not** currently utilize any Artificial Intelligence (AI), Machine Learning (ML), or Large Language Model (LLM) technologies in its runtime application or build process.
 
-## Configuration
-There are no AI-related environment variables or configuration files.
+## Status
+- **Models**: None.
+- **API Keys**: None.
+- **Dependencies**: No AI-related libraries (e.g., TensorFlow.js, LangChain) are installed.
 
-## Future Integration
-If AI features are added in the future (e.g., for predictive emissions modeling or natural language data querying), this document should be updated to include:
-- Model names and versions.
-- Provider details (e.g., OpenAI, Hugging Face).
-- API keys and environment variables.
-- Cost control mechanisms (caching, rate limiting).
+## Policy on AI Integration
+If AI features are considered in the future (e.g., for predictive emissions modeling, natural language querying of data, or automated insights):
+1.  **Documentation**: This file must be updated with model details, providers, and costs.
+2.  **Privacy**: Data privacy implications must be reviewed, especially for user inputs.
+3.  **Cost Control**: Caching and rate-limiting strategies must be implemented and documented here.

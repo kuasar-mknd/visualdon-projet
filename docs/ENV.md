@@ -1,23 +1,23 @@
 # Environment Variables
 
 ## Overview
-This application is a client-side React application built with Vite. It does not currently rely on specific environment variables for its core functionality.
+This application is a client-side React application built with Vite. It minimizes reliance on runtime environment variables to simplify deployment and maintenance.
 
 ## Current Usage
-- **NO** custom environment variables are currently required to run the application locally or in production.
-- **NODE_ENV**: Handled automatically by Vite (`development` during `pnpm dev`, `production` during `pnpm build`).
+- **NODE_ENV**: Managed automatically by Vite (`development` during `pnpm dev`, `production` during `pnpm build`).
+- **CI/CD Variables**: GitHub Actions (e.g., `update-data.yml`) use internal secrets (like `GITHUB_TOKEN`) which are automatically provided by the platform.
 
-## Conventions
-If you need to add environment variables in the future:
-1.  Prefix them with `VITE_` to expose them to the client-side code.
-2.  Access them via `import.meta.env.VITE_MY_VAR`.
-3.  Add them to this file.
+## Adding New Variables
+If future features require environment variables (e.g., a new API key):
+1.  **Prefix**: Must start with `VITE_` to be exposed to the browser.
+2.  **Access**: Use `import.meta.env.VITE_MY_VARIABLE`.
+3.  **Documentation**: Update this file immediately.
 
 ## Example `.env`
-Since no variables are currently needed, an `.env` file is not required. However, an example would look like this:
+No `.env` file is currently required for local development.
 
 ```bash
-# Example only - no active variables
-# VITE_API_BASE_URL=https://api.example.com
-# VITE_ENABLE_ANALYTICS=false
+# Example template (not active)
+# VITE_API_ENDPOINT=https://api.example.com
+# VITE_ANALYTICS_ID=UA-XXXXX-Y
 ```

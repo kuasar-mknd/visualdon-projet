@@ -37,6 +37,10 @@ Static assets that are served directly.
 Node.js scripts for maintenance tasks.
 - **`update-data.js`**: Fetches the latest data from the Global Carbon Project and updates the CSV files in `public/data/`.
 
+### `script-to-clean-data/` (Legacy)
+Contains `cleaner.ps1`, a legacy PowerShell script for manual data cleaning.
+> **Note:** This script is superseded by the automated `scripts/update-data.js` pipeline and is kept for reference only.
+
 ### `verification/`
 Contains scripts and artifacts for frontend verification.
 - **`verify_load.py`**: A Playwright (Python) script used to verify that the application loads correctly and renders the main chart components. This serves as a lightweight smoke test for the frontend.
