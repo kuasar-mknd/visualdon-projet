@@ -31,6 +31,10 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
   const scaleRef = useRef(250);
   const hoveredCountryIdRef = useRef(null); // Ref to access current hover state in drag loop
 
+  // Optimization: Cache D3 selections to avoid expensive DOM queries during drag/zoom loop
+  const countrySelectionRef = useRef(null);
+  const sphereSelectionRef = useRef(null);
+
   // Force update only when dimensions change significantly
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
@@ -84,26 +88,6 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
         .clamp(true);
   }, [maxVal]);
 
-  // Update projection setup (rotation/scale)
-  // This is called initially and when dimensions change, but NOT during drag
-  useEffect(() => {
-     if (dimensions.width === 0) return;
-
-     projectionRef.current
-        .scale(scaleRef.current)
-        .translate([dimensions.width / 2, dimensions.height / 2])
-        .rotate(rotationRef.current);
-
-     // Initial render of paths
-     if (svgRef.current && geoJson) {
-        d3.select(svgRef.current).selectAll("path.country-path")
-           .attr("d", pathGeneratorRef.current);
-
-        d3.select(svgRef.current).selectAll("path.sphere-path")
-           .attr("d", pathGeneratorRef.current({type: "Sphere"}));
-     }
-  }, [dimensions, geoJson]);
-
   const featureMap = useMemo(() => {
       if (!geoJson) return new Map();
       const map = new Map();
@@ -112,61 +96,6 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
       });
       return map;
   }, [geoJson]);
-
-  // Drag & Zoom handling - D3 Controlled
-  useEffect(() => {
-    if (!svgRef.current) return;
-
-    const svg = d3.select(svgRef.current);
-    
-    // Update function for high-performance rendering loop
-    const updateGlobe = () => {
-        const proj = projectionRef.current;
-        proj.rotate(rotationRef.current).scale(scaleRef.current);
-        const path = pathGeneratorRef.current;
-
-        const selection = d3.select(svgRef.current);
-        selection.selectAll("path.country-path").attr("d", path);
-        selection.selectAll("path.sphere-path").attr("d", path({type: "Sphere"}));
-
-        // Update highlight path if exists
-        const currentHoverId = hoveredCountryIdRef.current;
-        if (currentHoverId) {
-             const feature = featureMap.get(currentHoverId);
-             if (feature) {
-                 selection.select(".highlight-path").attr("d", path(feature));
-             }
-        }
-    };
-
-    const zoom = d3.zoom()
-      .scaleExtent([1, 5])
-      .on("zoom", (event) => {
-         if (event.sourceEvent && (event.sourceEvent.type === 'wheel' || 
-             (event.sourceEvent.touches && event.sourceEvent.touches.length >= 2))) {
-           const newScale = event.transform.k * 250;
-           scaleRef.current = newScale;
-           updateGlobe();
-         }
-      });
-    
-    const drag = d3.drag()
-      .on("start", () => svg.style("cursor", "grabbing"))
-      .on("drag", (event) => {
-        const sensitivity = 0.25;
-        const [r0, r1] = rotationRef.current;
-        rotationRef.current = [r0 + event.dx * sensitivity, r1 - event.dy * sensitivity];
-        updateGlobe();
-      })
-      .on("end", () => svg.style("cursor", "grab"));
-      
-    // Initialize zoom identity
-    svg.call(zoom.transform, d3.zoomIdentity.scale(scaleRef.current / 250));
-    svg.call(drag);
-    svg.call(zoom);
-    svg.on("dblclick.zoom", null);
-
-  }, [dimensions, featureMap]); // Re-bind if dimensions or featureMap changes
 
   const dataMap = useMemo(() => {
     if (!data) return new Map();
@@ -243,19 +172,119 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
                 onFocus={handlePathFocus}
                 onBlur={handleMouseLeave}
                 onMouseEnter={handlePathFocus}
-                onMouseLeave={handleMouseLeave}
+                onMouseLeave={handlePathFocus}
             >
             </path>
         );
     });
   }, [geoJson, handlePathClick, handlePathKeyDown, handlePathFocus, handleMouseLeave]);
 
+  // Optimization: Update cached selections when paths re-render
+  // This must be defined AFTER paths is defined.
+  useEffect(() => {
+    if (!svgRef.current) return;
+    const svg = d3.select(svgRef.current);
+    countrySelectionRef.current = svg.selectAll("path.country-path");
+    sphereSelectionRef.current = svg.selectAll("path.sphere-path");
+  }, [paths]);
+
+  // Update projection setup (rotation/scale) and paths
+  useEffect(() => {
+     if (dimensions.width === 0) return;
+
+     projectionRef.current
+        .scale(scaleRef.current)
+        .translate([dimensions.width / 2, dimensions.height / 2])
+        .rotate(rotationRef.current);
+
+     // Initial render of paths
+     // Use cached selections if available
+     const countrySelection = countrySelectionRef.current || d3.select(svgRef.current).selectAll("path.country-path");
+     const sphereSelection = sphereSelectionRef.current || d3.select(svgRef.current).selectAll("path.sphere-path");
+
+     if (!countrySelection.empty()) {
+        countrySelection.attr("d", pathGeneratorRef.current);
+     }
+     if (!sphereSelection.empty()) {
+        sphereSelection.attr("d", pathGeneratorRef.current({type: "Sphere"}));
+     }
+  }, [dimensions, geoJson]); // Depends on dimensions and geoJson (which implies paths exist)
+
+  // Drag & Zoom handling - D3 Controlled
+  useEffect(() => {
+    if (!svgRef.current) return;
+
+    const svg = d3.select(svgRef.current);
+
+    // Update function for high-performance rendering loop
+    const updateGlobe = () => {
+        const proj = projectionRef.current;
+        proj.rotate(rotationRef.current).scale(scaleRef.current);
+        const path = pathGeneratorRef.current;
+
+        // Optimization: Use cached selections to avoid expensive DOM querying (selectAll) on every frame
+        const countrySelection = countrySelectionRef.current;
+        if (countrySelection) {
+            countrySelection.attr("d", path);
+        } else {
+            // Fallback just in case
+            d3.select(svgRef.current).selectAll("path.country-path").attr("d", path);
+        }
+
+        const sphereSelection = sphereSelectionRef.current;
+        if (sphereSelection) {
+            sphereSelection.attr("d", path({type: "Sphere"}));
+        } else {
+             d3.select(svgRef.current).selectAll("path.sphere-path").attr("d", path({type: "Sphere"}));
+        }
+
+        // Update highlight path if exists
+        const currentHoverId = hoveredCountryIdRef.current;
+        if (currentHoverId) {
+             const feature = featureMap.get(currentHoverId);
+             if (feature) {
+                 d3.select(svgRef.current).select(".highlight-path").attr("d", path(feature));
+             }
+        }
+    };
+
+    const zoom = d3.zoom()
+      .scaleExtent([1, 5])
+      .on("zoom", (event) => {
+         if (event.sourceEvent && (event.sourceEvent.type === 'wheel' ||
+             (event.sourceEvent.touches && event.sourceEvent.touches.length >= 2))) {
+           const newScale = event.transform.k * 250;
+           scaleRef.current = newScale;
+           updateGlobe();
+         }
+      });
+
+    const drag = d3.drag()
+      .on("start", () => svg.style("cursor", "grabbing"))
+      .on("drag", (event) => {
+        const sensitivity = 0.25;
+        const [r0, r1] = rotationRef.current;
+        rotationRef.current = [r0 + event.dx * sensitivity, r1 - event.dy * sensitivity];
+        updateGlobe();
+      })
+      .on("end", () => svg.style("cursor", "grab"));
+
+    // Initialize zoom identity
+    svg.call(zoom.transform, d3.zoomIdentity.scale(scaleRef.current / 250));
+    svg.call(drag);
+    svg.call(zoom);
+    svg.on("dblclick.zoom", null);
+
+  }, [dimensions, featureMap]); // Re-bind if dimensions or featureMap changes
+
   // Effect: Update 'fill' attribute (Data/Animation) directly via D3
   useEffect(() => {
-      if (!geoJson || !dataMap || !svgRef.current) return;
+      // Use cached selection if available
+      const selection = countrySelectionRef.current || d3.select(svgRef.current).selectAll("path.country-path");
 
-      d3.select(svgRef.current)
-        .selectAll("path.country-path")
+      if (!geoJson || !dataMap || selection.empty()) return;
+
+      selection
         .data(geoJson.features)
         .attr("fill", d => {
             const countryId = d.properties.A3 || d.id;
