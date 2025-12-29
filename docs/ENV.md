@@ -14,10 +14,21 @@ If you need to add environment variables in the future:
 3.  Add them to this file.
 
 ## Example `.env`
-Since no variables are currently needed, an `.env` file is not required. However, an example would look like this:
+For a quick start, you can copy the provided example file:
 
 ```bash
-# Example only - no active variables
-# VITE_API_BASE_URL=https://api.example.com
-# VITE_ENABLE_ANALYTICS=false
+cp .env.example .env
+```
+
+The `.env.example` file contains commented-out placeholders for potential future configuration:
+
+```bash
+# Application Base URL (optional, defaults to root)
+# VITE_BASE_URL=/
+
+# Analytics ID (if applicable)
+# VITE_ANALYTICS_ID=
+
+# Debug Mode (true/false)
+# VITE_DEBUG=false
 ```

@@ -12,3 +12,9 @@ If AI features are added in the future (e.g., for predictive emissions modeling 
 - Provider details (e.g., OpenAI, Hugging Face).
 - API keys and environment variables.
 - Cost control mechanisms (caching, rate limiting).
+
+## Cost Control & Best Practices
+Although no AI models are currently used, any future integration should adhere to the following principles:
+- **Caching**: Cache AI responses aggressively (e.g., in LocalStorage or a backend proxy) to minimize API calls.
+- **Rate Limiting**: Implement client-side throttling (debouncing) on user inputs that trigger AI requests.
+- **Budget Alerts**: Configure provider-side budget alerts (e.g., OpenAI Usage Limits) to prevent unexpected costs.
