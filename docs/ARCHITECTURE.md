@@ -67,3 +67,18 @@ Logic for data fetching and state management is encapsulated in hooks (`useData`
 
 ### Context API
 Global state (like Language) is shared using React Context to avoid prop drilling.
+
+## Extending the Application
+
+### Adding New Visualizations
+To add a new chart type (e.g., `LineChart`):
+1.  **Create Component**: Add `src/components/charts/LineChart.jsx`.
+2.  **Data Logic**: Use the `useData` hook to retrieve emissions data.
+3.  **D3 Integration**: Implement D3 logic within a `useEffect` hook (or `useLayoutEffect` for measurements).
+4.  **Register**: Import and add the component to `App.jsx` or a specific container.
+
+### Adding New Data Sources
+To integrate a new dataset:
+1.  **Update Script**: Modify `scripts/update-data.js` to fetch and clean the new data.
+2.  **Manifest**: Ensure the new file is added to `manifest.json`.
+3.  **Hook**: Update `src/hooks/useData.js` to fetch the new file key from the manifest.

@@ -3,6 +3,8 @@
 ## Overview
 This application is a **frontend-only** visualization tool. It does not communicate with a traditional backend API for its core functionality during runtime. Instead, it relies on static data files served from the `public/data` directory, managed via a manifest file.
 
+This document describes the structure of these data files, which serve as the "API" for the application.
+
 ## Data Architecture
 
 ### Data Loading Strategy
