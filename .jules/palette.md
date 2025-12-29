@@ -11,3 +11,4 @@
 - **External Links:** Always append "(opens in a new tab)" to the `aria-label` of links with `target="_blank"` to warn users of context changes.
 - **Dialog Descriptions:** Ensure modals have `aria-describedby` pointing to a summary or description, even if hidden, to provide context beyond the title.
 - **D3 Focus States:** For SVG-based visualizations (like maps or bar charts), use explicit visual cues (e.g., `stroke-white`, `opacity-100`) on `focus` combined with `tabindex="0"` and `role="button"` (or `listitem`) to ensure keyboard users can navigate and perceive the active element. Standard browser focus rings are often insufficient or invisible on complex SVG paths.
+- **Abbreviation Clarity:** For UI controls using abbreviations (like "EN"/"FR" language toggles), always provide the full term via the `title` attribute to assist users who may not immediately recognize the short form. This is a low-cost, high-value clarity improvement.
