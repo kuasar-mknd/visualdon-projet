@@ -8,6 +8,9 @@ const MAX_CACHE_SIZE = 250; // Limit cache to ~250 countries to prevent localSto
 // This significantly reduces main-thread blocking during animations where fetchCountryDetails is called repeatedly.
 let memoryCache = null;
 
+// Debounce timer for localStorage writes
+let cacheWriteTimer = null;
+
 const getCache = () => {
   if (memoryCache !== null) return memoryCache;
 
@@ -37,24 +40,30 @@ const getCache = () => {
 };
 
 const setCache = (cache) => {
-  // Security Enhancement: Prevent unlimited growth of localStorage (DoS risk)
-  const keys = Object.keys(cache);
-  if (keys.length > MAX_CACHE_SIZE) {
-    // Sort keys by timestamp (oldest first) to implement LRU-like eviction
-    // Note: This is O(N log N) but N is small (250), so performance impact is negligible compared to network request
-    const sortedKeys = keys.sort((a, b) => (cache[a].timestamp || 0) - (cache[b].timestamp || 0));
-
-    // Remove oldest entries to bring size down to limit
-    const keysToRemove = sortedKeys.slice(0, keys.length - MAX_CACHE_SIZE);
-    keysToRemove.forEach(key => delete cache[key]);
-  }
-
+  // Update memory cache immediately
   memoryCache = cache;
-  try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
-  } catch (e) {
-    console.error("Error writing cache:", e.message);
-  }
+
+  // Debounce the expensive localStorage write
+  if (cacheWriteTimer) clearTimeout(cacheWriteTimer);
+
+  cacheWriteTimer = setTimeout(() => {
+      // Security Enhancement: Prevent unlimited growth of localStorage (DoS risk)
+      const keys = Object.keys(memoryCache);
+      if (keys.length > MAX_CACHE_SIZE) {
+        // Sort keys by timestamp (oldest first) to implement LRU-like eviction
+        const sortedKeys = keys.sort((a, b) => (memoryCache[a].timestamp || 0) - (memoryCache[b].timestamp || 0));
+
+        // Remove oldest entries to bring size down to limit
+        const keysToRemove = sortedKeys.slice(0, keys.length - MAX_CACHE_SIZE);
+        keysToRemove.forEach(key => delete memoryCache[key]);
+      }
+
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify(memoryCache));
+      } catch (e) {
+        console.error("Error writing cache:", e.message);
+      }
+  }, 2000); // 2 seconds delay
 };
 
 export const fetchCountryDetails = async (code, language) => {
