@@ -90,6 +90,9 @@ function downloadFile(url, destPath) {
       const file = fs.createWriteStream(destPath);
       
       const req = https.get(fileUrl, { timeout: 15000 }, (response) => {
+        const MAX_SIZE = 50 * 1024 * 1024; // 50MB limit to prevent disk exhaustion (DoS)
+        let downloadedSize = 0;
+
         // Handle redirects
         if (response.statusCode === 302 || response.statusCode === 301) {
           file.close();
@@ -113,14 +116,37 @@ function downloadFile(url, destPath) {
           return reject(new Error(`Failed to download: ${response.statusCode}`));
         }
         
+        response.on('data', (chunk) => {
+          downloadedSize += chunk.length;
+          if (downloadedSize > MAX_SIZE) {
+            response.destroy(); // Abort the request
+            file.close();
+            try {
+              fs.unlinkSync(destPath);
+            } catch (e) { /* ignore */ } // eslint-disable-line no-unused-vars
+            reject(new Error(`File too large (exceeded ${MAX_SIZE / (1024 * 1024)}MB)`));
+          }
+        });
+
         response.pipe(file);
         file.on('finish', () => {
           file.close();
+          // Check again in case data event didn't trigger correctly or race condition
+          if (downloadedSize > MAX_SIZE) {
+             if (fs.existsSync(destPath)) fs.unlinkSync(destPath);
+             // Already rejected above
+             return;
+          }
           resolve();
         });
         
         file.on('error', (err) => {
-          fs.unlinkSync(destPath);
+          // unlinkSync might throw if file is open, but close() is async?
+          // fs.createWriteStream returns a stream that needs to be closed.
+          // In 'error' handler of file stream, it might be safer to try/catch unlink
+          try {
+            fs.unlinkSync(destPath);
+          } catch (e) { /* ignore */ } // eslint-disable-line no-unused-vars
           reject(err);
         });
       });
