@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import * as d3 from 'd3';
+import { select, scaleLinear, extent, max, scaleSqrt, scalePoint, axisBottom, format, axisLeft, forceSimulation, forceX, forceY, forceCollide, transition } from 'd3';
 import { useLanguage } from '../../context/LanguageContext';
 
 const BubbleChart = ({ 
@@ -18,35 +18,35 @@ const BubbleChart = ({
     if (!containerRef.current || !chartData || chartData.length === 0) return;
 
     // Clear previous
-    d3.select(containerRef.current).selectAll("*").remove();
+    select(containerRef.current).selectAll("*").remove();
 
-    const svg = d3.select(containerRef.current)
+    const svg = select(containerRef.current)
       .append("svg")
       .attr("width", width)
       .attr("height", height);
 
     // Scales
-    const xScale = d3.scaleLinear()
-        .domain(d3.extent(chartData, d => d.year))
+    const xScale = scaleLinear()
+        .domain(extent(chartData, d => d.year))
         .range([padding.left, width - padding.right]);
 
-    const maxValue = d3.max(chartData, d => d.value);
-    const yScale = d3.scaleLinear()
+    const maxValue = max(chartData, d => d.value);
+    const yScale = scaleLinear()
         .domain([0, maxValue])
         .nice()
         .range([height - padding.bottom, padding.top]);
 
-    const sizeScale = d3.scaleSqrt()
+    const sizeScale = scaleSqrt()
         .domain([0, maxValue])
         .range([1.5, 7]); 
 
-    const yScaleSplit = d3.scalePoint()
+    const yScaleSplit = scalePoint()
         .domain(Object.keys(colorMapping))
         .range([padding.top + 50, height - padding.bottom - 50])
         .padding(1.2); 
 
     // Axes
-    const xAxis = d3.axisBottom(xScale).tickFormat(d3.format("d")).ticks(6);
+    const xAxis = axisBottom(xScale).tickFormat(format("d")).ticks(6);
     svg.append("g")
         .attr("transform", `translate(0, ${height - padding.bottom})`)
         .call(xAxis)
@@ -56,7 +56,7 @@ const BubbleChart = ({
         .call(g => g.selectAll("line").attr("stroke", "#94a3b8"))
         .call(g => g.select(".domain").attr("stroke", "#94a3b8"));
 
-    const yAxis = d3.axisLeft(yScale).ticks(5);
+    const yAxis = axisLeft(yScale).ticks(5);
     const yAxisGroup = svg.append("g")
         .attr("class", "y-axis")
         .attr("transform", `translate(${padding.left}, 0)`)
@@ -121,7 +121,7 @@ const BubbleChart = ({
 
     // Shared handlers for mouse and keyboard interactions
     const handleInteractionStart = function(event, d) {
-        d3.select(this)
+        select(this)
             .transition()
             .duration(200)
             .attr("opacity", 1)
@@ -157,7 +157,7 @@ const BubbleChart = ({
     };
 
     const handleInteractionEnd = function() {
-        d3.select(this)
+        select(this)
             .transition()
             .duration(200)
             .attr("opacity", 0.7)
@@ -231,10 +231,10 @@ const BubbleChart = ({
 
     // Simulation
     const centerY = (height - padding.top - padding.bottom) / 2 + padding.top;
-    const simulation = d3.forceSimulation(chartData)
-        .force("x", d3.forceX(d => xScale(d.year)).strength(1))
-        .force("y", d3.forceY(split ? d => yScaleSplit(d.sector) : centerY).strength(split ? 0.5 : 0.1))
-        .force("collide", d3.forceCollide(d => sizeScale(d.value) + 1.5).strength(0.95))
+    const simulation = forceSimulation(chartData)
+        .force("x", forceX(d => xScale(d.year)).strength(1))
+        .force("y", forceY(split ? d => yScaleSplit(d.sector) : centerY).strength(split ? 0.5 : 0.1))
+        .force("collide", forceCollide(d => sizeScale(d.value) + 1.5).strength(0.95))
         .on("tick", () => {
              bubbles.selectAll("circle")
                 .attr("cx", d => {
@@ -248,12 +248,12 @@ const BubbleChart = ({
         });
 
     if (split) {
-        simulation.force("y", d3.forceY(d => yScaleSplit(d.sector)).strength(0.5));
+        simulation.force("y", forceY(d => yScaleSplit(d.sector)).strength(0.5));
         simulation.alpha(1).restart();
         yAxisGroup.style("display", "none");
         yAxisLabel.style("display", "none");
     } else {
-        simulation.force("y", d3.forceY(centerY).strength(0.1));
+        simulation.force("y", forceY(centerY).strength(0.1));
         simulation.alpha(1).restart();
         yAxisGroup.style("display", "block");
         yAxisLabel.style("display", "block");
