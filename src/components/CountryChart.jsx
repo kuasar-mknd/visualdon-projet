@@ -93,7 +93,7 @@ const CountryChart = ({ countryCode, emissionsData }) => {
   if (!countryCode) {
     return (
       <div
-        className="flex items-center justify-center h-full text-slate-400"
+        className="flex items-center justify-center h-full text-slate-500"
         role="status"
         aria-live="polite"
       >
@@ -109,7 +109,7 @@ const CountryChart = ({ countryCode, emissionsData }) => {
         role="status"
         aria-live="polite"
       >
-        <p className="text-lg">{t('noData')}</p>
+        <p className="text-lg">∅ {t('noData')}</p>
       </div>
     );
   }
@@ -122,6 +122,7 @@ const CountryChart = ({ countryCode, emissionsData }) => {
           <button
             onClick={() => setViewMode('bubbles')}
             aria-pressed={viewMode === 'bubbles'}
+            title={t('chart.bubbles')}
             className={`px-4 py-2 rounded-lg font-semibold transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none ${
               viewMode === 'bubbles'
                 ? 'bg-blue-50 text-blue-600 border border-blue-200 shadow-sm'
@@ -133,6 +134,7 @@ const CountryChart = ({ countryCode, emissionsData }) => {
           <button
             onClick={() => setViewMode('lines')}
             aria-pressed={viewMode === 'lines'}
+            title={t('chart.stackedChart')}
             className={`px-4 py-2 rounded-lg font-semibold transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none ${
               viewMode === 'lines'
                 ? 'bg-blue-50 text-blue-600 border border-blue-200 shadow-sm'
@@ -144,7 +146,7 @@ const CountryChart = ({ countryCode, emissionsData }) => {
         </div>
 
         {viewMode === 'bubbles' && (
-          <label className="flex items-center gap-3 px-4 py-2 bg-slate-800 rounded-lg border border-slate-700 cursor-pointer hover:bg-slate-700 transition-colors focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+          <label title={t('chart.splitBySector')} className="flex items-center gap-3 px-4 py-2 bg-slate-800 rounded-lg border border-slate-700 cursor-pointer hover:bg-slate-700 transition-colors focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
             <input 
               type="checkbox" 
               checked={split} 
@@ -164,7 +166,15 @@ const CountryChart = ({ countryCode, emissionsData }) => {
       <div className="flex-1 bg-transparent rounded-lg overflow-hidden relative">
         <div ref={containerRef} className="w-full h-full absolute inset-0">
            {dimensions.width > 0 && dimensions.height > 0 && emissionData.length > 0 && (
-             <Suspense fallback={<div className="flex items-center justify-center h-full text-slate-400">{t('loading')}...</div>}>
+             <Suspense fallback={
+                <div className="flex items-center justify-center h-full text-slate-500">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    {t('loading')}...
+                </div>
+             }>
                 {viewMode === 'bubbles' ? (
                   <BubbleChart
                     chartData={chartData}
