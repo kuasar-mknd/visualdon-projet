@@ -256,9 +256,11 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect })
         .attr("x", d => x(d[category] || 0) + 8)
         .style("opacity", 1)
         .tween("text", function(d) {
-            const i = d3.interpolateNumber(parseFloat(this.textContent) || 0, d[category] || 0);
+            // Optimization: Avoid parseFloat(this.textContent) to prevent layout thrashing
+            const i = d3.interpolateNumber(this._currentValue || 0, d[category] || 0);
             return function(t) {
-                this.textContent = i(t).toFixed(1);
+                this._currentValue = i(t);
+                this.textContent = this._currentValue.toFixed(1);
             };
         });
 
