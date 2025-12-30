@@ -104,10 +104,20 @@ export const translations = {
 };
 
 export const LanguageProvider = ({ children }) => {
-  const [language, setLanguage] = useState('fr'); // Default to French as requested
+  const [language, setLanguageState] = useState('fr'); // Default to French as requested
+
+  // Security Enhancement: Validate language input to prevent invalid states
+  const setLanguage = (lang) => {
+    if (['en', 'fr'].includes(lang)) {
+      setLanguageState(lang);
+    } else {
+      console.warn(`Attempted to set invalid language: ${lang}`);
+      // Fallback to default or keep current
+    }
+  };
 
   const toggleLanguage = () => {
-    setLanguage(prev => prev === 'en' ? 'fr' : 'en');
+    setLanguage(language === 'en' ? 'fr' : 'en');
   };
 
   const t = (key) => {

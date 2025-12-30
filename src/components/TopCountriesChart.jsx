@@ -16,11 +16,13 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect })
 
   // Optimization: Memoize the filtered and sorted topData calculation
   const topData = useMemo(() => {
-    if (!data) return [];
+    // Security/Robustness: Validate data structure
+    if (!data || !Array.isArray(data)) return [];
     
+    // Filter out invalid entries and sanitize numeric values
     return data
-      .filter(d => (d[category] || 0) > 0)
-      .sort((a, b) => (b[category] || 0) - (a[category] || 0))
+      .filter(d => d && typeof d === 'object' && d[category] !== null && d[category] !== undefined && !isNaN(parseFloat(d[category])) && (parseFloat(d[category]) > 0))
+      .sort((a, b) => (parseFloat(b[category]) || 0) - (parseFloat(a[category]) || 0))
       .slice(0, 10);
   }, [data, category]);
 

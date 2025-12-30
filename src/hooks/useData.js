@@ -58,6 +58,13 @@ export function useData() {
           throw new Error('Invalid manifest');
         }
 
+        // Security Enhancement: Validate manifest filenames to prevent path traversal
+        // Ensure they are just filenames, not paths
+        const isValidFilename = (name) => /^[a-zA-Z0-9_.-]+$/.test(name);
+        if (!isValidFilename(manifest.emissions) || !isValidFilename(manifest.perCapita)) {
+           throw new Error('Invalid manifest filenames');
+        }
+
         // Parallelize fetching
         const [emissions, geoJson, perCapita] = await Promise.all([
           safeCsv(`/data/${manifest.emissions}`, d3.autoType),

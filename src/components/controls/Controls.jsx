@@ -34,7 +34,14 @@ const Controls = ({ isPlaying, setIsPlaying, category, setCategory, year, setYea
   }, []);
 
   const handleYearChange = useCallback((e) => {
-    const val = parseInt(e.target.value);
+    let val = parseInt(e.target.value, 10);
+
+    // Security Enhancement: Input validation to prevent out-of-bounds or invalid values
+    if (isNaN(val)) return;
+
+    // Clamp value to valid range
+    val = Math.max(yearRange.min, Math.min(yearRange.max, val));
+
     setLocalYear(val);
 
     // Debounce the global state update to prevent excessive re-renders of heavy charts
@@ -43,7 +50,7 @@ const Controls = ({ isPlaying, setIsPlaying, category, setCategory, year, setYea
     debounceTimerRef.current = setTimeout(() => {
       setYear(val);
     }, 50); // 50ms debounce is enough to catch drag events but feel responsive
-  }, [setYear]);
+  }, [setYear, yearRange.min, yearRange.max]);
 
   // Keyboard shortcuts
   useEffect(() => {
