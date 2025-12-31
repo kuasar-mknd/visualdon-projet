@@ -112,15 +112,42 @@ function downloadFile(url, destPath) {
           fs.unlinkSync(destPath);
           return reject(new Error(`Failed to download: ${response.statusCode}`));
         }
+
+        // Security Enhancement: Validate Content-Length if available
+        const MAX_DOWNLOAD_SIZE = 50 * 1024 * 1024; // 50MB
+        const contentLength = response.headers['content-length'];
+        if (contentLength && parseInt(contentLength, 10) > MAX_DOWNLOAD_SIZE) {
+          file.close();
+          fs.unlinkSync(destPath);
+          response.destroy();
+          return reject(new Error(`File too large (Content-Length: ${contentLength} bytes)`));
+        }
+
+        let downloadedBytes = 0;
+        let isAborted = false;
+
+        response.on('data', (chunk) => {
+          if (isAborted) return;
+          downloadedBytes += chunk.length;
+          if (downloadedBytes > MAX_DOWNLOAD_SIZE) {
+            isAborted = true;
+            response.destroy();
+            file.close();
+            if (fs.existsSync(destPath)) fs.unlinkSync(destPath);
+            reject(new Error(`File too large (exceeded ${MAX_DOWNLOAD_SIZE} bytes)`));
+          }
+        });
         
         response.pipe(file);
         file.on('finish', () => {
+          if (isAborted) return;
           file.close();
           resolve();
         });
         
         file.on('error', (err) => {
-          fs.unlinkSync(destPath);
+          if (isAborted) return;
+          if (fs.existsSync(destPath)) fs.unlinkSync(destPath);
           reject(err);
         });
       });
