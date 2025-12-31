@@ -41,7 +41,8 @@ export const translations = {
       selectYear: "Select year",
       toggleLanguage: "Switch language",
       closeOverlay: "Close details",
-      skipToContent: "Skip to main content"
+      skipToContent: "Skip to main content",
+      globe: "3D Globe Visualization"
     },
     chart: {
       selectCountryPrompt: "Select a country to view details",
@@ -89,7 +90,8 @@ export const translations = {
       selectYear: "Sélectionner l'année",
       toggleLanguage: "Changer de langue",
       closeOverlay: "Fermer les détails",
-      skipToContent: "Aller au contenu principal"
+      skipToContent: "Aller au contenu principal",
+      globe: "Visualisation Globe 3D"
     },
     chart: {
       selectCountryPrompt: "Sélectionnez un pays pour voir les détails",
