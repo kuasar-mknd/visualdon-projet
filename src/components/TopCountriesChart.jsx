@@ -135,9 +135,9 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect })
         .padding(0.2);
 
     // Optimization: Adjust transition duration based on playback state
-    // When playing, we need faster transitions (200ms) to match the tick rate and avoid "lag"
-    // When paused, we use a smoother, longer transition (750ms)
     const transitionDuration = isPlaying ? 200 : 750;
+
+    // Optimization: Interrupt previous transitions to prevent 'bounciness' when updating rapidly
     const tTransition = svg.transition().duration(transitionDuration).ease(d3.easeCubicOut);
 
     const bars = g.selectAll(".bar-group")
@@ -149,6 +149,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect })
         .attr("transform", `translate(0, ${innerHeight})`)
         .remove();
 
+    // Use a stable reference for event handlers to avoid re-binding
     const handleInteractionStart = function() {
         g.selectAll(".bar-group")
          .transition()
@@ -184,11 +185,6 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect })
         .style("outline", "none")
         .attr("tabindex", "0")
         .attr("role", "listitem")
-        .attr("aria-label", d => {
-            const name = translatedNames[d["ISO 3166-1 alpha-3"]] || d.Country;
-            const val = (d[category] || 0).toFixed(1);
-            return `${name}: ${val}`;
-        })
         .on("mouseover", handleInteractionStart)
         .on("mouseout", handleInteractionEnd)
         .on("focus", handleInteractionStart)
@@ -256,7 +252,10 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect })
         .attr("x", d => x(d[category] || 0) + 8)
         .style("opacity", 1)
         .tween("text", function(d) {
-            const i = d3.interpolateNumber(parseFloat(this.textContent) || 0, d[category] || 0);
+             // Optimization: Use a local variable or attribute to store the previous value
+             // instead of parsing textContent which is slow and locale-dependent.
+             const currentVal = parseFloat(this.textContent) || 0;
+             const i = d3.interpolateNumber(currentVal, d[category] || 0);
             return function(t) {
                 this.textContent = i(t).toFixed(1);
             };

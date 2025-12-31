@@ -21,18 +21,28 @@ async function safeCsv(url, rowConverter) {
   const body = rows.slice(1);
 
   // Optimization: Pre-filter safe headers once instead of checking every key in every row
-  const safeHeaders = header
-    .map((key, index) => ({ key, index }))
-    .filter(({ key }) => key !== '__proto__' && key !== 'constructor' && key !== 'prototype');
+  const safeHeaders = [];
+  for (let i = 0; i < header.length; i++) {
+    const key = header[i];
+    if (key !== '__proto__' && key !== 'constructor' && key !== 'prototype') {
+        safeHeaders.push({ key, index: i });
+    }
+  }
 
-  const data = body.map(row => {
+  // Optimization: Use a manual loop instead of map to reduce object allocation overhead
+  // and improve performance on large datasets (10k+ rows).
+  const len = body.length;
+  const data = new Array(len);
+
+  for (let i = 0; i < len; i++) {
+    const row = body[i];
     const obj = {};
     for (let j = 0; j < safeHeaders.length; j++) {
       const { key, index } = safeHeaders[j];
       obj[key] = row[index];
     }
-    return rowConverter ? rowConverter(obj) : obj;
-  });
+    data[i] = rowConverter ? rowConverter(obj) : obj;
+  }
 
   // Attach columns property as d3.csv does, in case it's used
   data.columns = header;

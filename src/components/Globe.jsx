@@ -116,10 +116,13 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
   const handleMouseEnter = useCallback((countryId, featureName) => {
       setHoveredCountryId(countryId);
       if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+
+      // Optimization: Increased debounce time for fetching country details
+      // to avoid triggering API calls during rapid mouse movement over multiple countries
       hoverTimeoutRef.current = setTimeout(async () => {
           const name = await fetchCountryDetails(countryId, language);
           setHoveredCountryName(name || featureName);
-      }, 150);
+      }, 200);
   }, [language]);
 
   const handleMouseLeave = useCallback(() => {

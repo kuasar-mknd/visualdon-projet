@@ -8,6 +8,9 @@ const MAX_CACHE_SIZE = 250; // Limit cache to ~250 countries to prevent localSto
 // This significantly reduces main-thread blocking during animations where fetchCountryDetails is called repeatedly.
 let memoryCache = null;
 
+// Optimization: Promise cache to deduplicate in-flight requests
+const pendingRequests = new Map();
+
 const getCache = () => {
   if (memoryCache !== null) return memoryCache;
 
@@ -81,46 +84,63 @@ export const fetchCountryDetails = async (code, language) => {
     return getNameFromData(data, language);
   }
 
+  // Check if there is already a pending request for this code
+  if (pendingRequests.has(code)) {
+    const data = await pendingRequests.get(code);
+    return getNameFromData(data, language);
+  }
+
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-  try {
-    // Sanitize input to prevent URL injection
-    const safeCode = encodeURIComponent(code);
-    const response = await fetch(`https://restcountries.com/v3.1/alpha/${safeCode}`, {
-      signal: controller.signal
-    });
+  // Create a new promise for this request
+  const requestPromise = (async () => {
+    try {
+      // Sanitize input to prevent URL injection
+      const safeCode = encodeURIComponent(code);
+      const response = await fetch(`https://restcountries.com/v3.1/alpha/${safeCode}`, {
+        signal: controller.signal
+      });
 
-    if (!response.ok) throw new Error('Network response was not ok');
-    
-    const data = await response.json();
+      if (!response.ok) throw new Error('Network response was not ok');
 
-    // Security Enhancement: Validate API response structure before using it
-    if (!Array.isArray(data) || data.length === 0) {
-      throw new Error('Invalid API response format');
+      const data = await response.json();
+
+      // Security Enhancement: Validate API response structure before using it
+      if (!Array.isArray(data) || data.length === 0) {
+        throw new Error('Invalid API response format');
+      }
+
+      const countryData = data[0]; // API returns array
+
+      // Validate country data shape
+      if (!countryData || !countryData.name) {
+        throw new Error('Missing country name data in response');
+      }
+
+      // Update cache
+      cache[code] = {
+        data: countryData,
+        timestamp: Date.now()
+      };
+      setCache(cache);
+
+      return countryData;
+    } catch (error) {
+      console.warn(`Failed to fetch data for ${code}:`, error.message);
+      return null; // Return null on failure so UI can fallback
+    } finally {
+      clearTimeout(timeoutId);
+      // Remove from pending requests once complete (success or failure)
+      pendingRequests.delete(code);
     }
+  })();
 
-    const countryData = data[0]; // API returns array
+  // Store the promise in the map
+  pendingRequests.set(code, requestPromise);
 
-    // Validate country data shape
-    if (!countryData || !countryData.name) {
-      throw new Error('Missing country name data in response');
-    }
-
-    // Update cache
-    cache[code] = {
-      data: countryData,
-      timestamp: now
-    };
-    setCache(cache);
-
-    return getNameFromData(countryData, language);
-  } catch (error) {
-    console.warn(`Failed to fetch data for ${code}:`, error.message);
-    return null;
-  } finally {
-    clearTimeout(timeoutId);
-  }
+  const result = await requestPromise;
+  return getNameFromData(result, language);
 };
 
 const getNameFromData = (data, language) => {
