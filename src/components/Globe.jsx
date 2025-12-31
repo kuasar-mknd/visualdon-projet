@@ -184,9 +184,12 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
   useEffect(() => {
     if (!svgRef.current) return;
     const svg = d3.select(svgRef.current);
-    countrySelectionRef.current = svg.selectAll("path.country-path");
+    // Bind data to the selection immediately so it's available for other effects/interactions
+    // We can safely use index matching here as paths are mapped from geoJson.features
+    // This avoids re-binding data in the animation loop (O(N) join)
+    countrySelectionRef.current = svg.selectAll("path.country-path").data(geoJson ? geoJson.features : []);
     sphereSelectionRef.current = svg.selectAll("path.sphere-path");
-  }, [paths]);
+  }, [paths, geoJson]);
 
   // Update projection setup (rotation/scale) and paths
   useEffect(() => {
@@ -285,8 +288,11 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
       if (!geoJson || !dataMap || selection.empty()) return;
 
       selection
-        .data(geoJson.features)
+        // Optimization: Removed .data(geoJson.features) call here.
+        // Data is already bound in the selection caching effect.
+        // This prevents expensive data join operations on every animation tick.
         .attr("fill", d => {
+            if (!d) return '#475569';
             const countryId = d.properties.A3 || d.id;
             const countryData = dataMap.get(countryId);
             const value = countryData ? countryData[category] : 0;
