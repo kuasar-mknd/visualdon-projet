@@ -39,7 +39,7 @@ Node.js scripts for maintenance tasks.
 
 ### `verification/`
 Contains scripts and artifacts for frontend verification.
-- **`verify_load.py`**: A Playwright (Python) script used to verify that the application loads correctly and renders the main chart components. This serves as a lightweight smoke test for the frontend.
+- **`verify_load.js`**: A Playwright (Node.js) script used to verify that the application loads correctly and renders the main chart components. This serves as a lightweight smoke test for the frontend.
 
 ## Data Flow
 1.  **Initialization**: On load, `App.jsx` initializes.
