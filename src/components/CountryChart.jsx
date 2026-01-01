@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, Suspense } from 'react';
+import React, { useRef, useState, Suspense } from 'react';
 import PropTypes from 'prop-types';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -27,36 +27,38 @@ const CountryChart = ({ countryCode, emissionsData }) => {
   const [dimensions, setDimensions] = useState({ width: 500, height: 500 });
 
   // Handle Resize
-  useEffect(() => {
-    if (!containerRef.current) return;
+  // Optimization: Use callback ref to handle potential late mounting of the container
+  const resizeObserverRef = useRef(null);
 
-    const updateDimensions = () => {
-       if (containerRef.current) {
-          setDimensions({
-            width: containerRef.current.clientWidth || 500,
-            height: containerRef.current.clientHeight || 500
+  const setContainerRef = React.useCallback(node => {
+      if (resizeObserverRef.current) {
+          resizeObserverRef.current.disconnect();
+          resizeObserverRef.current = null;
+      }
+
+      if (node) {
+          const updateDimensions = () => {
+              setDimensions({
+                  width: node.clientWidth || 500,
+                  height: node.clientHeight || 500
+              });
+          };
+
+          // Initial measure
+          updateDimensions();
+
+          // Optimization: Debounce ResizeObserver to prevent layout thrashing
+          let timeoutId;
+          const resizeObserver = new ResizeObserver(() => {
+              clearTimeout(timeoutId);
+              timeoutId = setTimeout(updateDimensions, 100);
           });
-       }
-    };
 
-    updateDimensions();
-    
-    // Optimization: Use ResizeObserver only, removing redundant window resize listener
-    // ResizeObserver is more efficient as it monitors the specific element size
-    // Added debounce to prevent excessive updates during resizing
-    let timeoutId;
-    const resizeObserver = new ResizeObserver(() => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(updateDimensions, 100);
-    });
-
-    resizeObserver.observe(containerRef.current);
-
-    return () => {
-      resizeObserver.disconnect();
-      clearTimeout(timeoutId);
-    };
-  }, [containerRef.current]);
+          resizeObserver.observe(node);
+          resizeObserverRef.current = resizeObserver;
+      }
+      containerRef.current = node; // Update the stable ref if needed elsewhere
+  }, []);
 
   const emissionData = React.useMemo(() => {
       if (!countryCode || !emissionsData) return [];
@@ -162,7 +164,7 @@ const CountryChart = ({ countryCode, emissionsData }) => {
       
       {/* Chart Container */}
       <div className="flex-1 bg-transparent rounded-lg overflow-hidden relative">
-        <div ref={containerRef} className="w-full h-full absolute inset-0">
+        <div ref={setContainerRef} className="w-full h-full absolute inset-0">
            {dimensions.width > 0 && dimensions.height > 0 && emissionData.length > 0 && (
              <Suspense fallback={<div className="flex items-center justify-center h-full text-slate-400">{t('loading')}...</div>}>
                 {viewMode === 'bubbles' ? (
