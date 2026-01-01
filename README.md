@@ -8,6 +8,8 @@
 
 An interactive 3D globe visualization exploring global CO₂ emissions from 1750 to 2024. Built with React, D3.js, and Three.js, this project transforms complex climate data into an engaging, accessible experience.
 
+**Note:** This is a **Frontend-only** repository. Data is served via static files managed by a build-time script.
+
 ![Preview](wireframes/preview.png)
 
 ## ✨ Features
@@ -101,7 +103,7 @@ visualdon-projet/
 │   │   ├── controls/    # UI Controls (Play, Slider)
 │   │   ├── globe/       # 3D Globe elements & Legend
 │   │   ├── layout/      # Header, Footer
-│   │   └── overlay/     # Details Panel
+│   │   ├── overlay/     # Details Panel
 │   ├── context/         # React context (Language)
 │   ├── hooks/           # Custom React hooks (useData)
 │   ├── services/        # API services (country translations)
@@ -127,6 +129,7 @@ Common issues and solutions:
 - **Port already in use**: If `http://localhost:5173` is taken, Vite will automatically try the next available port (e.g., 5174). Check the console output.
 - **Data not loading**: If charts are empty, try running `pnpm run update-data` to fetch the latest dataset.
 - **Environment Issues**: Ensure your `.env` file (if present) does not contain conflicting variables. See [docs/ENV.md](docs/ENV.md) for details.
+- **Visual Artifacts**: If the globe doesn't render, ensure your browser supports WebGL.
 
 ## ✅ Verification
 

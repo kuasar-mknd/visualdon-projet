@@ -32,6 +32,43 @@ To support versioned data without requiring code changes, the application uses a
   - **Source**: Calculated during the update process.
   - **Columns**: `Country`, `Year`, `Per Capita`.
 
+## API Examples
+
+You can access the data programmatically using standard HTTP clients.
+
+### Get the Manifest
+Retrieves the current dataset configuration and filenames.
+
+```bash
+curl -s https://visualdon-projet.pages.dev/data/manifest.json
+```
+
+**Response:**
+```json
+{
+  "emissions": "GCB2024v17_MtCO2_flat.csv",
+  "perCapita": "GCB2024v17_percapita_flat.csv",
+  "version": "2024",
+  "lastUpdated": "2024-05-23T12:00:00.000Z"
+}
+```
+
+### Get Emissions Data
+Once you have the filename from the manifest (e.g., `GCB2024v17_MtCO2_flat.csv`), you can fetch the full dataset.
+
+```bash
+# Example assuming the filename from manifest
+curl -s "https://visualdon-projet.pages.dev/data/GCB2024v17_MtCO2_flat.csv" | head -n 5
+```
+
+**Response (CSV):**
+```csv
+Country,ISO 3166-1 alpha-3,Year,Total,Coal,Oil,Gas,Cement,Flaring,Other,Per Capita
+Afghanistan,AFG,1750,0,0,0,0,0,0,0,0
+Afghanistan,AFG,1751,0,0,0,0,0,0,0,0
+...
+```
+
 ## Internal Services
 
 ### Country Service (`src/services/countryService.js`)

@@ -56,11 +56,14 @@ The application follows a component-based architecture where each UI element is 
 - **Container/Presenter**: Some components act as containers (fetching data/state) while others are purely presentational.
 
 ### Clean Architecture Mapping
-While this is a frontend-only application, the structure loosely maps to Clean Architecture principles:
-- **Domain Layer**: Implicitly defined by the data structures (emissions data) and types. `src/services/` contains domain-specific logic like country translation.
-- **Application Layer**: `src/hooks/` and `src/context/` manage the application state and business logic (e.g., filtering data by year).
-- **Infrastructure Layer**: `d3.csv` and `fetch` APIs act as the infrastructure for data retrieval. `scripts/update-data.js` handles external data source integration and manifest generation.
-- **Presentation Layer**: React components (`src/components/`) handle the UI and user interaction.
+This project adapts Clean Architecture principles to a frontend context, organizing code by responsibility:
+
+| Layer | Frontend Equivalent | Description |
+|---|---|---|
+| **Domain** | `src/services/` | Business rules and entities (e.g., Country data normalization, translation logic). Independent of UI. |
+| **Application** | `src/hooks/`, `src/context/` | Use cases and application state (e.g., `useData` fetching strategy, `LanguageContext` state). Orchestrates data flow. |
+| **Infrastructure** | `scripts/`, `d3-fetch` | External interfaces (e.g., Data fetching from CSVs, `update-data.js` script for Zenodo integration). |
+| **Presentation** | `src/components/` | UI components (React) that render the state and handle user events. |
 
 ### Custom Hooks
 Logic for data fetching and state management is encapsulated in hooks (`useData`) to separate concerns and keep components clean.
