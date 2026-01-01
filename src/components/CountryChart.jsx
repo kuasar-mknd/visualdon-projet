@@ -93,7 +93,7 @@ const CountryChart = ({ countryCode, emissionsData }) => {
   if (!countryCode) {
     return (
       <div
-        className="flex items-center justify-center h-full text-slate-400"
+        className="flex items-center justify-center h-full text-slate-500"
         role="status"
         aria-live="polite"
       >
@@ -164,7 +164,7 @@ const CountryChart = ({ countryCode, emissionsData }) => {
       <div className="flex-1 bg-transparent rounded-lg overflow-hidden relative">
         <div ref={containerRef} className="w-full h-full absolute inset-0">
            {dimensions.width > 0 && dimensions.height > 0 && emissionData.length > 0 && (
-             <Suspense fallback={<div className="flex items-center justify-center h-full text-slate-400">{t('loading')}...</div>}>
+             <Suspense fallback={<div className="flex items-center justify-center h-full text-slate-500">{t('loading')}...</div>}>
                 {viewMode === 'bubbles' ? (
                   <BubbleChart
                     chartData={chartData}
