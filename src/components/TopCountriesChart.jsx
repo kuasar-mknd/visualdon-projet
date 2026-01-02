@@ -8,10 +8,12 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect })
   const svgRef = useRef(null);
   const { t, language } = useLanguage();
   const [translatedNames, setTranslatedNames] = useState({});
+  const fetchedCodes = useRef(new Set());
 
   // Reset translations when language changes to force re-fetch in new language
   useEffect(() => {
     setTranslatedNames({});
+    fetchedCodes.current.clear();
   }, [language]);
 
   // Optimization: Memoize the filtered and sorted topData calculation
@@ -28,9 +30,14 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect })
   useEffect(() => {
     const neededCodes = topData
       .map(d => d["ISO 3166-1 alpha-3"])
-      .filter(code => !translatedNames[code]);
+      // Optimization: Check both the results map AND the inflight/completed ref
+      // This prevents firing duplicate requests for the same country code during animations
+      .filter(code => !translatedNames[code] && !fetchedCodes.current.has(code));
 
     if (neededCodes.length === 0) return;
+
+    // Mark as fetched immediately
+    neededCodes.forEach(code => fetchedCodes.current.add(code));
 
     const fetchTranslations = async () => {
       const newTranslations = {};
