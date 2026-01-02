@@ -14,7 +14,21 @@ If AI features are added in the future (e.g., for predictive emissions modeling 
 - Cost control mechanisms (caching, rate limiting).
 
 ## Cost Control & Best Practices
-Although no AI models are currently used, any future integration should adhere to the following principles:
-- **Caching**: Cache AI responses aggressively (e.g., in LocalStorage or a backend proxy) to minimize API calls.
-- **Rate Limiting**: Implement client-side throttling (debouncing) on user inputs that trigger AI requests.
-- **Budget Alerts**: Configure provider-side budget alerts (e.g., OpenAI Usage Limits) to prevent unexpected costs.
+Although no AI models are currently used, any future integration **must** adhere to the following principles to prevent cost overruns:
+
+### 1. Caching Strategy
+- **Browser Caching**: Store expensive AI responses in `localStorage` or `IndexedDB` with a timestamp.
+- **Deduplication**: Implement a request map to prevent identical in-flight requests.
+- **Stale-While-Revalidate**: Serve cached content immediately while fetching updates in the background.
+
+### 2. Rate Limiting & Throttling
+- **Debounce Inputs**: Wait at least 500ms after the user stops typing before sending a request.
+- **Request Quotas**: Limit the number of AI requests a user can make per session (e.g., 5 queries/minute).
+
+### 3. Model Selection
+- **Default to Low-Cost**: Use cheaper models (e.g., `gpt-4o-mini`, `claude-3-haiku`) for general tasks.
+- **Selective Escalation**: Only use flagship models (e.g., `gpt-4o`) for complex reasoning tasks that cheaper models fail.
+
+### 4. Safety & Budgeting
+- **Hard Limits**: Configure provider-side hard limits (e.g., OpenAI Usage Limits) to strictly cap monthly spend.
+- **Sanitization**: Never send PII or sensitive user data to external AI providers.

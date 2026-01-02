@@ -131,11 +131,17 @@ Common issues and solutions:
 ## ✅ Verification
 
 ### Automated Verification
-The project includes a lightweight verification script in the `verification/` directory. This script uses Playwright (Python) to ensure the application loads and renders key components.
+The project includes a lightweight verification script in the `verification/` directory. This script uses Playwright (Node.js) to ensure the application loads and renders key components.
 
 ```bash
-# Run the verification script (requires Python and Playwright)
-python verification/verify_load.py
+# Build the application
+pnpm run build
+
+# Start the preview server in the background
+pnpm run preview &
+
+# Run the verification script
+pnpm run test:e2e
 ```
 
 ### Static Analysis

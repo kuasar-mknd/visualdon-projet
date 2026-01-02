@@ -8,6 +8,7 @@
     "build": "vite build",
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
+    "test:e2e": "node verification/verify_load.cjs",
     "update-data": "node scripts/update-data.js"
   },
   "dependencies": {

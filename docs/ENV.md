@@ -20,15 +20,11 @@ For a quick start, you can copy the provided example file:
 cp .env.example .env
 ```
 
-The `.env.example` file contains commented-out placeholders for potential future configuration:
+The `.env.example` file contains placeholders for potential future configuration.
 
-```bash
-# Application Base URL (optional, defaults to root)
-# VITE_BASE_URL=/
-
-# Analytics ID (if applicable)
-# VITE_ANALYTICS_ID=
-
-# Debug Mode (true/false)
-# VITE_DEBUG=false
-```
+### Supported Variables
+| Variable | Description | Default |
+|---|---|---|
+| `VITE_BASE_URL` | The base URL for the application (useful for deployment to subdirectories). | `/` |
+| `VITE_ANALYTICS_ID` | Cloudflare Analytics ID or similar tracking code. | `undefined` |
+| `VITE_DEBUG` | Enable debug logging in the console (`true` or `false`). | `false` |

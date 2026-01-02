@@ -39,7 +39,7 @@ Node.js scripts for maintenance tasks.
 
 ### `verification/`
 Contains scripts and artifacts for frontend verification.
-- **`verify_load.py`**: A Playwright (Python) script used to verify that the application loads correctly and renders the main chart components. This serves as a lightweight smoke test for the frontend.
+- **`verify_load.cjs`**: A Playwright (Node.js) script used to verify that the application loads correctly and renders the main chart components. This serves as a lightweight smoke test for the frontend.
 
 ## Data Flow
 1.  **Initialization**: On load, `App.jsx` initializes.
@@ -56,11 +56,26 @@ The application follows a component-based architecture where each UI element is 
 - **Container/Presenter**: Some components act as containers (fetching data/state) while others are purely presentational.
 
 ### Clean Architecture Mapping
-While this is a frontend-only application, the structure loosely maps to Clean Architecture principles:
-- **Domain Layer**: Implicitly defined by the data structures (emissions data) and types. `src/services/` contains domain-specific logic like country translation.
-- **Application Layer**: `src/hooks/` and `src/context/` manage the application state and business logic (e.g., filtering data by year).
-- **Infrastructure Layer**: `d3.csv` and `fetch` APIs act as the infrastructure for data retrieval. `scripts/update-data.js` handles external data source integration and manifest generation.
-- **Presentation Layer**: React components (`src/components/`) handle the UI and user interaction.
+This project adapts Clean Architecture principles to a frontend context to separate concerns and improve maintainability:
+
+1.  **Domain Layer (Entities)**
+    *   **Concept**: Business objects and rules independent of the UI.
+    *   **Implementation**: Implicitly defined by the data schemas (Emissions, Country) and logic in `src/services/countryService.js` (e.g., country code validation, name translation).
+
+2.  **Application Layer (Use Cases)**
+    *   **Concept**: Orchestration of data flow and business rules.
+    *   **Implementation**: `src/hooks/` (e.g., `useData`) and `src/context/` (e.g., `LanguageContext`). These modules manage *what* happens (fetching data, toggling language, filtering by year) without worrying about *how* it's rendered.
+
+3.  **Interface Adapters (Presentation)**
+    *   **Concept**: Converting data for the UI and handling user input.
+    *   **Implementation**: React Components in `src/components/`. They receive data via props (from the Application Layer) and render it. Events (clicks, sliders) are passed back up to the Application Layer.
+
+4.  **Infrastructure Layer**
+    *   **Concept**: External tools, frameworks, and data sources.
+    *   **Implementation**:
+        *   **Data Access**: `d3.csv`, `fetch` API.
+        *   **Build/Env**: Vite, `.env` configuration.
+        *   **External Scripts**: `scripts/update-data.js` acts as an infrastructure tool to bridge the external data source (Global Carbon Project) to our internal static API.
 
 ### Custom Hooks
 Logic for data fetching and state management is encapsulated in hooks (`useData`) to separate concerns and keep components clean.
