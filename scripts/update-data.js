@@ -186,6 +186,21 @@ async function getZenodoData() {
 }
 
 /**
+ * Calculate file checksum (SHA-256) for integrity verification
+ * @param {string} filePath - Path to file
+ * @returns {Promise<string>} - Hex string of hash
+ */
+function calculateFileHash(filePath) {
+  return new Promise((resolve, reject) => {
+    const stream = fs.createReadStream(filePath);
+    const hasher = crypto.createHash('sha256');
+    stream.on('data', data => hasher.update(data));
+    stream.on('end', () => resolve(hasher.digest('hex')));
+    stream.on('error', reject);
+  });
+}
+
+/**
  * Verify file checksum
  * @param {string} filePath - Path to file
  * @param {string} checksum - Expected checksum (e.g., 'md5:12345...')
@@ -417,10 +432,19 @@ async function updateData() {
     fs.writeFileSync(perCapitaFinal, arrayToCSV(perCapitaData), 'utf-8');
     console.log(`✓ Saved: ${perCapitaFinal}\n`);
 
+    // Calculate hashes for integrity verification
+    console.log('🔒 Calculating integrity hashes...');
+    const emissionsHash = await calculateFileHash(mtCO2Final);
+    const perCapitaHash = await calculateFileHash(perCapitaFinal);
+    console.log(`✓ Emissions hash: ${emissionsHash.substring(0, 8)}...`);
+    console.log(`✓ Per capita hash: ${perCapitaHash.substring(0, 8)}...\n`);
+
     // Create and save manifest
     const manifest = {
       emissions: mtCO2FinalName,
       perCapita: perCapitaFinalName,
+      emissionsHash,
+      perCapitaHash,
       version: zenodoData.version,
       lastUpdated: new Date().toISOString()
     };
