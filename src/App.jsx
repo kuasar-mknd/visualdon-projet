@@ -83,7 +83,7 @@ function AppContent() {
   }, [yearRange, year]);
 
   // Helper to group data by year
-  const groupDataByYear = useCallback((data) => {
+  const groupDataByYear = useCallback((data, sortKey = 'Total') => {
     if (!data) return new Map();
 
     const grouped = new Map();
@@ -99,14 +99,21 @@ function AppContent() {
       entry.list.push(d);
       entry.map.set(d["ISO 3166-1 alpha-3"], d);
     }
+
+    // Optimization: Sort lists descending by the sortKey to avoid sorting in TopCountriesChart on every frame
+    for (const entry of grouped.values()) {
+        entry.list.sort((a, b) => (b[sortKey] || 0) - (a[sortKey] || 0));
+    }
+
     return grouped;
   }, []);
 
   // Optimization: Pre-group data by year for BOTH datasets once on load.
   // This avoids O(N) iteration every time the user switches categories.
   // This significantly improves responsiveness when toggling metrics.
-  const emissionsByYear = useMemo(() => groupDataByYear(emissions), [emissions, groupDataByYear]);
-  const perCapitaByYear = useMemo(() => groupDataByYear(perCapita), [perCapita, groupDataByYear]);
+  // We sort by 'Total' because TopCountriesChart uses 'Total' for both categories.
+  const emissionsByYear = useMemo(() => groupDataByYear(emissions, 'Total'), [emissions, groupDataByYear]);
+  const perCapitaByYear = useMemo(() => groupDataByYear(perCapita, 'Total'), [perCapita, groupDataByYear]);
 
   const dataByYear = category === 'Per Capita' ? perCapitaByYear : emissionsByYear;
 

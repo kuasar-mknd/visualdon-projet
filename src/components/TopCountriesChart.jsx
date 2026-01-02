@@ -14,14 +14,19 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect })
     setTranslatedNames({});
   }, [language]);
 
-  // Optimization: Memoize the filtered and sorted topData calculation
+  // Optimization: Memoize the filtered topData calculation.
+  // Note: Data is already pre-sorted in App.jsx (descending by Total), so we just slice and filter.
+  // This avoids O(N log N) sorting on every render/frame.
   const topData = useMemo(() => {
     if (!data) return [];
     
+    // Slice first to get top candidates, then filter out zeros.
+    // Since data is sorted descending, non-zeros are at the start.
+    // If we have fewer than 10 non-zero items, they will all be in the first 10 slice anyway (unless there are fewer than 10 items total and some are zero).
+    // Actually, if we have [10, 8, 0, 0...], slice(0, 10) gives [10, 8, 0...], filter gives [10, 8]. Correct.
     return data
-      .filter(d => (d[category] || 0) > 0)
-      .sort((a, b) => (b[category] || 0) - (a[category] || 0))
-      .slice(0, 10);
+      .slice(0, 10)
+      .filter(d => (d[category] || 0) > 0);
   }, [data, category]);
 
   // Fetch translated country names when topData changes
