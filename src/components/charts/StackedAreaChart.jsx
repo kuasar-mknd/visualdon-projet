@@ -24,7 +24,9 @@ const StackedAreaChart = ({
     const svg = d3.select(containerRef.current)
       .append("svg")
       .attr("width", width)
-      .attr("height", height);
+      .attr("height", height)
+      .attr("role", "graphics-document")
+      .attr("aria-label", t('chart.stackedChart'));
 
     // Prepare stacked data
     const stackData = years.map(year => {
@@ -62,7 +64,11 @@ const StackedAreaChart = ({
 
     // Shared handlers
     const handleInteractionStart = function(event, d) {
-        d3.select(this).attr('opacity', 1);
+        // Visual feedback
+        d3.select(this)
+          .attr('opacity', 1)
+          .attr('stroke', '#ffffff')
+          .attr('stroke-width', 2);
 
         // Highlight in legend
         svg.selectAll('.legend-row')
@@ -70,7 +76,11 @@ const StackedAreaChart = ({
     };
 
     const handleInteractionEnd = function() {
-        d3.select(this).attr('opacity', 0.8);
+        d3.select(this)
+          .attr('opacity', 0.8)
+          .attr('stroke', 'none')
+          .attr('stroke-width', 0);
+
         svg.selectAll('.legend-row').attr('opacity', 1);
     };
 
@@ -83,6 +93,7 @@ const StackedAreaChart = ({
       .attr('d', area)
       .attr('opacity', 0.8)
       .style('cursor', 'pointer')
+      .style("outline", "none")
       .attr("tabindex", "0")
       .attr("role", "button")
       .attr("aria-label", d => t(`sectors.${d.key}`) || d.key)
@@ -151,10 +162,16 @@ const StackedAreaChart = ({
         .attr("transform", `translate(0, ${i * 28})`)
         .datum(sector)
         .style("cursor", "pointer")
+        .style("outline", "none")
         .attr("tabindex", "0")
         .attr("role", "button")
         .attr("aria-label", t(`sectors.${sector}`) || sector)
         .on("mouseover focus", function(event, hoveredSector) {
+          // Add visual feedback
+          d3.select(this).select("rect")
+            .attr("stroke", "#334155")
+            .attr("stroke-width", 2);
+
           // Handle both MouseEvent and FocusEvent (where data is attached to element)
           const key = hoveredSector || d3.select(this).datum();
           svg.selectAll('.area')
@@ -163,6 +180,10 @@ const StackedAreaChart = ({
             .attr('opacity', d => d.key === key ? 1 : 0.2);
         })
         .on("mouseout blur", function() {
+          // Remove visual feedback
+          d3.select(this).select("rect")
+            .attr("stroke", "none");
+
           svg.selectAll('.area')
             .transition()
             .duration(200)

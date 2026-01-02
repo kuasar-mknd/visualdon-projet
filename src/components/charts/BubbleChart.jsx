@@ -23,7 +23,9 @@ const BubbleChart = ({
     const svg = d3.select(containerRef.current)
       .append("svg")
       .attr("width", width)
-      .attr("height", height);
+      .attr("height", height)
+      .attr("role", "graphics-document")
+      .attr("aria-label", t('chart.bubbles'));
 
     // Scales
     const xScale = d3.scaleLinear()
@@ -121,11 +123,16 @@ const BubbleChart = ({
 
     // Shared handlers for mouse and keyboard interactions
     const handleInteractionStart = function(event, d) {
+        // Visual feedback for interaction
         d3.select(this)
             .transition()
             .duration(200)
             .attr("opacity", 1)
-            .attr("stroke-width", 3);
+            .attr("stroke-width", 3)
+            // Add a distinct stroke for focus/hover to ensure visibility
+            // especially when the fill color might have low contrast
+            .attr("stroke", "#ffffff")
+            .style("filter", "drop-shadow(0 0 2px rgba(0,0,0,0.5))");
 
         // Remove existing tooltips to prevent duplicates
         svg.selectAll(".tooltip").remove();
@@ -161,7 +168,9 @@ const BubbleChart = ({
             .transition()
             .duration(200)
             .attr("opacity", 0.7)
-            .attr("stroke-width", 2);
+            .attr("stroke-width", 2)
+            .attr("stroke", d => d.color) // Restore original stroke color
+            .style("filter", "none");
 
         svg.selectAll(".tooltip").remove();
     };
@@ -176,6 +185,7 @@ const BubbleChart = ({
         .attr("stroke", d => d.color)
         .attr("stroke-width", 2)
         .style("cursor", "pointer")
+        .style("outline", "none")
         .attr("tabindex", "0")
         .attr("role", "button")
         .attr("aria-label", d => `${t(`sectors.${d.sector}`)}: ${d.value.toFixed(1)} MtCO₂`)
@@ -192,16 +202,26 @@ const BubbleChart = ({
         const legendRow = legend.append("g")
             .attr("transform", `translate(0, ${i * 28})`)
             .style("cursor", "pointer")
+            .style("outline", "none")
             .attr("tabindex", "0")
             .attr("role", "button")
             .attr("aria-label", t(`sectors.${sector}`) || sector)
             .on("mouseover focus", function() {
+                // Add visual feedback for the legend item itself
+                d3.select(this).select("circle")
+                  .attr("stroke", "#334155")
+                  .attr("stroke-width", 2);
+
                 bubbles.selectAll("circle")
                     .transition()
                     .duration(200)
                     .attr("opacity", d => d.sector === sector ? 1 : 0.2);
             })
             .on("mouseout blur", function() {
+                // Remove visual feedback
+                d3.select(this).select("circle")
+                  .attr("stroke", "none");
+
                 bubbles.selectAll("circle")
                     .transition()
                     .duration(200)

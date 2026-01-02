@@ -20,7 +20,7 @@ const GlobeTooltip = ({ countryName, value, category }) => {
           </span>
         </div>
       ) : (
-        <div className="text-sm text-slate-400 italic">{t('noData')}</div>
+        <div className="text-sm text-slate-500 italic">{t('noData')}</div>
       )}
     </div>
   );

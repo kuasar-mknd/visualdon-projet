@@ -93,7 +93,7 @@ const CountryChart = ({ countryCode, emissionsData }) => {
   if (!countryCode) {
     return (
       <div
-        className="flex items-center justify-center h-full text-slate-400"
+        className="flex items-center justify-center h-full text-slate-500"
         role="status"
         aria-live="polite"
       >
