@@ -15,15 +15,16 @@ This project is a client-side Single Page Application (SPA) built with React 19 
 The source code is organized as follows:
 
 - **`components/`**: Reusable React components.
-  - **`charts/`**: D3.js based visualization components (e.g., BubbleChart, StackedAreaChart).
+  - **`charts/`**: D3.js based visualization components (e.g., `BubbleChart`, `StackedAreaChart`).
   - **`controls/`**: UI elements for user interaction (Play button, Slider).
-  - **`globe/`**: Components related to the 3D globe visualization.
-  - **`layout/`**: Structural components like Header and Footer.
-  - **`overlay/`**: UI overlays for detailed information.
-- **`context/`**: React Context definitions, primarily for state management that needs to be accessed globally (e.g., LanguageContext).
+  - **`globe/`**: Helper components for the globe (e.g., `GlobeLegend`, `GlobeTooltip`).
+  - **`layout/`**: Structural components like `Header` and `Footer`.
+  - **`overlay/`**: UI overlays for detailed information (`CountryDetailsOverlay`).
+  - *Note*: Major components like `Globe.jsx`, `CountryChart.jsx`, and `TopCountriesChart.jsx` reside directly in `src/components/`.
+- **`context/`**: React Context definitions, primarily for state management that needs to be accessed globally (e.g., `LanguageContext`).
 - **`hooks/`**: Custom React hooks.
   - **`useData.js`**: A critical hook for fetching, parsing, and managing the emissions data.
-- **`services/`**: logic for external or internal services.
+- **`services/`**: Logic for external or internal services.
   - **`countryService.js`**: Handles country name translations and mapping.
 - **`utils/`**: Shared utility functions (e.g., security helpers).
 - **`App.jsx`**: The main application component that orchestrates the layout and state.
@@ -43,8 +44,8 @@ Contains scripts and artifacts for frontend verification.
 
 ## Data Flow
 1.  **Initialization**: On load, `App.jsx` initializes.
-2.  **Data Fetching**: The `useData` hook is triggered. It fetches CSV files from `public/data/` using `d3-fetch` (or similar).
-3.  **Parsing**: Data is parsed and transformed into a usable format (likely an array of objects).
+2.  **Data Fetching**: The `useData` hook is triggered. It fetches CSV files from `public/data/` using `d3-fetch`.
+3.  **Parsing**: Data is parsed and transformed into a usable format (arrays of objects).
 4.  **State**: The parsed data is stored in the React state.
 5.  **Rendering**: Components (Charts, Globe) receive data via props and render the visualizations.
 6.  **Updates**: When the user interacts (e.g., moves the time slider), the state updates, triggering re-renders of the visualizations to show data for the selected year.

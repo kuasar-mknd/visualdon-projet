@@ -1,5 +1,7 @@
 # Environment Variables
 
+<!-- DocOps: Environment Variables -->
+
 ## Overview
 This application is a client-side React application built with Vite. It does not currently rely on specific environment variables for its core functionality.
 

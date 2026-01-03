@@ -12,22 +12,22 @@ An interactive 3D globe visualization exploring global CO₂ emissions from 1750
 
 ## ✨ Features
 
-- **🌐 Interactive 3D Globe**: Explore emissions data on a fully interactive, rotatable globe with zoom controls
-- **📊 Dynamic Visualizations**: Real-time charts showing top emitters and country-specific breakdowns by sector
-- **⏱️ Time Travel**: Animate through 270+ years of emissions history with play/pause controls
-- **🌍 Bilingual Support**: Switch seamlessly between English and French interfaces
-- **📈 Cloudflare Analytics**: Integrated privacy-first web analytics
-- **🔍 SEO Optimized**: Metadata, Sitemap, and Robots.txt for better discoverability
-- **📱 Responsive Design**: Optimized for desktop, tablet, and mobile devices
-- **♿ Accessible**: Built with accessibility best practices and semantic HTML
-- **🔄 Auto-updating Data**: Automated monthly data updates from the Global Carbon Budget
+- **🌐 Interactive 3D Globe**: Explore emissions data on a fully interactive, rotatable globe with zoom controls.
+- **📊 Dynamic Visualizations**: Real-time charts showing top emitters and country-specific breakdowns by sector.
+- **⏱️ Time Travel**: Animate through 270+ years of emissions history with play/pause controls.
+- **🌍 Bilingual Support**: Switch seamlessly between English and French interfaces.
+- **📈 Cloudflare Analytics**: Integrated privacy-first web analytics.
+- **🔍 SEO Optimized**: Metadata, Sitemap, and Robots.txt for better discoverability.
+- **📱 Responsive Design**: Optimized for desktop, tablet, and mobile devices.
+- **♿ Accessible**: Built with accessibility best practices and semantic HTML.
+- **🔄 Auto-updating Data**: Automated monthly data updates from the Global Carbon Budget.
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js 20.x or higher
-- pnpm (or npm/yarn)
+- **Node.js**: Version 20.x or higher is required.
+- **pnpm**: The project uses pnpm for package management.
 
 ### Installation
 
@@ -43,7 +43,7 @@ pnpm install
 pnpm run dev
 ```
 
-The application will be available at `http://localhost:5173`
+The application will be available at `http://localhost:5173`.
 
 ### Building for Production
 
@@ -58,9 +58,9 @@ This project uses authoritative emissions data from the [Global Carbon Budget](h
 
 ### Data Sources
 
-- **Territorial Emissions**: Country-level CO₂ emissions by source (coal, oil, gas, cement, flaring)
-- **Per Capita Emissions**: Population-adjusted emissions data
-- **Coverage**: 1750–2024 (updated annually)
+- **Territorial Emissions**: Country-level CO₂ emissions by source (coal, oil, gas, cement, flaring).
+- **Per Capita Emissions**: Population-adjusted emissions data.
+- **Coverage**: 1750–2024 (updated annually).
 
 ### API Access
 
@@ -96,13 +96,13 @@ Data updates are also automated via GitHub Actions, running monthly. See [DATA_U
 ```text
 visualdon-projet/
 ├── src/
-│   ├── components/      # React components
+│   ├── components/      # React components (Charts, Globe, UI)
 │   │   ├── charts/      # D3 Charts (Bubble, StackedArea)
 │   │   ├── controls/    # UI Controls (Play, Slider)
-│   │   ├── globe/       # 3D Globe elements & Legend
+│   │   ├── globe/       # Globe helpers (Legend, Tooltip)
 │   │   ├── layout/      # Header, Footer
 │   │   └── overlay/     # Details Panel
-│   ├── context/         # React context (Language)
+│   ├──Lx/         # React context (Language)
 │   ├── hooks/           # Custom React hooks (useData)
 │   ├── services/        # API services (country translations)
 │   ├── App.jsx          # Main orchestrator
@@ -165,10 +165,10 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines, includin
 
 ### Development Guidelines
 
-- Follow the existing code style (ESLint configuration provided)
-- Write meaningful commit messages
-- Test your changes across different browsers and devices
-- Update documentation as needed
+- Follow the existing code style (ESLint configuration provided).
+- Write meaningful commit messages.
+- Test your changes across different browsers and devices.
+- Update documentation as needed.
 
 ## 📜 License
 
@@ -185,9 +185,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 This visualization is based on the Global Carbon Budget dataset, which provides comprehensive, peer-reviewed estimates of anthropogenic greenhouse gas emissions from 1750 to present. The research highlights:
 
-- Continuous growth in CO₂ emissions across all sectors
-- No significant reduction observed in any global sector to date
-- The critical importance of independent, real-time emissions tracking for climate policy
+- Continuous growth in CO₂ emissions across all sectors.
+- No significant reduction observed in any global sector to date.
+- The critical importance of independent, real-time emissions tracking for climate policy.
 
 > **Citation**: Friedlingstein, P., Jones, M. W., O'Sullivan, M., et al. (2021). Global Carbon Budget 2021. _Earth System Science Data_, 13(11), 5213-5252. <https://doi.org/10.5194/essd-13-5213-2021>
 
