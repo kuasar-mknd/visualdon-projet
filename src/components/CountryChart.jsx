@@ -93,7 +93,7 @@ const CountryChart = ({ countryCode, emissionsData }) => {
   if (!countryCode) {
     return (
       <div
-        className="flex items-center justify-center h-full text-slate-400"
+        className="flex items-center justify-center h-full text-slate-500"
         role="status"
         aria-live="polite"
       >
@@ -105,7 +105,7 @@ const CountryChart = ({ countryCode, emissionsData }) => {
   if (emissionData.length === 0) {
     return (
       <div
-        className="flex items-center justify-center h-full text-slate-500"
+        className="flex items-center justify-center h-full text-slate-600"
         role="status"
         aria-live="polite"
       >
@@ -125,7 +125,7 @@ const CountryChart = ({ countryCode, emissionsData }) => {
             className={`px-4 py-2 rounded-lg font-semibold transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none ${
               viewMode === 'bubbles'
                 ? 'bg-blue-50 text-blue-600 border border-blue-200 shadow-sm'
-                : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
+                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
             }`}
           >
             🫧 {t('chart.bubbles')}
@@ -136,7 +136,7 @@ const CountryChart = ({ countryCode, emissionsData }) => {
             className={`px-4 py-2 rounded-lg font-semibold transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none ${
               viewMode === 'lines'
                 ? 'bg-blue-50 text-blue-600 border border-blue-200 shadow-sm'
-                : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
+                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
             }`}
           >
             📈 {t('chart.stackedChart')}
@@ -155,7 +155,7 @@ const CountryChart = ({ countryCode, emissionsData }) => {
           </label>
         )}
 
-        <div className="text-xs text-slate-500 italic ml-auto">
+        <div className="text-xs text-slate-600 italic ml-auto">
           {viewMode === 'bubbles' ? t('chart.hoverBubbles') : t('chart.hoverZones')}
         </div>
       </div>

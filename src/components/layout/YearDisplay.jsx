@@ -12,7 +12,7 @@ const YearDisplay = ({ year }) => {
             aria-atomic="true"
         >
             <div className="text-3xl font-mono font-bold text-blue-600 leading-none">{year || '...'}</div>
-            <div className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold leading-none">{t('year')}</div>
+            <div className="text-[10px] text-slate-600 uppercase tracking-widest font-semibold leading-none">{t('year')}</div>
         </div>
     );
 };
