@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import * as d3 from 'd3';
+import { select, stack, stackOrderNone, stackOffsetNone, scaleLinear, extent, max, area, curveMonotoneX, axisBottom, format, axisLeft } from 'd3';
 import { useLanguage } from '../../context/LanguageContext';
 
 const StackedAreaChart = ({ 
@@ -19,9 +19,9 @@ const StackedAreaChart = ({
     if (!containerRef.current) return;
 
     // Clear previous
-    d3.select(containerRef.current).selectAll("*").remove();
+    select(containerRef.current).selectAll("*").remove();
 
-    const svg = d3.select(containerRef.current)
+    const svg = select(containerRef.current)
       .append("svg")
       .attr("width", width)
       .attr("height", height);
@@ -36,33 +36,33 @@ const StackedAreaChart = ({
       return obj;
     });
 
-    const stack = d3.stack()
+    const stackGenerator = stack()
       .keys(sectors)
-      .order(d3.stackOrderNone)
-      .offset(d3.stackOffsetNone);
+      .order(stackOrderNone)
+      .offset(stackOffsetNone);
 
-    const series = stack(stackData);
+    const series = stackGenerator(stackData);
 
     // Scales
-    const xScale = d3.scaleLinear()
-      .domain(d3.extent(years))
+    const xScale = scaleLinear()
+      .domain(extent(years))
       .range([padding.left, width - padding.right]);
 
-    const yScale = d3.scaleLinear()
-      .domain([0, d3.max(series, s => d3.max(s, d => d[1]))])
+    const yScale = scaleLinear()
+      .domain([0, max(series, s => max(s, d => d[1]))])
       .nice()
       .range([height - padding.bottom, padding.top]);
 
     // Area generator
-    const area = d3.area()
+    const areaGenerator = area()
       .x(d => xScale(d.data.year))
       .y0(d => yScale(d[0]))
       .y1(d => yScale(d[1]))
-      .curve(d3.curveMonotoneX);
+      .curve(curveMonotoneX);
 
     // Shared handlers
     const handleInteractionStart = function(event, d) {
-        d3.select(this).attr('opacity', 1);
+        select(this).attr('opacity', 1);
 
         // Highlight in legend
         svg.selectAll('.legend-row')
@@ -70,7 +70,7 @@ const StackedAreaChart = ({
     };
 
     const handleInteractionEnd = function() {
-        d3.select(this).attr('opacity', 0.8);
+        select(this).attr('opacity', 0.8);
         svg.selectAll('.legend-row').attr('opacity', 1);
     };
 
@@ -80,7 +80,7 @@ const StackedAreaChart = ({
       .join('path')
       .attr('class', 'area')
       .attr('fill', d => colorMapping[d.key])
-      .attr('d', area)
+      .attr('d', areaGenerator)
       .attr('opacity', 0.8)
       .style('cursor', 'pointer')
       .attr("tabindex", "0")
@@ -92,7 +92,7 @@ const StackedAreaChart = ({
       .on('blur', handleInteractionEnd);
 
     // Axes
-    const xAxis = d3.axisBottom(xScale).tickFormat(d3.format("d")).ticks(10);
+    const xAxis = axisBottom(xScale).tickFormat(format("d")).ticks(10);
     svg.append("g")
       .attr("transform", `translate(0, ${height - padding.bottom})`)
       .call(xAxis)
@@ -102,7 +102,7 @@ const StackedAreaChart = ({
       .call(g => g.selectAll("line").attr("stroke", "#475569"))
       .call(g => g.select(".domain").attr("stroke", "#475569"));
 
-    const yAxis = d3.axisLeft(yScale).ticks(8);
+    const yAxis = axisLeft(yScale).ticks(8);
     svg.append("g")
       .attr("transform", `translate(${padding.left}, 0)`)
       .call(yAxis)
@@ -156,7 +156,7 @@ const StackedAreaChart = ({
         .attr("aria-label", t(`sectors.${sector}`) || sector)
         .on("mouseover focus", function(event, hoveredSector) {
           // Handle both MouseEvent and FocusEvent (where data is attached to element)
-          const key = hoveredSector || d3.select(this).datum();
+          const key = hoveredSector || select(this).datum();
           svg.selectAll('.area')
             .transition()
             .duration(200)
