@@ -204,6 +204,13 @@ function verifyChecksum(filePath, checksum) {
       return;
     }
 
+    // Security: Whitelist allowed algorithms to prevent using weak or insecure ones if injected
+    const allowedAlgos = ['md5', 'sha1', 'sha256', 'sha512'];
+    if (!allowedAlgos.includes(algo)) {
+      reject(new Error(`Unsupported or insecure checksum algorithm: ${algo}`));
+      return;
+    }
+
     const stream = fs.createReadStream(filePath);
     const hasher = crypto.createHash(algo);
 
@@ -221,7 +228,6 @@ function verifyChecksum(filePath, checksum) {
   });
 }
 
-/**
 /**
  * Parse a single CSV line with support for quoted fields and escaped quotes.
  * This replaces the regex-based split to avoid ReDoS vulnerabilities.
@@ -339,6 +345,15 @@ function arrayToCSV(data) {
 }
 
 /**
+ * Calculate SHA-256 hash of a string content
+ * @param {string} content
+ * @returns {string} Hex string of hash
+ */
+function calculateSha256(content) {
+  return crypto.createHash('sha256').update(content).digest('hex');
+}
+
+/**
  * Main update function
  */
 async function updateData() {
@@ -404,7 +419,8 @@ async function updateData() {
     }
 
     fs.writeFileSync(mtCO2Final, mtCO2Content, 'utf-8');
-    console.log(`✓ Saved: ${mtCO2Final}`);
+    const mtCO2Hash = calculateSha256(mtCO2Content);
+    console.log(`✓ Saved: ${mtCO2Final} (SHA-256: ${mtCO2Hash.substring(0, 8)}...)`);
     
     // Create dynamic name for per-capita data
     const perCapitaFinalName = `GCB_${zenodoData.version}_percapita_flat-clean.csv`;
@@ -414,13 +430,17 @@ async function updateData() {
       throw new Error('Path traversal detected in per-capita final filename');
     }
 
-    fs.writeFileSync(perCapitaFinal, arrayToCSV(perCapitaData), 'utf-8');
-    console.log(`✓ Saved: ${perCapitaFinal}\n`);
+    const perCapitaContent = arrayToCSV(perCapitaData);
+    fs.writeFileSync(perCapitaFinal, perCapitaContent, 'utf-8');
+    const perCapitaHash = calculateSha256(perCapitaContent);
+    console.log(`✓ Saved: ${perCapitaFinal} (SHA-256: ${perCapitaHash.substring(0, 8)}...)\n`);
 
     // Create and save manifest
     const manifest = {
       emissions: mtCO2FinalName,
+      emissionsHash: mtCO2Hash,
       perCapita: perCapitaFinalName,
+      perCapitaHash: perCapitaHash,
       version: zenodoData.version,
       lastUpdated: new Date().toISOString()
     };
