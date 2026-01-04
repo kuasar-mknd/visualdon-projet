@@ -22,6 +22,7 @@ const __dirname = path.dirname(__filename);
 // Configuration
 const DATA_DIR = path.join(__dirname, '../public/data');
 const TEMP_DIR = path.join(__dirname, '../.temp');
+const MAX_DOWNLOAD_SIZE = 50 * 1024 * 1024; // 50MB limit
 
 // Zenodo Concept Record ID for GCP Fossil CO2 emissions (stable across versions)
 const ZENODO_CONCEPT_ID = '5569234';
@@ -37,13 +38,13 @@ function fetchJSON(url) {
         console.warn(`⚠️  Warning: Expected application/json but got ${contentType}`);
       }
 
-      const MAX_SIZE = 10 * 1024 * 1024; // 10MB limit
+      const MAX_JSON_SIZE = 10 * 1024 * 1024; // 10MB limit
       let length = 0;
       let data = '';
 
       res.on('data', chunk => {
         length += chunk.length;
-        if (length > MAX_SIZE) {
+        if (length > MAX_JSON_SIZE) {
           res.destroy();
           reject(new Error('Response too large (exceeded 10MB)'));
           return;
@@ -112,27 +113,81 @@ function downloadFile(url, destPath) {
           fs.unlinkSync(destPath);
           return reject(new Error(`Failed to download: ${response.statusCode}`));
         }
+
+        // Security Enhancement: Check Content-Length header
+        const contentLength = response.headers['content-length'];
+        if (contentLength && parseInt(contentLength, 10) > MAX_DOWNLOAD_SIZE) {
+           file.close();
+           fs.unlinkSync(destPath);
+           reject(new Error(`File too large (Content-Length: ${contentLength} bytes)`));
+           return;
+        }
+
+        let downloadedBytes = 0;
+        let rejected = false;
+
+        // Security Enhancement: Monitor stream size
+        response.on('data', (chunk) => {
+          if (rejected) return;
+          downloadedBytes += chunk.length;
+          if (downloadedBytes > MAX_DOWNLOAD_SIZE) {
+            rejected = true;
+            response.destroy(); // Stop receiving data
+            file.destroy(); // Use destroy instead of end to force close
+            // We'll unlink in the cleanup handler to avoid race conditions
+            reject(new Error(`File too large (exceeded ${MAX_DOWNLOAD_SIZE} bytes)`));
+          }
+        });
         
         response.pipe(file);
+
         file.on('finish', () => {
+          if (rejected) return;
           file.close();
           resolve();
         });
         
         file.on('error', (err) => {
-          fs.unlinkSync(destPath);
+          if (rejected) {
+            // Already handled in data handler, but ensure cleanup
+             try {
+               if (fs.existsSync(destPath)) fs.unlinkSync(destPath);
+             } catch {
+               // Ignore unlink errors if file is busy, it's temp anyway
+             }
+             return;
+          }
+          try {
+             if (fs.existsSync(destPath)) fs.unlinkSync(destPath);
+          } catch { /* ignore */ }
           reject(err);
+        });
+
+        file.on('close', () => {
+            if (rejected) {
+                 try {
+                   if (fs.existsSync(destPath)) fs.unlinkSync(destPath);
+                 } catch { /* ignore */ }
+            }
         });
       });
 
       req.on('error', (err) => {
-        if (fs.existsSync(destPath)) fs.unlinkSync(destPath);
+        if (fs.existsSync(destPath)) {
+            try {
+                fs.unlinkSync(destPath);
+            } catch { /* ignore */ }
+        }
         reject(err);
       });
 
       req.on('timeout', () => {
         req.destroy();
-        if (fs.existsSync(destPath)) fs.unlinkSync(destPath);
+        if (fs.existsSync(destPath)) {
+            try {
+                fs.unlinkSync(destPath);
+            } catch { /* ignore */ }
+        }
         reject(new Error('Download timed out'));
       });
     };
@@ -221,7 +276,6 @@ function verifyChecksum(filePath, checksum) {
   });
 }
 
-/**
 /**
  * Parse a single CSV line with support for quoted fields and escaped quotes.
  * This replaces the regex-based split to avoid ReDoS vulnerabilities.
