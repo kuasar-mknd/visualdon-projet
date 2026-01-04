@@ -144,14 +144,18 @@ const CountryChart = ({ countryCode, emissionsData }) => {
         </div>
 
         {viewMode === 'bubbles' && (
-          <label className="flex items-center gap-3 px-4 py-2 bg-slate-800 rounded-lg border border-slate-700 cursor-pointer hover:bg-slate-700 transition-colors focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+          <label className={`flex items-center gap-3 px-4 py-2 rounded-lg border cursor-pointer transition-all focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500 ${
+            split
+              ? 'bg-blue-50 border-blue-200 hover:bg-blue-100'
+              : 'bg-white border-slate-200 hover:bg-slate-50'
+          }`}>
             <input 
               type="checkbox" 
               checked={split} 
               onChange={(e) => setSplit(e.target.checked)}
               className="w-4 h-4 accent-blue-500 cursor-pointer outline-none"
             />
-            <span className="text-slate-300 font-medium">{t('chart.splitBySector')}</span>
+            <span className={`font-medium ${split ? 'text-blue-600' : 'text-slate-500'}`}>{t('chart.splitBySector')}</span>
           </label>
         )}
 
