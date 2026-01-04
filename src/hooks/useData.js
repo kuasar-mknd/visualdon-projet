@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import * as d3 from 'd3';
+import { isValidFilename } from '../utils/security';
 
 // Helper to fetch with timeout
 function fetchWithTimeout(promise, ms = 10000) {
@@ -56,6 +57,11 @@ export function useData() {
         const manifest = await fetchWithTimeout(d3.json('/data/manifest.json'));
         if (!manifest || !manifest.emissions || !manifest.perCapita) {
           throw new Error('Invalid manifest');
+        }
+
+        // Security Enhancement: Validate filenames to prevent path traversal
+        if (!isValidFilename(manifest.emissions) || !isValidFilename(manifest.perCapita)) {
+          throw new Error('Security: Invalid filename in manifest');
         }
 
         // Parallelize fetching

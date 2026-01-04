@@ -13,6 +13,19 @@ export const isValidCountryCode = (code) => {
 };
 
 /**
+ * Validates if a filename is safe (alphanumeric, dots, dashes, underscores).
+ * Prevents path traversal attacks (e.g. "../", "/etc/passwd").
+ * @param {string} filename - The filename to validate.
+ * @returns {boolean} - True if valid, false otherwise.
+ */
+export const isValidFilename = (filename) => {
+  if (!filename || typeof filename !== 'string') return false;
+  // Allow alphanumeric, dot, dash, underscore.
+  // Must not contain slash, backslash, or start/end with dot/space.
+  return /^[a-zA-Z0-9_.-]+$/.test(filename) && !filename.includes('..');
+};
+
+/**
  * Sanitizes a string to prevent XSS.
  * Removes HTML tags and unsafe characters.
  * @param {string} str - The string to sanitize.
