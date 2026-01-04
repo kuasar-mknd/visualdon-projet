@@ -179,14 +179,19 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
     });
   }, [geoJson, handlePathClick, handlePathKeyDown, handlePathFocus, handleMouseLeave]);
 
-  // Optimization: Update cached selections when paths re-render
+  // Optimization: Update cached selections AND bind data when paths re-render
   // This must be defined AFTER paths is defined.
   useEffect(() => {
-    if (!svgRef.current) return;
+    if (!svgRef.current || !geoJson) return;
     const svg = d3.select(svgRef.current);
-    countrySelectionRef.current = svg.selectAll("path.country-path");
+    const countrySelection = svg.selectAll("path.country-path");
+
+    // Bolt Optimization: Bind data once when DOM elements change, avoiding O(N) bind in animation loop
+    countrySelection.data(geoJson.features);
+
+    countrySelectionRef.current = countrySelection;
     sphereSelectionRef.current = svg.selectAll("path.sphere-path");
-  }, [paths]);
+  }, [paths, geoJson]);
 
   // Update projection setup (rotation/scale) and paths
   useEffect(() => {
@@ -284,8 +289,9 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
 
       if (!geoJson || !dataMap || selection.empty()) return;
 
+      // Bolt Optimization: Skipped .data() re-binding here as it's handled in the paths effect.
+      // We rely on the fact that DOM nodes are stable during animation, so __data__ is preserved.
       selection
-        .data(geoJson.features)
         .attr("fill", d => {
             const countryId = d.properties.A3 || d.id;
             const countryData = dataMap.get(countryId);
