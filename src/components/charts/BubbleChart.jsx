@@ -78,7 +78,7 @@ const BubbleChart = ({
         .attr("fill", "#475569")
         .attr("font-size", "13px")
         .attr("font-weight", "500")
-        .text("Émissions (MtCO₂)");
+        .text(`${t('emissionsLabel')} (MtCO₂)`);
 
     svg.append("text")
         .attr("x", width / 2)
@@ -87,7 +87,7 @@ const BubbleChart = ({
         .attr("fill", "#475569")
         .attr("font-size", "13px")
         .attr("font-weight", "500")
-        .text("Année");
+        .text(t('year'));
 
     // Title
     svg.append("text")

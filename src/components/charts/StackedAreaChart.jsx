@@ -121,7 +121,7 @@ const StackedAreaChart = ({
       .attr("fill", "#cbd5e1")
       .attr("font-size", "13px")
       .attr("font-weight", "500")
-      .text("Émissions (MtCO₂)");
+      .text(`${t('emissionsLabel')} (MtCO₂)`);
 
     svg.append("text")
       .attr("x", width / 2)
@@ -130,7 +130,7 @@ const StackedAreaChart = ({
       .attr("fill", "#cbd5e1")
       .attr("font-size", "13px")
       .attr("font-weight", "500")
-      .text("Année");
+      .text(t('year'));
 
     // Title
     svg.append("text")
