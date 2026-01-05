@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import * as d3 from 'd3';
 import { useLanguage } from '../context/LanguageContext';
 import { fetchCountryDetails } from '../services/countryService';
+import { useResizeObserver } from '../hooks/useResizeObserver';
 import GlobeLegend from './globe/GlobeLegend';
 import GlobeTooltip from './globe/GlobeTooltip';
 
@@ -18,8 +19,10 @@ const customInterpolator = t => {
 };
 
 const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
-  const containerRef = useRef(null);
   const svgRef = useRef(null);
+
+  // Optimization: Use reusable ResizeObserver hook
+  const [containerRef, dimensions] = useResizeObserver({ debounceTime: 100 });
 
   // Optimization: Use Refs for mutable state that updates frequently (animation/interaction)
   // to avoid React re-renders on every frame.
@@ -35,9 +38,6 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
   const countrySelectionRef = useRef(null);
   const sphereSelectionRef = useRef(null);
 
-  // Force update only when dimensions change significantly
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-
   const [hoveredCountryName, setHoveredCountryName] = useState(null);
   const [hoveredCountryId, setHoveredCountryId] = useState(null);
   const hoverTimeoutRef = useRef(null);
@@ -48,38 +48,16 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
     hoveredCountryIdRef.current = hoveredCountryId;
   }, [hoveredCountryId]);
 
-  // Resize observer
+  // Update refs when dimensions change (from hook)
   useEffect(() => {
-    if (!containerRef.current) return;
+      if (dimensions.width === 0) return;
 
-    // Optimization: Debounce resize events to prevent excessive re-renders and projection updates
-    // during window resizing operations.
-    let timeoutId;
+      widthRef.current = dimensions.width;
+      heightRef.current = dimensions.height;
 
-    const resizeObserver = new ResizeObserver(entries => {
-      // Get the latest entry
-      const entry = entries[entries.length - 1];
-      const { width, height } = entry.contentRect;
-
-      clearTimeout(timeoutId);
-
-      timeoutId = setTimeout(() => {
-        widthRef.current = width;
-        heightRef.current = height;
-        setDimensions({ width, height });
-
-        // Update projection center when dimensions settle
-        projectionRef.current.translate([width / 2, height / 2]);
-      }, 100);
-    });
-
-    resizeObserver.observe(containerRef.current);
-
-    return () => {
-      resizeObserver.disconnect();
-      clearTimeout(timeoutId);
-    };
-  }, []);
+      // Update projection center when dimensions settle
+      projectionRef.current.translate([dimensions.width / 2, dimensions.height / 2]);
+  }, [dimensions]);
 
   const colorScale = useMemo(() => {
     const max = maxVal || 100;

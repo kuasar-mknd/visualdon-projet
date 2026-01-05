@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState, Suspense } from 'react';
+import React, { useState, Suspense } from 'react';
 import PropTypes from 'prop-types';
 import { useLanguage } from '../context/LanguageContext';
+import { useResizeObserver } from '../hooks/useResizeObserver';
 
 const BubbleChart = React.lazy(() => import('./charts/BubbleChart'));
 const StackedAreaChart = React.lazy(() => import('./charts/StackedAreaChart'));
@@ -19,44 +20,16 @@ const colorMapping = {
 const padding = {top: 60, right: 160, bottom: 60, left: 70};
 
 const CountryChart = ({ countryCode, emissionsData }) => {
-  const containerRef = useRef(null);
   const { t } = useLanguage();
   const [split, setSplit] = useState(false);
   const [viewMode, setViewMode] = useState('bubbles'); // 'bubbles' or 'lines'
 
-  const [dimensions, setDimensions] = useState({ width: 500, height: 500 });
-
-  // Handle Resize
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const updateDimensions = () => {
-       if (containerRef.current) {
-          setDimensions({
-            width: containerRef.current.clientWidth || 500,
-            height: containerRef.current.clientHeight || 500
-          });
-       }
-    };
-
-    updateDimensions();
-    
-    // Optimization: Use ResizeObserver only, removing redundant window resize listener
-    // ResizeObserver is more efficient as it monitors the specific element size
-    // Added debounce to prevent excessive updates during resizing
-    let timeoutId;
-    const resizeObserver = new ResizeObserver(() => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(updateDimensions, 100);
-    });
-
-    resizeObserver.observe(containerRef.current);
-
-    return () => {
-      resizeObserver.disconnect();
-      clearTimeout(timeoutId);
-    };
-  }, [containerRef.current]);
+  // Optimization: Replaced manual ResizeObserver logic with a reusable hook
+  // This reduces code duplication and ensures consistent behavior.
+  const [containerRef, dimensions] = useResizeObserver({
+    debounceTime: 100,
+    defaultDimensions: { width: 500, height: 500 }
+  });
 
   const emissionData = React.useMemo(() => {
       if (!countryCode || !emissionsData) return [];
