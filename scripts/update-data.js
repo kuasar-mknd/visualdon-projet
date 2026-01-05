@@ -204,6 +204,13 @@ function verifyChecksum(filePath, checksum) {
       return;
     }
 
+    // Security Enhancement: Whitelist allowed hashing algorithms to prevent usage of weak or unexpected ones.
+    const ALLOWED_ALGORITHMS = ['md5', 'sha1', 'sha256', 'sha512'];
+    if (!ALLOWED_ALGORITHMS.includes(algo.toLowerCase())) {
+      reject(new Error(`Security: Algorithm not allowed: ${algo}. Allowed: ${ALLOWED_ALGORITHMS.join(', ')}`));
+      return;
+    }
+
     const stream = fs.createReadStream(filePath);
     const hasher = crypto.createHash(algo);
 
@@ -453,4 +460,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   updateData();
 }
 
-export { updateData };
+export { updateData, verifyChecksum };
