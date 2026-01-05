@@ -1,84 +1,105 @@
-# Architecture
+# Architecture Documentation
 
-## Overview
-This project is a client-side Single Page Application (SPA) built with React 19 and Vite. It visualizes global CO₂ emissions data using D3.js for charts and Three.js (via React components) for 3D globe elements. The application is designed to be performant, accessible, and responsive.
+This document describes the architectural principles and structure of the **Global CO₂ Emissions Visualization** project.
 
-## Core Technologies
-- **React 19**: UI library for building component-based user interfaces.
-- **Vite**: Next-generation frontend tooling for fast builds and hot module replacement.
-- **Tailwind CSS v4**: Utility-first CSS framework for styling.
-- **D3.js**: JavaScript library for manipulating documents based on data, used here for complex visualizations.
+## 🏗️ Architectural Pattern
 
-## Directory Structure
+The application follows a **Clean Architecture** approach adapted for a Frontend-only React application, organizing code into layers to separate concerns and improve maintainability.
 
-### `src/`
-The source code is organized as follows:
+### 1. Domain Layer (Data & Entities)
+Located in `public/data/` and `src/services/`.
+- **Responsibilities**: Defining the data structure, fetching raw data, and providing core business logic.
+- **Components**:
+  - **Data Source**: CSV files from the Global Carbon Budget (stored in `public/data/`).
+  - **Service**: `countryService.js` handles external data fetching (translations) and local caching.
+  - **Manifest**: `manifest.json` maps logical data keys to specific versioned files.
 
-- **`components/`**: Reusable React components.
-  - **`charts/`**: D3.js based visualization components (e.g., BubbleChart, StackedAreaChart).
-  - **`controls/`**: UI elements for user interaction (Play button, Slider).
-  - **`globe/`**: Components related to the 3D globe visualization.
-  - **`layout/`**: Structural components like Header and Footer.
-  - **`overlay/`**: UI overlays for detailed information.
-- **`context/`**: React Context definitions, primarily for state management that needs to be accessed globally (e.g., LanguageContext).
-- **`hooks/`**: Custom React hooks.
-  - **`useData.js`**: A critical hook for fetching, parsing, and managing the emissions data.
-- **`services/`**: logic for external or internal services.
-  - **`countryService.js`**: Handles country name translations and mapping.
-- **`utils/`**: Shared utility functions (e.g., security helpers).
-- **`App.jsx`**: The main application component that orchestrates the layout and state.
-- **`main.jsx`**: The entry point that mounts the React application.
+### 2. Application Layer (Logic & State)
+Located in `src/hooks/` and `src/context/`.
+- **Responsibilities**: Managing application state, data processing, and business rules.
+- **Components**:
+  - **`useData.js`**: Custom hook for fetching, parsing, and validating CSV data. It handles the "loading", "error", and "success" states.
+  - **`LanguageContext.jsx`**: Global state management for internationalization (English/French).
+  - **`App.jsx`**: The main orchestrator that integrates hooks and passes data to the Presentation layer.
 
-### `public/`
-Static assets that are served directly.
-- **`data/`**: Contains the CSV files with CO₂ emissions data. These are fetched by the application at runtime.
+### 3. Presentation Layer (UI & Visualization)
+Located in `src/components/`.
+- **Responsibilities**: Rendering the user interface and visualizations based on data props.
+- **Components**:
+  - **Globe**: 3D interactive visualization using `d3-geo`.
+  - **Charts**: Reusable D3.js charts (`CountryChart`, `TopCountriesChart`, `StackedAreaChart`).
+  - **Controls**: User input components (`Controls`, `Header`, `Footer`).
+  - **Overlays**: Detailed views (`CountryDetailsOverlay`) dependent on selection state.
 
-### `scripts/`
-Node.js scripts for maintenance tasks.
-- **`update-data.js`**: Fetches the latest data from the Global Carbon Project and updates the CSV files in `public/data/`.
+### 4. Infrastructure Layer (Build & Deployment)
+Located in `scripts/`, `vite.config.js`, and `.github/`.
+- **Responsibilities**: Building the application, deploying artifacts, and automating data updates.
+- **Components**:
+  - **Build System**: Vite + Tailwind CSS.
+  - **Scripts**: `update-data.js` for fetching and processing new datasets.
+  - **CI/CD**: GitHub Actions for linting, verification, and data updates.
 
-### `verification/`
-Contains scripts and artifacts for frontend verification.
-- **`verify_load.py`**: A Playwright (Python) script used to verify that the application loads correctly and renders the main chart components. This serves as a lightweight smoke test for the frontend.
+## 🧩 Component Hierarchy
 
-## Data Flow
-1.  **Initialization**: On load, `App.jsx` initializes.
-2.  **Data Fetching**: The `useData` hook is triggered. It fetches CSV files from `public/data/` using `d3-fetch` (or similar).
-3.  **Parsing**: Data is parsed and transformed into a usable format (likely an array of objects).
-4.  **State**: The parsed data is stored in the React state.
-5.  **Rendering**: Components (Charts, Globe) receive data via props and render the visualizations.
-6.  **Updates**: When the user interacts (e.g., moves the time slider), the state updates, triggering re-renders of the visualizations to show data for the selected year.
+```mermaid
+graph TD
+    App[App.jsx] --> Provider[LanguageContext]
+    Provider --> Layout[Layout Components]
+    Layout --> Header
+    Layout --> MainContent
+    Layout --> Footer
 
-## Design Patterns
+    MainContent --> Globe[Globe Visualization]
+    MainContent --> Controls[Playback Controls]
+    MainContent --> TopCharts[Top Countries Chart]
+    MainContent --> Details[Country Details Overlay]
 
-### Component Architecture
-The application follows a component-based architecture where each UI element is a self-contained unit.
-- **Container/Presenter**: Some components act as containers (fetching data/state) while others are purely presentational.
+    Details --> StackedChart[Stacked Area Chart]
+    Details --> BubbleChart[Bubble Chart]
 
-### Clean Architecture Mapping
-While this is a frontend-only application, the structure loosely maps to Clean Architecture principles:
-- **Domain Layer**: Implicitly defined by the data structures (emissions data) and types. `src/services/` contains domain-specific logic like country translation.
-- **Application Layer**: `src/hooks/` and `src/context/` manage the application state and business logic (e.g., filtering data by year).
-- **Infrastructure Layer**: `d3.csv` and `fetch` APIs act as the infrastructure for data retrieval. `scripts/update-data.js` handles external data source integration and manifest generation.
-- **Presentation Layer**: React components (`src/components/`) handle the UI and user interaction.
+    Globe -- "Select Country" --> App
+    Controls -- "Update Year" --> App
+```
 
-### Custom Hooks
-Logic for data fetching and state management is encapsulated in hooks (`useData`) to separate concerns and keep components clean.
+## 🔄 Data Flow
 
-### Context API
-Global state (like Language) is shared using React Context to avoid prop drilling.
+1.  **Initialization**:
+    -   `App.jsx` mounts.
+    -   `useData` hook requests `manifest.json`.
+    -   `useData` fetches the CSV files specified in the manifest.
+    -   Data is parsed (via D3), validated, and processed (grouped by year, calculated totals).
 
-## Extending the Application
+2.  **Interaction**:
+    -   **Time Travel**: User moves the slider -> `year` state updates -> Charts re-render with filtered data for that year.
+    -   **Selection**: User clicks a country -> `selectedCountry` state updates -> `CountryDetailsOverlay` opens -> `countryService` fetches details.
 
-### Adding New Visualizations
-To add a new chart type (e.g., `LineChart`):
-1.  **Create Component**: Add `src/components/charts/LineChart.jsx`.
-2.  **Data Logic**: Use the `useData` hook to retrieve emissions data.
-3.  **D3 Integration**: Implement D3 logic within a `useEffect` hook (or `useLayoutEffect` for measurements).
-4.  **Register**: Import and add the component to `App.jsx` or a specific container.
+3.  **Visualization Updates**:
+    -   Components like `Globe` and `TopCountriesChart` use `useEffect` to trigger D3 transitions when data props change, ensuring smooth animations outside the standard React render cycle.
 
-### Adding New Data Sources
-To integrate a new dataset:
-1.  **Update Script**: Modify `scripts/update-data.js` to fetch and clean the new data.
-2.  **Manifest**: Ensure the new file is added to `manifest.json`.
-3.  **Hook**: Update `src/hooks/useData.js` to fetch the new file key from the manifest.
+## 🛠️ Extending the Application
+
+### Adding a New Visualization
+1.  **Create Component**: Add a new file in `src/components/charts/`.
+2.  **Implement D3 Logic**: Use a `useRef` for the SVG container and `useEffect` for D3 drawing logic.
+3.  **Optimize**: Wrap in `React.memo` if it receives frequent updates (like `year`).
+4.  **Integrate**: Import and render in `App.jsx` or a relevant container.
+
+### Adding a New Data Source
+1.  **Update Script**: Modify `scripts/update-data.js` to fetch and process the new dataset.
+2.  **Update Manifest**: Ensure the new file is generated and referenced in `manifest.json`.
+3.  **Consume Data**: Update `useData.js` to load the new file.
+4.  **Visualize**: Pass the new data to components.
+
+## 🔒 Security Considerations
+
+-   **Data Validation**: All incoming data (CSV, JSON) is validated before use.
+-   **Content Security Policy (CSP)**: Strict headers are enforced to prevent XSS.
+-   **Dependency Review**: Automated checks prevent malicious packages.
+-   **Sanitization**: User inputs (even logical ones like country codes) are sanitized.
+
+## 📉 Performance Optimizations
+
+-   **Lazy Loading**: Heavy components (Globe, Charts) are lazy-loaded.
+-   **Memoization**: `React.memo`, `useMemo`, and `useCallback` prevent unnecessary re-renders.
+-   **D3 Optimization**: D3 manipulations often bypass React's virtual DOM for performance during animations.
+-   **Data Structure**: Data is pre-processed into Maps for O(1) lookup during animation loops.

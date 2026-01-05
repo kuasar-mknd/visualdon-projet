@@ -1,20 +1,30 @@
-# AI Documentation
+# AI & Machine Learning Policy
 
-## Overview
-This project **does not** currently utilize any Artificial Intelligence (AI) or Machine Learning (ML) models in its runtime application.
+## 🤖 AI Usage
 
-## Configuration
-There are no AI-related environment variables or configuration files.
+**This project explicitly DOES NOT use Artificial Intelligence (AI) or Machine Learning (ML) models for its core functionality.**
 
-## Future Integration
-If AI features are added in the future (e.g., for predictive emissions modeling or natural language data querying), this document should be updated to include:
-- Model names and versions.
-- Provider details (e.g., OpenAI, Hugging Face).
-- API keys and environment variables.
-- Cost control mechanisms (caching, rate limiting).
+All visualizations, data processing, and interactions are deterministic, based on standard algorithms and hardcoded logic (D3.js, React, standard math).
 
-## Cost Control & Best Practices
-Although no AI models are currently used, any future integration should adhere to the following principles:
-- **Caching**: Cache AI responses aggressively (e.g., in LocalStorage or a backend proxy) to minimize API calls.
-- **Rate Limiting**: Implement client-side throttling (debouncing) on user inputs that trigger AI requests.
-- **Budget Alerts**: Configure provider-side budget alerts (e.g., OpenAI Usage Limits) to prevent unexpected costs.
+## 🛠️ Configuration
+
+There are no AI-related environment variables or configurations.
+
+## 💰 Cost Control
+
+Since no AI services are used, there are no costs associated with token usage or model inference.
+
+### Future Considerations (If AI is added)
+If AI integration is planned in the future (e.g., for predictive emissions modeling or natural language data querying), the following strict guidelines must be followed:
+
+1.  **Browser Caching**: Store results in `localStorage` or IndexedDB to prevent redundant API calls.
+2.  **Rate Limiting**: Implement strict client-side rate limiting.
+3.  **Cost Monitoring**: Set strict budget alerts on the provider side (e.g., OpenAI, Anthropic).
+4.  **Transparency**: Explicitly label AI-generated content in the UI.
+
+## 🔍 Verification
+
+The codebase is free of:
+- Calls to OpenAI/Anthropic/Google APIs.
+- Local inference libraries (TensorFlow.js, ONNX).
+- vector databases.
