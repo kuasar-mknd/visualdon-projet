@@ -1,13 +1,8 @@
-# Palette's Journal 🎨
+# Palette's Journal
 
-## Philosophy
-"Consistency is Comfort."
-- **Scale:** Fixing one button is nice; fixing all buttons is professional.
-- **Invisibility:** Good UX shouldn't be noticed; it should just feel "right".
-- **Accessibility:** It's not a feature; it's a requirement.
+## Critical Learnings
 
-## Learned Patterns (Project Specific)
-- **Status Updates:** Use `role="status"` with `aria-live="polite"` for elements that update automatically (like the Year display) or indicate loading/empty states, to ensure screen readers announce changes without interrupting the user.
-- **External Links:** Always append "(opens in a new tab)" to the `aria-label` of links with `target="_blank"` to warn users of context changes.
-- **Dialog Descriptions:** Ensure modals have `aria-describedby` pointing to a summary or description, even if hidden, to provide context beyond the title.
-- **D3 Focus States:** For SVG-based visualizations (like maps or bar charts), use explicit visual cues (e.g., `stroke-white`, `opacity-100`) on `focus` combined with `tabindex="0"` and `role="button"` (or `listitem`) to ensure keyboard users can navigate and perceive the active element. Standard browser focus rings are often insufficient or invisible on complex SVG paths.
+| Date | Pattern | Notes |
+|------|---------|-------|
+| 2024-05-23 | D3 Focus Management | D3 charts in this project use a hybrid focus model. Elements have `tabindex="0"` and listen for `focus` events to trigger visual updates (opacity/stroke). Standard `outline` is often suppressed in favor of SVG attributes. When modifying charts, ensure `focus` listeners are paired with `mouseover` listeners for consistent behavior. |
+| 2024-05-23 | Contrast in D3 | The project uses a light theme (`glass-panel-light`, `bg-white`). Several D3 charts (specifically `StackedAreaChart`) were copying dark-mode styles (light text), making them invisible. Always verify the parent container's background color when styling SVG text. |
