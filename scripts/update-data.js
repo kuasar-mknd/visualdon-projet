@@ -417,10 +417,16 @@ async function updateData() {
     fs.writeFileSync(perCapitaFinal, arrayToCSV(perCapitaData), 'utf-8');
     console.log(`✓ Saved: ${perCapitaFinal}\n`);
 
+    // Calculate hashes for integrity verification
+    const emissionsHash = crypto.createHash('sha256').update(mtCO2Content).digest('hex');
+    const perCapitaHash = crypto.createHash('sha256').update(arrayToCSV(perCapitaData)).digest('hex');
+
     // Create and save manifest
     const manifest = {
       emissions: mtCO2FinalName,
       perCapita: perCapitaFinalName,
+      emissionsHash,
+      perCapitaHash,
       version: zenodoData.version,
       lastUpdated: new Date().toISOString()
     };

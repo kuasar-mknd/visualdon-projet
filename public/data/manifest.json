@@ -1,6 +1,8 @@
 {
   "emissions": "GCB2025v15_MtCO2_flat.csv",
   "perCapita": "GCB_2025v15_percapita_flat-clean.csv",
+  "emissionsHash": "20650c19b394d91b6b31cddff2fbc9508bcdbbed7c3f93660336f2f655f367ff",
+  "perCapitaHash": "45a02b31ef760ab50018e301824b1167ec5c460adb4734bc78e15403e981a3af",
   "version": "2025v15",
-  "lastUpdated": "2025-12-27T00:04:57.161Z"
+  "lastUpdated": "2026-01-06T00:05:08.304Z"
 }
