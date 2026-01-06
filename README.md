@@ -126,7 +126,7 @@ Common issues and solutions:
 - **Node version**: This project requires Node.js 20+. Use `node -v` to check your version.
 - **Port already in use**: If `http://localhost:5173` is taken, Vite will automatically try the next available port (e.g., 5174). Check the console output.
 - **Data not loading**: If charts are empty, try running `pnpm run update-data` to fetch the latest dataset.
-- **Environment Issues**: Ensure your `.env` file (if present) does not contain conflicting variables. See [docs/ENV.md](docs/ENV.md) for details.
+- **Environment Issues**: This project does not require custom environment variables. If you added a `.env` file, ensure it does not conflict with Vite defaults. See [docs/ENV.md](docs/ENV.md) for details.
 
 ## ✅ Verification
 
