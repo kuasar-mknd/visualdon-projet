@@ -19,16 +19,16 @@ To support versioned data without requiring code changes, the application uses a
 - **`manifest.json`**:
   ```json
   {
-    "emissions": "GCB2023v43_MtCO2_flat.csv",
-    "perCapita": "GCB_2023_percapita_flat-clean.csv",
-    "version": "2023",
-    "lastUpdated": "2023-12-05T10:00:00.000Z"
+    "emissions": "GCB2025v15_MtCO2_flat.csv",
+    "perCapita": "GCB_2025v15_percapita_flat-clean.csv",
+    "version": "2025v15",
+    "lastUpdated": "2025-12-27T00:04:57.161Z"
   }
   ```
-- **Emissions Data** (e.g., `GCB2023v43_MtCO2_flat.csv`):
+- **Emissions Data** (e.g., `GCB2025v15_MtCO2_flat.csv`):
   - **Source**: Directly from Global Carbon Budget (Zenodo).
   - **Columns**: `Country`, `ISO 3166-1 alpha-3`, `Year`, `Total`, `Coal`, `Oil`, `Gas`, `Cement`, `Flaring`, `Other`, `Per Capita`.
-- **Per Capita Data** (e.g., `GCB_2023_percapita_flat-clean.csv`):
+- **Per Capita Data** (e.g., `GCB_2025v15_percapita_flat-clean.csv`):
   - **Source**: Calculated during the update process.
   - **Columns**: `Country`, `Year`, `Per Capita`.
 
