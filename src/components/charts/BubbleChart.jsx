@@ -51,7 +51,7 @@ const BubbleChart = ({
         .attr("transform", `translate(0, ${height - padding.bottom})`)
         .call(xAxis)
         .call(g => g.selectAll("text")
-            .attr("fill", "#64748b")
+            .attr("fill", "#475569")
             .attr("font-size", "11px"))
         .call(g => g.selectAll("line").attr("stroke", "#94a3b8"))
         .call(g => g.select(".domain").attr("stroke", "#94a3b8"));
@@ -63,7 +63,7 @@ const BubbleChart = ({
         .style("display", split ? "none" : "block") 
         .call(yAxis)
         .call(g => g.selectAll("text")
-            .attr("fill", "#64748b")
+            .attr("fill", "#475569")
             .attr("font-size", "11px"))
         .call(g => g.selectAll("line").attr("stroke", "#94a3b8"))
         .call(g => g.select(".domain").attr("stroke", "#94a3b8"));
