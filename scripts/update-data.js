@@ -204,20 +204,31 @@ function verifyChecksum(filePath, checksum) {
       return;
     }
 
-    const stream = fs.createReadStream(filePath);
-    const hasher = crypto.createHash(algo);
+    // Security Enhancement: Whitelist allowed algorithms to prevent usage of weak or unexpected algorithms
+    const ALLOWED_ALGOS = ['md5', 'sha1', 'sha256', 'sha512'];
+    if (!ALLOWED_ALGOS.includes(algo)) {
+      reject(new Error(`Algorithm not allowed: ${algo}. Allowed: ${ALLOWED_ALGOS.join(', ')}`));
+      return;
+    }
 
-    stream.on('data', data => hasher.update(data));
-    stream.on('end', () => {
-      const calculatedHash = hasher.digest('hex');
-      if (calculatedHash === hash) {
-        console.log(`✓ Integrity check passed (${algo})`);
-        resolve();
-      } else {
-        reject(new Error(`Checksum mismatch! Expected ${hash}, got ${calculatedHash}`));
-      }
-    });
-    stream.on('error', reject);
+    try {
+      const stream = fs.createReadStream(filePath);
+      const hasher = crypto.createHash(algo);
+
+      stream.on('data', data => hasher.update(data));
+      stream.on('end', () => {
+        const calculatedHash = hasher.digest('hex');
+        if (calculatedHash === hash) {
+          console.log(`✓ Integrity check passed (${algo})`);
+          resolve();
+        } else {
+          reject(new Error(`Checksum mismatch! Expected ${hash}, got ${calculatedHash}`));
+        }
+      });
+      stream.on('error', reject);
+    } catch (error) {
+      reject(new Error(`Hashing error: ${error.message}`));
+    }
   });
 }
 
@@ -453,4 +464,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   updateData();
 }
 
-export { updateData };
+export { updateData, verifyChecksum };
