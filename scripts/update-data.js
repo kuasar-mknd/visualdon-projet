@@ -112,6 +112,16 @@ function downloadFile(url, destPath) {
           fs.unlinkSync(destPath);
           return reject(new Error(`Failed to download: ${response.statusCode}`));
         }
+
+        // Security Enhancement: Validate Content-Type
+        const contentType = response.headers['content-type'];
+        const validTypes = ['text/csv', 'text/plain', 'application/octet-stream', 'application/csv'];
+        const isLikelyCSV = validTypes.some(type => contentType && contentType.includes(type));
+
+        if (!isLikelyCSV) {
+          console.warn(`⚠️  Warning: Unexpected Content-Type for CSV download: ${contentType}`);
+          // We warn but allow for now as Zenodo might serve octet-stream for CSVs sometimes
+        }
         
         response.pipe(file);
         file.on('finish', () => {
@@ -199,7 +209,15 @@ function verifyChecksum(filePath, checksum) {
     }
 
     const [algo, hash] = checksum.split(':');
-    if (!algo || !hash) {
+
+    // Security Enhancement: Whitelist allowed algorithms
+    const ALLOWED_ALGOS = ['md5', 'sha1', 'sha256', 'sha512'];
+    if (!algo || !ALLOWED_ALGOS.includes(algo)) {
+      reject(new Error(`Invalid or unsupported checksum algorithm: ${algo}`));
+      return;
+    }
+
+    if (!hash) {
       reject(new Error(`Invalid checksum format: ${checksum}`));
       return;
     }
@@ -221,7 +239,6 @@ function verifyChecksum(filePath, checksum) {
   });
 }
 
-/**
 /**
  * Parse a single CSV line with support for quoted fields and escaped quotes.
  * This replaces the regex-based split to avoid ReDoS vulnerabilities.
@@ -440,10 +457,6 @@ async function updateData() {
     
   } catch (error) {
     console.error('\n❌ Error:', error.message);
-    // Don't log stack trace in production/CI logs if unnecessary, or keep it for debugging but ensure no sensitive data is there.
-    // Here we are in a dev/maintenance script, so stack is useful, but we ensure the error message is what we rely on.
-    // To comply with strict "fail safe" (errors shouldn't leak system details), we'll reduce verbosity unless needed.
-    // console.error(error.stack);
     process.exit(1);
   }
 }
