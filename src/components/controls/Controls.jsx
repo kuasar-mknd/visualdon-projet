@@ -134,6 +134,7 @@ const Controls = ({ isPlaying, setIsPlaying, category, setCategory, year, setYea
           disabled={!year}
           onChange={handleYearChange}
           aria-label={t('aria.selectYear')}
+          aria-valuetext={t('aria.yearValue').replace('{year}', localYear || yearRange.min)}
           aria-keyshortcuts="ArrowLeft ArrowRight"
           title={`${t('aria.selectYear')} (←/→)`}
           className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"

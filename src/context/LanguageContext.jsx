@@ -39,6 +39,7 @@ export const translations = {
       pause: "Pause animation",
       selectCategory: "Select emission category",
       selectYear: "Select year",
+      yearValue: "Year {year}",
       toggleLanguage: "Switch language",
       closeOverlay: "Close details",
       skipToContent: "Skip to main content"
@@ -87,6 +88,7 @@ export const translations = {
       pause: "Mettre en pause l'animation",
       selectCategory: "Sélectionner la catégorie d'émission",
       selectYear: "Sélectionner l'année",
+      yearValue: "Année {year}",
       toggleLanguage: "Changer de langue",
       closeOverlay: "Fermer les détails",
       skipToContent: "Aller au contenu principal"
