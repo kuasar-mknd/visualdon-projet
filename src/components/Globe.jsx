@@ -5,6 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { fetchCountryDetails } from '../services/countryService';
 import GlobeLegend from './globe/GlobeLegend';
 import GlobeTooltip from './globe/GlobeTooltip';
+import GlobePaths from './globe/GlobePaths';
 
 // Create a custom interpolator for better visibility and meaning
 const customInterpolator = t => {
@@ -128,57 +129,6 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
       setHoveredCountryId(null);
   }, []);
 
-  const handlePathFocus = useCallback((e) => {
-    const { id, name } = e.currentTarget.dataset;
-    handleMouseEnter(id, name);
-  }, [handleMouseEnter]);
-
-  const handlePathClick = useCallback((e) => {
-    e.stopPropagation();
-    const { id } = e.currentTarget.dataset;
-    onCountrySelect(id);
-  }, [onCountrySelect]);
-
-  const handlePathKeyDown = useCallback((e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        const { id } = e.currentTarget.dataset;
-        onCountrySelect(id);
-    }
-  }, [onCountrySelect]);
-
-  // Optimization: Render static paths once. Attributes 'd' are updated via D3 refs.
-  const paths = useMemo(() => {
-    if (!geoJson) return [];
-    // Note: 'd' attribute is initially empty or set once, then updated by D3 in useEffect/drag
-    // We set an initial 'd' here to avoid FOUC (Flash of Unstyled Content) if possible,
-    // but projectionRef might not be ready. It's safe to let useEffect handle 'd'.
-
-    return geoJson.features.map((feature, i) => {
-        const countryId = feature.properties.A3 || feature.id;
-        return (
-            <path
-                key={countryId || i}
-                stroke="#0f172a"
-                strokeWidth="0.5"
-                className="country-path transition-colors duration-300 hover:opacity-80 cursor-pointer focus:outline-none focus:opacity-100 focus:stroke-white focus:stroke-[1.5px]"
-                role="button"
-                tabIndex="0"
-                aria-label={feature.properties.NAME || countryId}
-                data-id={countryId}
-                data-name={feature.properties.NAME}
-                onClick={handlePathClick}
-                onKeyDown={handlePathKeyDown}
-                onFocus={handlePathFocus}
-                onBlur={handleMouseLeave}
-                onMouseEnter={handlePathFocus}
-                onMouseLeave={handlePathFocus}
-            >
-            </path>
-        );
-    });
-  }, [geoJson, handlePathClick, handlePathKeyDown, handlePathFocus, handleMouseLeave]);
-
   // Optimization: Update cached selections when paths re-render
   // This must be defined AFTER paths is defined.
   useEffect(() => {
@@ -186,7 +136,7 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
     const svg = d3.select(svgRef.current);
     countrySelectionRef.current = svg.selectAll("path.country-path");
     sphereSelectionRef.current = svg.selectAll("path.sphere-path");
-  }, [paths]);
+  }, [geoJson]); // Update when geoJson changes (which implies paths change)
 
   // Update projection setup (rotation/scale) and paths
   useEffect(() => {
@@ -360,7 +310,12 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
             {/* Center glow - static relative to viewport */}
             <circle cx={dimensions.width/2} cy={dimensions.height/2} r={scaleRef.current} fill="#60a5fa" opacity="0.1" filter="url(#glow)" />
 
-            {paths}
+            <GlobePaths
+               geoJson={geoJson}
+               onCountrySelect={onCountrySelect}
+               onHover={handleMouseEnter}
+               onLeave={handleMouseLeave}
+            />
             {highlightPath}
 
             <path 

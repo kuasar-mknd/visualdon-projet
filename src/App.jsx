@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'reac
 import * as d3 from 'd3';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
+import LoadingPlaceholder from './components/layout/LoadingPlaceholder';
 import Controls from './components/controls/Controls';
 import { useData } from './hooks/useData';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
@@ -144,13 +145,6 @@ function AppContent() {
       </div>
     );
   }
-
-  // Loading fallback component
-  const LoadingPlaceholder = () => (
-    <div className="flex items-center justify-center w-full h-full text-slate-400">
-      <div className="animate-pulse">{t('loading')}...</div>
-    </div>
-  );
 
   return (
     <div className="min-h-screen text-slate-800 p-2 md:p-4 font-sans selection:bg-blue-100 selection:text-blue-900 overflow-hidden">

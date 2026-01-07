@@ -45,7 +45,19 @@ const CountryChart = ({ countryCode, emissionsData }) => {
     // ResizeObserver is more efficient as it monitors the specific element size
     // Added debounce to prevent excessive updates during resizing
     let timeoutId;
-    const resizeObserver = new ResizeObserver(() => {
+    const resizeObserver = new ResizeObserver((entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+
+        // Optimization: Ignore insignificant resize events (< 5px) to prevent layout thrashing
+        // and unnecessary D3 redraws during mobile scrolling or minor layout shifts.
+        const newWidth = entry.contentRect.width;
+        const newHeight = entry.contentRect.height;
+
+        if (Math.abs(newWidth - dimensions.width) < 5 && Math.abs(newHeight - dimensions.height) < 5) {
+            return;
+        }
+
         clearTimeout(timeoutId);
         timeoutId = setTimeout(updateDimensions, 100);
     });
