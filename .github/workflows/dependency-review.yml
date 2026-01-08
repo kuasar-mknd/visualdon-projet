@@ -13,4 +13,5 @@ jobs:
       - name: 'Dependency Review'
         uses: actions/dependency-review-action@v4
         with:
+          # Enforce strict dependency review
           fail-on-severity: high

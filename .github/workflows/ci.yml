@@ -48,3 +48,7 @@ jobs:
 
       - name: Build
         run: pnpm run build
+
+      # Note: Tests are currently skipped as vitest is not listed in devDependencies
+      # - name: Test
+      #   run: pnpm test

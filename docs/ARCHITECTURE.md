@@ -39,7 +39,7 @@ Node.js scripts for maintenance tasks.
 
 ### `verification/`
 Contains scripts and artifacts for frontend verification.
-- **`verify_load.py`**: A Playwright (Python) script used to verify that the application loads correctly and renders the main chart components. This serves as a lightweight smoke test for the frontend.
+- **`verify_load.py`**: A Playwright (Python) script used to verify that the application loads correctly and renders key components.
 
 ## Data Flow
 1.  **Initialization**: On load, `App.jsx` initializes.
@@ -56,7 +56,7 @@ The application follows a component-based architecture where each UI element is 
 - **Container/Presenter**: Some components act as containers (fetching data/state) while others are purely presentational.
 
 ### Clean Architecture Mapping
-While this is a frontend-only application, the structure loosely maps to Clean Architecture principles:
+While this is a frontend-only application, the structure maps to Clean Architecture principles:
 - **Domain Layer**: Implicitly defined by the data structures (emissions data) and types. `src/services/` contains domain-specific logic like country translation.
 - **Application Layer**: `src/hooks/` and `src/context/` manage the application state and business logic (e.g., filtering data by year).
 - **Infrastructure Layer**: `d3.csv` and `fetch` APIs act as the infrastructure for data retrieval. `scripts/update-data.js` handles external data source integration and manifest generation.
