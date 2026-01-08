@@ -134,11 +134,12 @@ const Controls = ({ isPlaying, setIsPlaying, category, setCategory, year, setYea
           disabled={!year}
           onChange={handleYearChange}
           aria-label={t('aria.selectYear')}
+          aria-valuetext={`${t('year')} ${localYear || yearRange.min}`}
           aria-keyshortcuts="ArrowLeft ArrowRight"
           title={`${t('aria.selectYear')} (←/→)`}
           className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
         />
-        <div className="flex justify-between items-center text-[10px] font-mono text-slate-500 mt-2">
+        <div className="flex justify-between items-center text-xs font-mono text-slate-600 mt-2">
           <span>{yearRange.min}</span>
           <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100 transition-all duration-200 opacity-60 grayscale group-hover:opacity-100 group-hover:grayscale-0 group-hover:scale-110 group-focus-within:opacity-100 group-focus-within:grayscale-0 group-focus-within:scale-110">
             {localYear || yearRange.min}
