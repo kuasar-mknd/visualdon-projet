@@ -12,7 +12,7 @@ const Header = ({ year }) => {
         <h1 className="text-2xl md:text-3xl font-bold text-slate-800 tracking-tight">
           {t('title')}
         </h1>
-        <p className="text-slate-500 mt-0.5 text-sm font-normal">{t('subtitle')}</p>
+        <p className="text-slate-600 mt-0.5 text-sm font-normal">{t('subtitle')}</p>
       </div>
       
       <div className="flex items-center gap-4">

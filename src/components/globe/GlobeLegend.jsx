@@ -10,23 +10,23 @@ const GlobeLegend = () => {
              <div className="space-y-2" role="list">
                  <div className="flex items-center gap-3" role="listitem">
                      <div className="w-3 h-3 rounded-full" style={{background: '#3b82f6'}} aria-hidden="true"></div>
-                     <span className="text-slate-600">{t('legend.low')}</span>
+                     <span className="text-slate-700">{t('legend.low')}</span>
                  </div>
                  <div className="flex items-center gap-3" role="listitem">
                      <div className="w-3 h-3 rounded-full" style={{background: '#10b981'}} aria-hidden="true"></div>
-                     <span className="text-slate-600">{t('legend.moderate')}</span>
+                     <span className="text-slate-700">{t('legend.moderate')}</span>
                  </div>
                  <div className="flex items-center gap-3" role="listitem">
                      <div className="w-3 h-3 rounded-full" style={{background: '#fbbf24'}} aria-hidden="true"></div>
-                     <span className="text-slate-600">{t('legend.medium')}</span>
+                     <span className="text-slate-700">{t('legend.medium')}</span>
                  </div>
                  <div className="flex items-center gap-3" role="listitem">
                      <div className="w-3 h-3 rounded-full" style={{background: '#ef4444'}} aria-hidden="true"></div>
-                     <span className="text-slate-600">{t('legend.high')}</span>
+                     <span className="text-slate-700">{t('legend.high')}</span>
                  </div>
                  <div className="flex items-center gap-3 pt-1 border-t border-slate-200 mt-1" role="listitem">
                      <div className="w-3 h-3 rounded-full bg-slate-300" aria-hidden="true"></div>
-                     <span className="text-slate-600">{t('noData')}</span>
+                     <span className="text-slate-700">{t('noData')}</span>
                  </div>
              </div>
          </div>
