@@ -111,12 +111,17 @@ export const LanguageProvider = ({ children }) => {
   };
 
   const t = (key) => {
+    if (typeof key !== 'string') return '';
     const keys = key.split('.');
     let value = translations[language];
     for (const k of keys) {
       value = value?.[k];
     }
-    return value || key;
+    // Security: Ensure we only return strings or numbers (safe primitives)
+    if (typeof value !== 'string' && typeof value !== 'number') {
+        return key;
+    }
+    return value;
   };
 
   return (
