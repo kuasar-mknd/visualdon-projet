@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import CountryChart from '../CountryChart';
 import { useLanguage } from '../../context/LanguageContext';
 
-const CountryDetailsOverlay = ({ selectedCountry, selectedCountryName, displayCountry, onClose, emissions }) => {
+const CountryDetailsOverlay = ({ selectedCountry, selectedCountryName, displayCountry, onClose, countryData }) => {
   const { t } = useLanguage();
 
   const closeButtonRef = useRef(null);
@@ -74,7 +74,7 @@ const CountryDetailsOverlay = ({ selectedCountry, selectedCountryName, displayCo
         <div className="flex-1 px-6 pb-6 overflow-auto">
             <CountryChart 
                 countryCode={displayCountry} 
-                emissionsData={emissions}
+                data={countryData}
             />
         </div>
     </div>
@@ -86,7 +86,7 @@ CountryDetailsOverlay.propTypes = {
   selectedCountryName: PropTypes.string,
   displayCountry: PropTypes.string,
   onClose: PropTypes.func.isRequired,
-  emissions: PropTypes.arrayOf(PropTypes.object).isRequired,
+  countryData: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 
 // Optimization: Memoize to prevent re-renders when parent re-renders (animation loop)
