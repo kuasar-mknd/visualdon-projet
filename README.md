@@ -177,7 +177,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - **Data Provider**: [Global Carbon Project](https://www.globalcarbonproject.org/)
-- **Research Paper**: Friedlingstein et al. (2021) - [Global Carbon Budget 2021](https://doi.org/10.5194/essd-13-5213-2021)
+- **Research Paper**: Friedlingstein et al. (2024) - [Global Carbon Budget 2024](https://doi.org/10.5194/essd-16-5287-2024)
 - **Country Translations**: [REST Countries API](https://restcountries.com/)
 - **Institution**: HEIG-VD (Haute École d'Ingénierie et de Gestion du Canton de Vaud)
 
@@ -189,7 +189,7 @@ This visualization is based on the Global Carbon Budget dataset, which provides 
 - No significant reduction observed in any global sector to date
 - The critical importance of independent, real-time emissions tracking for climate policy
 
-> **Citation**: Friedlingstein, P., Jones, M. W., O'Sullivan, M., et al. (2021). Global Carbon Budget 2021. _Earth System Science Data_, 13(11), 5213-5252. <https://doi.org/10.5194/essd-13-5213-2021>
+> **Citation**: Friedlingstein, P., O'Sullivan, M., Jones, M. W., et al. (2024). Global Carbon Budget 2024. _Earth System Science Data_, 16, 5287–5383. <https://doi.org/10.5194/essd-16-5287-2024>
 
 ## 🔗 Links
 

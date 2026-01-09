@@ -7,6 +7,8 @@ This application is a client-side React application built with Vite. It does not
 - **NO** custom environment variables are currently required to run the application locally or in production.
 - **NODE_ENV**: Handled automatically by Vite (`development` during `pnpm dev`, `production` during `pnpm build`).
 
+> **Note**: The environment variables listed below (and in `.env.example`) are **examples** for potential future configuration. They are not currently utilized by the application code.
+
 ## Conventions
 If you need to add environment variables in the future:
 1.  Prefix them with `VITE_` to expose them to the client-side code.

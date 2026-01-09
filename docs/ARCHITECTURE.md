@@ -56,11 +56,23 @@ The application follows a component-based architecture where each UI element is 
 - **Container/Presenter**: Some components act as containers (fetching data/state) while others are purely presentational.
 
 ### Clean Architecture Mapping
-While this is a frontend-only application, the structure loosely maps to Clean Architecture principles:
-- **Domain Layer**: Implicitly defined by the data structures (emissions data) and types. `src/services/` contains domain-specific logic like country translation.
-- **Application Layer**: `src/hooks/` and `src/context/` manage the application state and business logic (e.g., filtering data by year).
-- **Infrastructure Layer**: `d3.csv` and `fetch` APIs act as the infrastructure for data retrieval. `scripts/update-data.js` handles external data source integration and manifest generation.
-- **Presentation Layer**: React components (`src/components/`) handle the UI and user interaction.
+This project adapts Clean Architecture principles to a React context, separating concerns into distinct layers:
+
+1.  **Domain Layer (Entities & Business Rules)**
+    *   *Definition*: The core data models and business rules independent of the UI.
+    *   *Implementation*: `src/services/` (Country logic), Data structures defined in CSV schemas.
+
+2.  **Application Layer (Use Cases)**
+    *   *Definition*: Application-specific business rules.
+    *   *Implementation*: `src/hooks/useData.js` (Data fetching/processing), `src/context/` (Global state management).
+
+3.  **Presentation Layer (UI)**
+    *   *Definition*: The interface the user interacts with.
+    *   *Implementation*: `src/components/` (React components), `src/App.jsx`.
+
+4.  **Infrastructure Layer (External Interfaces)**
+    *   *Definition*: Tools and external agents.
+    *   *Implementation*: `scripts/update-data.js` (Data fetching), Browser APIs (`fetch`, `localStorage`).
 
 ### Custom Hooks
 Logic for data fetching and state management is encapsulated in hooks (`useData`) to separate concerns and keep components clean.
