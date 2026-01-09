@@ -41,7 +41,7 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
   const [hoveredCountryName, setHoveredCountryName] = useState(null);
   const [hoveredCountryId, setHoveredCountryId] = useState(null);
   const hoverTimeoutRef = useRef(null);
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
 
   // Sync ref with state
   useEffect(() => {
@@ -325,7 +325,15 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
 
   return (
     <div ref={containerRef} className="w-full h-full relative bg-slate-50 overflow-hidden cursor-grab active:cursor-grabbing">
-       <svg ref={svgRef} width={dimensions.width} height={dimensions.height} style={{background: 'radial-gradient(circle at 50% 50%, #f8fafc 0%, #e2e8f0 100%)'}}>
+       <svg
+         ref={svgRef}
+         width={dimensions.width}
+         height={dimensions.height}
+         style={{background: 'radial-gradient(circle at 50% 50%, #f8fafc 0%, #e2e8f0 100%)'}}
+         role="img"
+         aria-label={t('aria.globeDescription')}
+       >
+          <title>{t('aria.globeDescription')}</title>
           <defs>
             <radialGradient id="oceanGradient" cx="50%" cy="50%" r="50%">
                 <stop offset="0%" stopColor="#dbeafe" stopOpacity="1" />

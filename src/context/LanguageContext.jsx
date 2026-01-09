@@ -39,9 +39,12 @@ export const translations = {
       pause: "Pause animation",
       selectCategory: "Select emission category",
       selectYear: "Select year",
+      yearLabel: "Year",
       toggleLanguage: "Switch language",
       closeOverlay: "Close details",
-      skipToContent: "Skip to main content"
+      skipToContent: "Skip to main content",
+      globeDescription: "Interactive 3D globe showing CO2 emissions by country",
+      openInNewTab: "(opens in a new tab)"
     },
     chart: {
       selectCountryPrompt: "Select a country to view details",
@@ -87,9 +90,12 @@ export const translations = {
       pause: "Mettre en pause l'animation",
       selectCategory: "Sélectionner la catégorie d'émission",
       selectYear: "Sélectionner l'année",
+      yearLabel: "Année",
       toggleLanguage: "Changer de langue",
       closeOverlay: "Fermer les détails",
-      skipToContent: "Aller au contenu principal"
+      skipToContent: "Aller au contenu principal",
+      globeDescription: "Globe 3D interactif montrant les émissions de CO2 par pays",
+      openInNewTab: "(ouvre un nouvel onglet)"
     },
     chart: {
       selectCountryPrompt: "Sélectionnez un pays pour voir les détails",
