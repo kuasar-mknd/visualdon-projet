@@ -17,7 +17,7 @@ const customInterpolator = t => {
   }
 };
 
-const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
+const Globe = ({ data: dataMap, geoJson, category, maxVal, onCountrySelect }) => {
   const containerRef = useRef(null);
   const svgRef = useRef(null);
 
@@ -96,16 +96,6 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
       });
       return map;
   }, [geoJson]);
-
-  const dataMap = useMemo(() => {
-    if (!data) return new Map();
-    if (data instanceof Map) return data;
-    const map = new Map();
-    data.forEach(d => {
-        map.set(d["ISO 3166-1 alpha-3"], d);
-    });
-    return map;
-  }, [data]);
 
   const hoveredValue = useMemo(() => {
       if (!hoveredCountryId) return null;
@@ -321,7 +311,7 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
       );
   }, [hoveredCountryId]);
 
-  if (!data || !geoJson) return <div ref={containerRef} className="w-full h-full bg-slate-100" />;
+  if (!dataMap || !geoJson) return <div ref={containerRef} className="w-full h-full bg-slate-100" />;
 
   return (
     <div ref={containerRef} className="w-full h-full relative bg-slate-50 overflow-hidden cursor-grab active:cursor-grabbing">
@@ -383,12 +373,7 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
 };
 
 Globe.propTypes = {
-  data: PropTypes.oneOfType([
-    PropTypes.arrayOf(PropTypes.shape({
-      "ISO 3166-1 alpha-3": PropTypes.string,
-    })),
-    PropTypes.instanceOf(Map)
-  ]).isRequired,
+  data: PropTypes.instanceOf(Map).isRequired,
   geoJson: PropTypes.shape({
     type: PropTypes.string,
     features: PropTypes.arrayOf(PropTypes.object)

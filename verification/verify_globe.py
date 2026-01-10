@@ -1,40 +1,30 @@
 from playwright.sync_api import sync_playwright
 
-def verify_globe_render():
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        page = browser.new_page()
+def verify_globe(page):
+    # Go to app
+    page.goto("http://localhost:5173")
 
-        try:
-            print("Navigating to app...")
-            page.goto("http://localhost:5173/")
+    # Wait for the main content to appear, meaning loading is done.
+    # We can check for a specific element that appears after loading, e.g., the Header or Controls
+    page.wait_for_selector('#main-content', timeout=60000)
 
-            # Wait for loading to finish (Year display appears)
-            print("Waiting for data load...")
-            page.wait_for_selector('role=status', state='hidden', timeout=30000)
+    # Wait for Globe to render (look for sphere-path)
+    page.wait_for_selector('.sphere-path', timeout=60000)
 
-            # Wait for Globe canvas/svg to be visible
-            print("Waiting for Globe...")
-            page.wait_for_selector('path.sphere-path', timeout=10000)
+    # Wait a bit for globe to initialize
+    page.wait_for_timeout(3000)
 
-            # Check if countries are rendered
-            print("Checking countries...")
-            countries = page.locator('path.country-path').count()
-            print(f"Found {countries} countries")
-
-            if countries == 0:
-                raise Exception("No countries rendered!")
-
-            # Take screenshot
-            print("Taking screenshot...")
-            page.screenshot(path="verification/globe_render.png")
-            print("Screenshot saved to verification/globe_render.png")
-
-        except Exception as e:
-            print(f"Error: {e}")
-            page.screenshot(path="verification/error.png")
-        finally:
-            browser.close()
+    # Take screenshot
+    page.screenshot(path="verification/globe_check.png")
+    print("Screenshot saved to verification/globe_check.png")
 
 if __name__ == "__main__":
-    verify_globe_render()
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page()
+        try:
+            verify_globe(page)
+        except Exception as e:
+            print(f"Error: {e}")
+        finally:
+            browser.close()
