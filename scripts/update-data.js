@@ -346,6 +346,20 @@ function arrayToCSV(data) {
 }
 
 /**
+ * Calculate SHA-256 hash of a file
+ * @param {string} filePath - Path to file
+ */
+function calculateFileHash(filePath) {
+  return new Promise((resolve, reject) => {
+    const stream = fs.createReadStream(filePath);
+    const hasher = crypto.createHash('sha256');
+    stream.on('data', data => hasher.update(data));
+    stream.on('end', () => resolve(hasher.digest('hex')));
+    stream.on('error', reject);
+  });
+}
+
+/**
  * Main update function
  */
 async function updateData() {
@@ -425,9 +439,16 @@ async function updateData() {
     console.log(`✓ Saved: ${perCapitaFinal}\n`);
 
     // Create and save manifest
+    console.log('🔒 Generating integrity hashes...');
+    // calculateFileHash is defined above
+    const emissionsHash = await calculateFileHash(mtCO2Final);
+    const perCapitaHash = await calculateFileHash(perCapitaFinal);
+
     const manifest = {
       emissions: mtCO2FinalName,
       perCapita: perCapitaFinalName,
+      emissionsHash: emissionsHash,
+      perCapitaHash: perCapitaHash,
       version: zenodoData.version,
       lastUpdated: new Date().toISOString()
     };
