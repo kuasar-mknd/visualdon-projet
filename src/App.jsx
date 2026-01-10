@@ -7,6 +7,8 @@ import { useData } from './hooks/useData';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { fetchCountryDetails } from './services/countryService';
 
+import LoadingPlaceholder from './components/common/LoadingPlaceholder';
+
 // Lazy load heavy visualization components
 const Globe = React.lazy(() => import('./components/Globe'));
 const TopCountriesChart = React.lazy(() => import('./components/TopCountriesChart'));
@@ -164,13 +166,6 @@ function AppContent() {
       </div>
     );
   }
-
-  // Loading fallback component
-  const LoadingPlaceholder = () => (
-    <div className="flex items-center justify-center w-full h-full text-slate-400">
-      <div className="animate-pulse">{t('loading')}...</div>
-    </div>
-  );
 
   return (
     <div className="min-h-screen text-slate-800 p-2 md:p-4 font-sans selection:bg-blue-100 selection:text-blue-900 overflow-hidden">
