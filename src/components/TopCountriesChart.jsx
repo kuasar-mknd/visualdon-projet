@@ -18,6 +18,26 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect })
   const topData = useMemo(() => {
     if (!data) return [];
     
+    // Optimization: Data is pre-sorted by 'Total' in App.jsx.
+    // Since category is 'Total' (or mapped to it), we can take a fast path O(K) instead of O(N log N) + O(N).
+    // This is significant during animation frames.
+    if (category === 'Total') {
+        const result = [];
+        // Iterate until we find 10 positive items or exhaust the list
+        // Since it's sorted descending, we can stop early.
+        for (let i = 0; i < data.length && result.length < 10; i++) {
+            const val = data[i].Total || 0;
+            if (val > 0) {
+                result.push(data[i]);
+            } else if (val <= 0) {
+                 // Optimization: sorted descending, so no more positive values exist
+                 break;
+            }
+        }
+        return result;
+    }
+
+    // Fallback for other categories (if any in future)
     return data
       .filter(d => (d[category] || 0) > 0)
       .sort((a, b) => (b[category] || 0) - (a[category] || 0))
@@ -271,6 +291,7 @@ TopCountriesChart.propTypes = {
   data: PropTypes.arrayOf(PropTypes.shape({
     Country: PropTypes.string,
     "ISO 3166-1 alpha-3": PropTypes.string,
+    Total: PropTypes.number, // Required for optimized sorting
   })).isRequired,
   year: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   category: PropTypes.string.isRequired,

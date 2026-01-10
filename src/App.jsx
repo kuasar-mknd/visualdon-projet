@@ -99,6 +99,12 @@ function AppContent() {
       entry.list.push(d);
       entry.map.set(d["ISO 3166-1 alpha-3"], d);
     }
+
+    // Sort lists by Total descending to optimize downstream charts
+    for (const entry of grouped.values()) {
+      entry.list.sort((a, b) => (b.Total || 0) - (a.Total || 0));
+    }
+
     return grouped;
   }, []);
 
