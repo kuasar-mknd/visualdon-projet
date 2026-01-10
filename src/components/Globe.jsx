@@ -76,21 +76,11 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
       return map;
   }, [geoJson]);
 
-  const dataMap = useMemo(() => {
-    if (!data) return new Map();
-    if (data instanceof Map) return data;
-    const map = new Map();
-    data.forEach(d => {
-        map.set(d["ISO 3166-1 alpha-3"], d);
-    });
-    return map;
-  }, [data]);
-
   const hoveredValue = useMemo(() => {
-      if (!hoveredCountryId) return null;
-      const countryData = dataMap.get(hoveredCountryId);
+      if (!hoveredCountryId || !data) return null;
+      const countryData = data.get(hoveredCountryId);
       return countryData ? (countryData[category] || 0) : null;
-  }, [hoveredCountryId, dataMap, category]);
+  }, [hoveredCountryId, data, category]);
 
   const handleMouseEnter = useCallback((countryId, featureName) => {
       setHoveredCountryId(countryId);
@@ -210,17 +200,17 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
       // Use cached selection if available
       const selection = countrySelectionRef.current || d3.select(svgRef.current).selectAll("path.country-path");
 
-      if (!geoJson || !dataMap || selection.empty()) return;
+      if (!geoJson || !data || selection.empty()) return;
 
       selection
         .data(geoJson.features)
         .attr("fill", d => {
             const countryId = d.properties.A3 || d.id;
-            const countryData = dataMap.get(countryId);
-            const value = countryData ? countryData[category] : 0;
+            const countryData = data.get(countryId);
+            const value = countryData ? (countryData[category] || 0) : 0;
             return (value > 0) ? colorScale(value) : '#475569';
         });
-  }, [geoJson, dataMap, category, colorScale]);
+  }, [geoJson, data, category, colorScale]);
 
   // Effect: Update Highlight Path Position on Interaction
   useEffect(() => {
@@ -324,12 +314,7 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
 };
 
 Globe.propTypes = {
-  data: PropTypes.oneOfType([
-    PropTypes.arrayOf(PropTypes.shape({
-      "ISO 3166-1 alpha-3": PropTypes.string,
-    })),
-    PropTypes.instanceOf(Map)
-  ]).isRequired,
+  data: PropTypes.instanceOf(Map).isRequired,
   geoJson: PropTypes.shape({
     type: PropTypes.string,
     features: PropTypes.arrayOf(PropTypes.object)
