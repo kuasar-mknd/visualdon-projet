@@ -9,6 +9,29 @@ function fetchWithTimeout(promise, ms = 10000) {
   ]);
 }
 
+// Optimization: Custom row converter to replace d3.autoType
+// significantly faster as it avoids regex for every field and only converts known numeric columns.
+const fastRowConverter = (obj) => {
+  const numericKeys = [
+    'Year', 'Total', 'Coal', 'Oil', 'Gas',
+    'Cement', 'Flaring', 'Other', 'Per Capita', 'UN M49'
+  ];
+
+  for (const key of numericKeys) {
+    const val = obj[key];
+    if (val === undefined) continue;
+
+    if (val === "") {
+      obj[key] = null;
+    } else if (val === "NaN" || val === "NA") {
+      obj[key] = NaN;
+    } else {
+      obj[key] = +val;
+    }
+  }
+  return obj;
+};
+
 // Helper to safely parse CSV without using new Function (eval) which violates CSP
 // d3.csv uses d3-dsv's objectConverter which uses new Function
 async function safeCsv(url, rowConverter) {
@@ -60,9 +83,9 @@ export function useData() {
 
         // Parallelize fetching
         const [emissions, geoJson, perCapita] = await Promise.all([
-          safeCsv(`/data/${manifest.emissions}`, d3.autoType),
+          safeCsv(`/data/${manifest.emissions}`, fastRowConverter),
           fetchWithTimeout(d3.json('/data/countries-coastline-10km.geo.json')),
-          safeCsv(`/data/${manifest.perCapita}`, d3.autoType),
+          safeCsv(`/data/${manifest.perCapita}`, fastRowConverter),
         ]);
 
         // Security Enhancement: Validate GeoJSON structure
