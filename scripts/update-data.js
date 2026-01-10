@@ -204,6 +204,13 @@ function verifyChecksum(filePath, checksum) {
       return;
     }
 
+    // Security Hardening: Whitelist allowed algorithms to prevent usage of weak or malicious ones
+    const ALLOWED_ALGOS = ['md5', 'sha1', 'sha256', 'sha512'];
+    if (!ALLOWED_ALGOS.includes(algo.toLowerCase())) {
+        reject(new Error(`Security Error: Algorithm '${algo}' is not in the allowed whitelist (${ALLOWED_ALGOS.join(', ')})`));
+        return;
+    }
+
     const stream = fs.createReadStream(filePath);
     const hasher = crypto.createHash(algo);
 
