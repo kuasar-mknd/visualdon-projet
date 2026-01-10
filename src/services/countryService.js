@@ -116,7 +116,9 @@ export const fetchCountryDetails = async (code, language) => {
 
     return getNameFromData(countryData, language);
   } catch (error) {
-    console.warn(`Failed to fetch data for ${code}:`, error.message);
+    // Sanitize code for logging to prevent log injection
+    const safeLogCode = encodeURIComponent(code);
+    console.warn(`Failed to fetch data for ${safeLogCode}:`, error.message);
     return null;
   } finally {
     clearTimeout(timeoutId);
