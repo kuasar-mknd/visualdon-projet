@@ -35,10 +35,31 @@ function fastRowConverter(d) {
   return d;
 }
 
+// Helper to verify SHA-256 integrity of fetched content
+async function verifyIntegrity(text, expectedHash) {
+  if (!expectedHash) return; // Skip if no hash provided (dev mode/legacy)
+
+  const encoder = new TextEncoder();
+  const data = encoder.encode(text);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+  if (hashHex !== expectedHash) {
+    throw new Error(`Integrity check failed! Calculated: ${hashHex}, Expected: ${expectedHash}`);
+  }
+}
+
 // Helper to safely parse CSV without using new Function (eval) which violates CSP
 // d3.csv uses d3-dsv's objectConverter which uses new Function
-async function safeCsv(url, rowConverter) {
+async function safeCsv(url, rowConverter, expectedHash) {
   const text = await fetchWithTimeout(d3.text(url));
+
+  // Verify integrity if hash is provided
+  if (expectedHash) {
+    await verifyIntegrity(text, expectedHash);
+  }
+
   const rows = d3.csvParseRows(text);
 
   if (rows.length === 0) return [];
@@ -87,9 +108,9 @@ export function useData() {
 
         // Parallelize fetching
         const [emissions, geoJson, perCapita] = await Promise.all([
-          safeCsv(`/data/${manifest.emissions}`, fastRowConverter),
+          safeCsv(`/data/${manifest.emissions}`, fastRowConverter, manifest.emissionsHash),
           fetchWithTimeout(d3.json('/data/countries-coastline-10km.geo.json')),
-          safeCsv(`/data/${manifest.perCapita}`, fastRowConverter),
+          safeCsv(`/data/${manifest.perCapita}`, fastRowConverter, manifest.perCapitaHash),
         ]);
 
         // Security Enhancement: Validate GeoJSON structure
