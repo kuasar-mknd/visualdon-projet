@@ -2,6 +2,7 @@ import React, { useState, Suspense } from 'react';
 import PropTypes from 'prop-types';
 import { useLanguage } from '../context/LanguageContext';
 import { useResizeObserver } from '../hooks/useResizeObserver';
+import LoadingPlaceholder from './common/LoadingPlaceholder';
 
 const BubbleChart = React.lazy(() => import('./charts/BubbleChart'));
 const StackedAreaChart = React.lazy(() => import('./charts/StackedAreaChart'));
@@ -133,7 +134,7 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
       <div className="flex-1 bg-transparent rounded-lg overflow-hidden relative">
         <div ref={containerRef} className="w-full h-full absolute inset-0">
            {dimensions.width > 0 && dimensions.height > 0 && emissionData.length > 0 && (
-             <Suspense fallback={<div className="flex items-center justify-center h-full text-slate-400">{t('loading')}...</div>}>
+             <Suspense fallback={<LoadingPlaceholder />}>
                 {viewMode === 'bubbles' ? (
                   <BubbleChart
                     chartData={chartData}

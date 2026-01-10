@@ -97,20 +97,20 @@ const StackedAreaChart = ({
       .attr("transform", `translate(0, ${height - padding.bottom})`)
       .call(xAxis)
       .call(g => g.selectAll("text")
-          .attr("fill", "#cbd5e1")
-          .attr("font-size", "12px"))
-      .call(g => g.selectAll("line").attr("stroke", "#475569"))
-      .call(g => g.select(".domain").attr("stroke", "#475569"));
+          .attr("fill", "#64748b")
+          .attr("font-size", "11px"))
+      .call(g => g.selectAll("line").attr("stroke", "#94a3b8"))
+      .call(g => g.select(".domain").attr("stroke", "#94a3b8"));
 
     const yAxis = d3.axisLeft(yScale).ticks(8);
     svg.append("g")
       .attr("transform", `translate(${padding.left}, 0)`)
       .call(yAxis)
       .call(g => g.selectAll("text")
-          .attr("fill", "#cbd5e1")
-          .attr("font-size", "12px"))
-      .call(g => g.selectAll("line").attr("stroke", "#475569"))
-      .call(g => g.select(".domain").attr("stroke", "#475569"));
+          .attr("fill", "#64748b")
+          .attr("font-size", "11px"))
+      .call(g => g.selectAll("line").attr("stroke", "#94a3b8"))
+      .call(g => g.select(".domain").attr("stroke", "#94a3b8"));
 
     // Labels
     svg.append("text")
@@ -118,7 +118,7 @@ const StackedAreaChart = ({
       .attr("x", -(height / 2))
       .attr("y", padding.left - 45)
       .attr("text-anchor", "middle")
-      .attr("fill", "#cbd5e1")
+      .attr("fill", "#475569")
       .attr("font-size", "13px")
       .attr("font-weight", "500")
       .text("Émissions (MtCO₂)");
@@ -127,7 +127,7 @@ const StackedAreaChart = ({
       .attr("x", width / 2)
       .attr("y", height - 15)
       .attr("text-anchor", "middle")
-      .attr("fill", "#cbd5e1")
+      .attr("fill", "#475569")
       .attr("font-size", "13px")
       .attr("font-weight", "500")
       .text("Année");
@@ -139,7 +139,7 @@ const StackedAreaChart = ({
       .attr("text-anchor", "middle")
       .style("font-size", "18px")
       .style("font-weight", "600")
-      .style("fill", "#e2e8f0");
+      .style("fill", "#334155");
 
     // Legend
     const legend = svg.append("g")
@@ -185,7 +185,7 @@ const StackedAreaChart = ({
         .attr("x", 22)
         .attr("y", 12)
         .text(t(`sectors.${sector}`) || sector)
-        .attr("fill", "#cbd5e1")
+        .attr("fill", "#475569")
         .style("font-size", "13px")
         .style("font-weight", "500");
     });
