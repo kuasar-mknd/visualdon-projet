@@ -1,10 +1,10 @@
 # Environment Variables
 
 ## Overview
-This application is a client-side React application built with Vite. It does not currently rely on specific environment variables for its core functionality.
+This application is a client-side React application built with Vite. It does not currently rely on specific environment variables for its core runtime functionality.
 
 ## Current Usage
-- **NO** custom environment variables are currently required to run the application locally or in production.
+- **NO** custom `VITE_` environment variables are currently required to run the application locally or in production.
 - **NODE_ENV**: Handled automatically by Vite (`development` during `pnpm dev`, `production` during `pnpm build`).
 
 ## Conventions

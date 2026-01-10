@@ -7,7 +7,7 @@ on:
     branches: [main, master, develop]
 
 jobs:
-  build-and-lint:
+  build-and-test:
     runs-on: ubuntu-latest
 
     strategy:
@@ -45,6 +45,14 @@ jobs:
 
       - name: Lint
         run: pnpm run lint
+
+      - name: Test
+        run: |
+          if npm run | grep -q "^test$"; then
+            pnpm run test
+          else
+            echo "No test script found, skipping tests."
+          fi
 
       - name: Build
         run: pnpm run build
