@@ -24,65 +24,13 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
   const [split, setSplit] = useState(false);
   const [viewMode, setViewMode] = useState('bubbles'); // 'bubbles' or 'lines'
 
-<<<<<<< HEAD
   // Optimization: Replaced manual ResizeObserver logic with a reusable hook
   // This reduces code duplication and ensures consistent behavior.
   const [containerRef, dimensions] = useResizeObserver({
     debounceTime: 100,
     defaultDimensions: { width: 500, height: 500 }
   });
-=======
-  const [dimensions, setDimensions] = useState({ width: 500, height: 500 });
 
-  // Handle Resize
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const updateDimensions = () => {
-       if (containerRef.current) {
-          setDimensions({
-            width: containerRef.current.clientWidth || 500,
-            height: containerRef.current.clientHeight || 500
-          });
-       }
-    };
-
-    updateDimensions();
-    
-    // Optimization: Use ResizeObserver only, removing redundant window resize listener
-    // ResizeObserver is more efficient as it monitors the specific element size
-    // Added debounce to prevent excessive updates during resizing
-    let timeoutId;
-    const resizeObserver = new ResizeObserver((entries) => {
-        const entry = entries[0];
-        if (!entry) return;
-
-        // Optimization: Ignore insignificant resize events (< 5px) to prevent layout thrashing
-        // and unnecessary D3 redraws during mobile scrolling or minor layout shifts.
-        const newWidth = entry.contentRect.width;
-        const newHeight = entry.contentRect.height;
-
-        if (Math.abs(newWidth - dimensions.width) < 5 && Math.abs(newHeight - dimensions.height) < 5) {
-            return;
-        }
-
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(updateDimensions, 100);
-    });
-
-    resizeObserver.observe(containerRef.current);
-
-    return () => {
-      resizeObserver.disconnect();
-      clearTimeout(timeoutId);
-    };
-  }, [containerRef.current]);
-
-  const emissionData = React.useMemo(() => {
-      if (!countryCode || !emissionsData) return [];
-      return emissionsData.filter(e => e["ISO 3166-1 alpha-3"] === countryCode);
-  }, [countryCode, emissionsData]);
->>>>>>> origin/bolt-frontend-opt-batch-1-17348910179708092052
 
   // Transform data for charts
   const chartData = React.useMemo(() => {

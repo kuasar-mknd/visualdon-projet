@@ -47,6 +47,5 @@ GlobePaths.propTypes = {
   onHover: PropTypes.func.isRequired,
   onLeave: PropTypes.func.isRequired,
 };
-};
 
 export default React.memo(GlobePaths);

@@ -2,13 +2,11 @@ import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'reac
 import * as d3 from 'd3';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
-import LoadingPlaceholder from './components/layout/LoadingPlaceholder';
+import LoadingPlaceholder from './components/common/LoadingPlaceholder';
 import Controls from './components/controls/Controls';
 import { useData } from './hooks/useData';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { fetchCountryDetails } from './services/countryService';
-
-import LoadingPlaceholder from './components/common/LoadingPlaceholder';
 
 // Lazy load heavy visualization components
 const Globe = React.lazy(() => import('./components/Globe'));
