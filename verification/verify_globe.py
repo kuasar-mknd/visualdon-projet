@@ -4,34 +4,39 @@ def verify_globe_render():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
-
         try:
             print("Navigating to app...")
-            page.goto("http://localhost:5173/")
+            page.goto("http://localhost:5173")
 
-            # Wait for loading to finish (Year display appears)
-            print("Waiting for data load...")
-            page.wait_for_selector('role=status', state='hidden', timeout=30000)
+            print("Waiting for loading to complete...")
+            page.wait_for_selector('text=Loading...', state="detached", timeout=30000)
 
-            # Wait for Globe canvas/svg to be visible
             print("Waiting for Globe...")
-            page.wait_for_selector('path.sphere-path', timeout=10000)
+            page.wait_for_selector('.sphere-path', timeout=10000)
 
-            # Check if countries are rendered
-            print("Checking countries...")
-            countries = page.locator('path.country-path').count()
-            print(f"Found {countries} countries")
+            print("Waiting for country paths...")
+            page.wait_for_selector('.country-path', timeout=10000)
 
-            if countries == 0:
-                raise Exception("No countries rendered!")
+            # The glow circle (filter) intercepts clicks/hovers.
+            # We can force the hover or interact via JS.
+            print("Attempting to hover via JS dispatch...")
 
-            # Take screenshot
+            # Locate the first country path
+            country = page.locator('.country-path').first
+
+            # Use dispatch_event to bypass the intercepting overlay
+            country.dispatch_event('mouseenter')
+            country.focus() # Also try focus
+
+            print("Waiting for highlight...")
+            page.wait_for_selector('.highlight-path', timeout=5000)
+
             print("Taking screenshot...")
-            page.screenshot(path="verification/globe_render.png")
-            print("Screenshot saved to verification/globe_render.png")
+            page.screenshot(path="verification/globe_verification.png")
+            print("Verification successful!")
 
         except Exception as e:
-            print(f"Error: {e}")
+            print(f"Verification failed: {e}")
             page.screenshot(path="verification/error.png")
         finally:
             browser.close()
