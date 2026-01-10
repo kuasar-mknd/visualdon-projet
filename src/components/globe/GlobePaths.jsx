@@ -1,24 +1,10 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 
-/**
- * GlobePaths - Renders the static SVG paths for the countries.
- *
- * Performance Note:
- * This component is extracted from Globe.jsx to prevent unnecessary React reconciliation
- * of ~200 path elements on every animation frame (200ms). By using React.memo,
- * this component only re-renders when the GeoJSON data or event handlers change,
- * bypassing the virtual DOM diffing process completely during the timeline animation loop.
- */
-const GlobePaths = ({
-  geoJson,
-  onPathClick,
-  onPathKeyDown,
-  onPathFocus,
-  onPathBlur
-}) => {
-  return useMemo(() => {
-    if (!geoJson) return null;
+const GlobePaths = ({ geoJson, onCountrySelect, onHover, onLeave }) => {
+  // Optimization: Render static paths once.
+  const paths = useMemo(() => {
+    if (!geoJson) return [];
 
     return geoJson.features.map((feature, i) => {
         const countryId = feature.properties.A3 || feature.id;
@@ -33,25 +19,34 @@ const GlobePaths = ({
                 aria-label={feature.properties.NAME || countryId}
                 data-id={countryId}
                 data-name={feature.properties.NAME}
-                onClick={onPathClick}
-                onKeyDown={onPathKeyDown}
-                onFocus={onPathFocus}
-                onBlur={onPathBlur}
-                onMouseEnter={onPathFocus}
-                onMouseLeave={onPathFocus} // Preserving existing behavior from Globe.jsx
-            >
-            </path>
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCountrySelect(countryId);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onCountrySelect(countryId);
+                  }
+                }}
+                onFocus={() => onHover(countryId, feature.properties.NAME)}
+                onBlur={onLeave}
+                onMouseEnter={() => onHover(countryId, feature.properties.NAME)}
+                onMouseLeave={onLeave}
+            />
         );
     });
-  }, [geoJson, onPathClick, onPathKeyDown, onPathFocus, onPathBlur]);
+  }, [geoJson, onCountrySelect, onHover, onLeave]);
+
+  return <g>{paths}</g>;
 };
 
 GlobePaths.propTypes = {
-    geoJson: PropTypes.object,
-    onPathClick: PropTypes.func.isRequired,
-    onPathKeyDown: PropTypes.func.isRequired,
-    onPathFocus: PropTypes.func.isRequired,
-    onPathBlur: PropTypes.func.isRequired
+  geoJson: PropTypes.object,
+  onCountrySelect: PropTypes.func.isRequired,
+  onHover: PropTypes.func.isRequired,
+  onLeave: PropTypes.func.isRequired,
+};
 };
 
 export default React.memo(GlobePaths);

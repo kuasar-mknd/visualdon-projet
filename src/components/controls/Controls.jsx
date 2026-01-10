@@ -1,49 +1,9 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { useLanguage } from '../../context/LanguageContext';
-
-const PlayIcon = () => (
-  <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
-    <path d="M8 5v14l11-7z" />
-  </svg>
-);
-
-const PauseIcon = () => (
-  <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
-    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-  </svg>
-);
+import PlayControls from './PlayControls';
+import Timeline from './Timeline';
 
 const Controls = ({ isPlaying, setIsPlaying, category, setCategory, year, setYear, yearRange }) => {
-  const { t } = useLanguage();
-
-  // Optimization: Local state for slider to allow immediate UI feedback while debouncing the heavy global update
-  const [localYear, setLocalYear] = useState(year || yearRange.min);
-  const debounceTimerRef = useRef(null);
-
-  // Sync local state when external year prop changes (e.g. animation)
-  useEffect(() => {
-    setLocalYear(year);
-  }, [year]);
-
-  // Cleanup debounce timer on unmount
-  useEffect(() => {
-    return () => {
-      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
-    };
-  }, []);
-
-  const handleYearChange = useCallback((e) => {
-    const val = parseInt(e.target.value);
-    setLocalYear(val);
-
-    // Debounce the global state update to prevent excessive re-renders of heavy charts
-    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
-
-    debounceTimerRef.current = setTimeout(() => {
-      setYear(val);
-    }, 50); // 50ms debounce is enough to catch drag events but feel responsive
-  }, [setYear]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -89,64 +49,18 @@ const Controls = ({ isPlaying, setIsPlaying, category, setCategory, year, setYea
 
   return (
     <div className="glass-panel-light p-4 rounded-2xl shrink-0">
-      <div className="flex gap-3 mb-4">
-        <button
-          onClick={() => setIsPlaying(!isPlaying)}
-          aria-label={isPlaying ? t('aria.pause') : t('aria.play')}
-          aria-keyshortcuts="Space"
-          title={`${isPlaying ? t('pause') : t('play')} (Space)`}
-          className={`flex-1 py-3 px-6 rounded-xl font-semibold tracking-wide transition-all duration-300 shadow-sm hover:shadow-md focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none flex items-center justify-center gap-2 ${
-            isPlaying 
-              ? 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100' 
-              : 'bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100'
-          }`}
-        >
-          {isPlaying ? (
-            <>
-              <PauseIcon />
-              {t('pause')}
-            </>
-          ) : (
-            <>
-              <PlayIcon />
-              {t('play')}
-            </>
-          )}
-        </button>
-        
-        <select 
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          aria-label={t('aria.selectCategory')}
-          className="bg-white border border-slate-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-slate-700 font-medium shadow-sm cursor-pointer hover:border-blue-300 transition-colors text-sm"
-        >
-          <option value="Total">{t('total')}</option>
-          <option value="Per Capita">{t('perCapita')}</option>
-        </select>
-      </div>
+      <PlayControls
+        isPlaying={isPlaying}
+        setIsPlaying={setIsPlaying}
+        category={category}
+        setCategory={setCategory}
+      />
 
-      <div className="px-1 group">
-        <input
-          type="range"
-          min={yearRange.min}
-          max={yearRange.max}
-          value={localYear || yearRange.min}
-          disabled={!year}
-          onChange={handleYearChange}
-          aria-label={t('aria.selectYear')}
-          aria-valuetext={`${t('aria.yearLabel')} ${localYear || yearRange.min}`}
-          aria-keyshortcuts="ArrowLeft ArrowRight"
-          title={`${t('aria.selectYear')} (←/→)`}
-          className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-        />
-        <div className="flex justify-between items-center text-xs font-mono text-slate-600 mt-2">
-          <span>{yearRange.min}</span>
-          <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100 transition-all duration-200 opacity-60 grayscale group-hover:opacity-100 group-hover:grayscale-0 group-hover:scale-110 group-focus-within:opacity-100 group-focus-within:grayscale-0 group-focus-within:scale-110">
-            {localYear || yearRange.min}
-          </span>
-          <span>{yearRange.max}</span>
-        </div>
-      </div>
+      <Timeline
+        year={year}
+        setYear={setYear}
+        yearRange={yearRange}
+      />
     </div>
   );
 };
