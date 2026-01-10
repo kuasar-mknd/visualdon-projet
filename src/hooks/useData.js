@@ -9,6 +9,32 @@ function fetchWithTimeout(promise, ms = 10000) {
   ]);
 }
 
+// Optimization: Custom row converter that is faster than d3.autoType
+// d3.autoType uses regex to infer types for every value. We know the schema.
+function fastRowConverter(d) {
+  for (const key in d) {
+    // Skip known string columns
+    if (key === 'Country' || key === 'ISO 3166-1 alpha-3') continue;
+
+    const val = d[key];
+    if (val === '') {
+      d[key] = null;
+    } else {
+      // Unary plus is the fastest way to convert valid numeric strings
+      const num = +val;
+      // If it's NaN (e.g. "NA" or text), keep original string (match d3.autoType behavior partially)
+      // But for our dataset, we expect numbers.
+      // If result is NaN, check if it was actually a non-empty string that isn't a number.
+      if (isNaN(num) && val !== 'NaN') {
+         // keep string
+      } else {
+         d[key] = num;
+      }
+    }
+  }
+  return d;
+}
+
 // Helper to safely parse CSV without using new Function (eval) which violates CSP
 // d3.csv uses d3-dsv's objectConverter which uses new Function
 async function safeCsv(url, rowConverter) {
@@ -27,6 +53,7 @@ async function safeCsv(url, rowConverter) {
 
   const data = body.map(row => {
     const obj = {};
+    // Optimization: Manual loop is faster than reduce/forEach for hot paths
     for (let j = 0; j < safeHeaders.length; j++) {
       const { key, index } = safeHeaders[j];
       obj[key] = row[index];
@@ -60,9 +87,9 @@ export function useData() {
 
         // Parallelize fetching
         const [emissions, geoJson, perCapita] = await Promise.all([
-          safeCsv(`/data/${manifest.emissions}`, d3.autoType),
+          safeCsv(`/data/${manifest.emissions}`, fastRowConverter),
           fetchWithTimeout(d3.json('/data/countries-coastline-10km.geo.json')),
-          safeCsv(`/data/${manifest.perCapita}`, d3.autoType),
+          safeCsv(`/data/${manifest.perCapita}`, fastRowConverter),
         ]);
 
         // Security Enhancement: Validate GeoJSON structure

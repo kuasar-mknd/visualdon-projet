@@ -115,6 +115,20 @@ function AppContent() {
   const emptyData = useMemo(() => ({ list: [], map: new Map() }), []);
   const { list: currentYearList, map: currentYearMap } = dataByYear.get(year) || emptyData;
 
+  // Optimization: Group emissions by country code for O(1) lookup in CountryDetailsOverlay
+  const emissionsByCountry = useMemo(() => {
+    if (!emissions) return new Map();
+    const grouped = new Map();
+    for (const d of emissions) {
+      const iso = d["ISO 3166-1 alpha-3"];
+      if (!grouped.has(iso)) {
+        grouped.set(iso, []);
+      }
+      grouped.get(iso).push(d);
+    }
+    return grouped;
+  }, [emissions]);
+
   // Update displayCountry when selectedCountry changes to a valid value
   useEffect(() => {
     if (selectedCountry) {
@@ -209,7 +223,7 @@ function AppContent() {
                 selectedCountryName={selectedCountryName}
                 displayCountry={displayCountry}
                 onClose={handleCloseOverlay}
-                emissions={emissions}
+                countryData={displayCountry ? emissionsByCountry.get(displayCountry) || [] : []}
              />
            </Suspense>
         </div>

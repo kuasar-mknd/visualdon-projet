@@ -18,7 +18,7 @@ const colorMapping = {
 // This prevents unnecessary re-renders of child charts that depend on this object.
 const padding = {top: 60, right: 160, bottom: 60, left: 70};
 
-const CountryChart = ({ countryCode, emissionsData }) => {
+const CountryChart = ({ countryCode, data: emissionData }) => {
   const containerRef = useRef(null);
   const { t } = useLanguage();
   const [split, setSplit] = useState(false);
@@ -58,14 +58,9 @@ const CountryChart = ({ countryCode, emissionsData }) => {
     };
   }, [containerRef.current]);
 
-  const emissionData = React.useMemo(() => {
-      if (!countryCode || !emissionsData) return [];
-      return emissionsData.filter(e => e["ISO 3166-1 alpha-3"] === countryCode);
-  }, [countryCode, emissionsData]);
-
   // Transform data for charts
   const chartData = React.useMemo(() => {
-    if (viewMode !== 'bubbles' || !emissionData.length) return [];
+    if (viewMode !== 'bubbles' || !emissionData || !emissionData.length) return [];
     
     let data = [];
     emissionData.forEach(yearData => {
@@ -86,7 +81,7 @@ const CountryChart = ({ countryCode, emissionsData }) => {
   }, [emissionData, viewMode]);
 
   const years = React.useMemo(() => {
-    if (viewMode !== 'lines' || !emissionData.length) return [];
+    if (viewMode !== 'lines' || !emissionData || !emissionData.length) return [];
     return emissionData.map(d => +d.Year).sort((a, b) => a - b);
   }, [emissionData, viewMode]);
 
@@ -102,7 +97,7 @@ const CountryChart = ({ countryCode, emissionsData }) => {
     );
   }
 
-  if (emissionData.length === 0) {
+  if (!emissionData || emissionData.length === 0) {
     return (
       <div
         className="flex items-center justify-center h-full text-slate-500"
@@ -195,7 +190,7 @@ const CountryChart = ({ countryCode, emissionsData }) => {
 
 CountryChart.propTypes = {
   countryCode: PropTypes.string,
-  emissionsData: PropTypes.arrayOf(PropTypes.shape({
+  data: PropTypes.arrayOf(PropTypes.shape({
     Year: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     "ISO 3166-1 alpha-3": PropTypes.string,
   })),
