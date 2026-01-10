@@ -125,6 +125,7 @@ const BubbleChart = ({
             .transition()
             .duration(200)
             .attr("opacity", 1)
+            .attr("stroke", "#1e293b")
             .attr("stroke-width", 3);
 
         // Remove existing tooltips to prevent duplicates
