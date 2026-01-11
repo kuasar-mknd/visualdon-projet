@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import * as d3 from 'd3';
+import { validateManifest, validateGeoJson } from '../utils/security';
 
 // Helper to fetch with timeout
 function fetchWithTimeout(promise, ms = 10000) {
@@ -51,6 +52,23 @@ async function verifyIntegrity(text, expectedHash) {
 
   if (hashHex !== expectedHash) {
     throw new Error(`Integrity check failed! Calculated: ${hashHex}, Expected: ${expectedHash}`);
+  }
+}
+
+// Helper to safely fetch and verify JSON content (e.g., GeoJSON)
+async function safeJson(url, expectedHash) {
+  // We fetch as text first to verify the hash of the raw content
+  const text = await fetchWithTimeout(d3.text(url));
+
+  if (expectedHash) {
+    await verifyIntegrity(text, expectedHash);
+  }
+
+  // Then parse the verified text
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(`Failed to parse JSON from ${url}`);
   }
 }
 
@@ -108,23 +126,24 @@ export function useData() {
     async function loadData() {
       try {
         // First load the manifest to get current filenames
-        // Use a cache-busting strategy or check if we can rely on browser caching.
-        // For now, we fetch manifest.json.
         const manifest = await fetchWithTimeout(d3.json('/data/manifest.json'));
-        if (!manifest || !manifest.emissions || !manifest.perCapita) {
-          throw new Error('Invalid manifest');
+
+        // Security Enhancement: Validate manifest structure
+        if (!validateManifest(manifest)) {
+          throw new Error('Invalid manifest structure or missing security hashes');
         }
 
         // Parallelize fetching
+        // Note: verifyIntegrity uses crypto.subtle which is available in secure contexts (HTTPS/localhost)
         const [emissions, geoJson, perCapita] = await Promise.all([
           safeCsv(`/data/${manifest.emissions}`, fastRowBuilder, manifest.emissionsHash),
-          fetchWithTimeout(d3.json('/data/countries-coastline-10km.geo.json')),
+          safeJson('/data/countries-coastline-10km.geo.json', manifest.geoJsonHash),
           safeCsv(`/data/${manifest.perCapita}`, fastRowBuilder, manifest.perCapitaHash),
         ]);
 
         // Security Enhancement: Validate GeoJSON structure
-        if (!geoJson || geoJson.type !== 'FeatureCollection' || !Array.isArray(geoJson.features)) {
-          throw new Error('Invalid GeoJSON data');
+        if (!validateGeoJson(geoJson)) {
+          throw new Error('Invalid GeoJSON data structure');
         }
 
         setData({
