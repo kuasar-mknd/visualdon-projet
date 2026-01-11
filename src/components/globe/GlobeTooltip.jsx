@@ -15,12 +15,12 @@ const GlobeTooltip = ({ countryName, value, category }) => {
       {value !== null ? (
         <div className="flex items-baseline gap-2">
           <span className="text-2xl font-mono font-bold text-slate-800">{value.toFixed(2)}</span>
-          <span className="text-sm text-slate-500">
+          <span className="text-sm text-slate-600">
             {category === 'Per Capita' ? 'tCO₂/hab' : 'MtCO₂'}
           </span>
         </div>
       ) : (
-        <div className="text-sm text-slate-400 italic">{t('noData')}</div>
+        <div className="text-sm text-slate-600 italic">{t('noData')}</div>
       )}
     </div>
   );

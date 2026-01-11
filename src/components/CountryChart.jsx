@@ -63,7 +63,7 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
   if (!countryCode) {
     return (
       <div
-        className="flex items-center justify-center h-full text-slate-400"
+        className="flex items-center justify-center h-full text-slate-600"
         role="status"
         aria-live="polite"
       >
@@ -75,7 +75,7 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
   if (!emissionData || emissionData.length === 0) {
     return (
       <div
-        className="flex items-center justify-center h-full text-slate-500"
+        className="flex items-center justify-center h-full text-slate-600"
         role="status"
         aria-live="polite"
       >
@@ -92,7 +92,7 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
           <button
             onClick={() => setViewMode('bubbles')}
             aria-pressed={viewMode === 'bubbles'}
-            className={`px-4 py-2 rounded-lg font-semibold transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none ${
+            className={`px-4 py-2 rounded-lg font-semibold transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none cursor-pointer ${
               viewMode === 'bubbles'
                 ? 'bg-blue-50 text-blue-600 border border-blue-200 shadow-sm'
                 : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
@@ -103,7 +103,7 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
           <button
             onClick={() => setViewMode('lines')}
             aria-pressed={viewMode === 'lines'}
-            className={`px-4 py-2 rounded-lg font-semibold transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none ${
+            className={`px-4 py-2 rounded-lg font-semibold transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none cursor-pointer ${
               viewMode === 'lines'
                 ? 'bg-blue-50 text-blue-600 border border-blue-200 shadow-sm'
                 : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
