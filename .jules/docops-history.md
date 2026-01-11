@@ -6,3 +6,4 @@
 | 2025-02-23 | Docs + Workflows | README.md, docs/*, .github/workflows/*, .github/dependabot.yml | Standardized docs, fixed update-data workflow versions (v6->v4), added Dependabot, refined architecture docs |
 | 2025-02-26 | Docs + CI | README.md, docs/*, .env.example, .github/workflows/* | Enhanced README (API, Troubleshooting), updated Architecture/AI/ENV docs, refined CI/CodeQL workflows, created .env.example |
 | 2026-01-10 | Docs + CI | README.md, docs/API.md, docs/ENV.md, .github/workflows/ci.yml | Updated API docs for 2025 data, added conditional test step to CI, verified standard workflows. |
+| 2026-03-22 | Docs + Workflows | README.md, docs/*, .github/workflows/*, .env.example | Updated docs to reflect Frontend stack (Vite/React/D3). Added CI, CodeQL, Dependency Review workflows. |

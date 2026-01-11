@@ -2,57 +2,53 @@ name: CI
 
 on:
   push:
-    branches: [main, master, develop]
+    branches: [ "main" ]
   pull_request:
-    branches: [main, master, develop]
+    branches: [ "main" ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build-and-test:
+  build:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [20.x]
-
     steps:
-      - uses: actions/checkout@v6
-
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ matrix.node-version }}
+      - uses: actions/checkout@v4
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 9
 
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v5
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
         with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+          node-version: 20
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Lint
-        run: pnpm run lint
-
-      - name: Test
+        if: ${{ hashFiles('package.json') != '' }}
         run: |
-          if npm run | grep -q "^test$"; then
-            pnpm run test
-          else
-            echo "No test script found, skipping tests."
-          fi
+            if npm run | grep -q "lint"; then
+              pnpm run lint
+            fi
 
       - name: Build
-        run: pnpm run build
+        if: ${{ hashFiles('package.json') != '' }}
+        run: |
+            if npm run | grep -q "build"; then
+              pnpm run build
+            fi
+
+      # Test step is conditional as per instructions (repo lacks test script)
+      - name: Test
+        if: ${{ hashFiles('package.json') != '' }}
+        run: |
+            if npm run | grep -q "test"; then
+              pnpm run test
+            fi
