@@ -32,6 +32,13 @@ To support versioned data without requiring code changes, the application uses a
   - **Source**: Calculated during the update process.
   - **Columns**: `Country`, `Year`, `Per Capita`.
 
+### API Access Example
+You can inspect the current data manifest using curl:
+
+```bash
+curl -s https://visualdon-projet.pages.dev/data/manifest.json | jq .
+```
+
 ## Internal Services
 
 ### Country Service (`src/services/countryService.js`)

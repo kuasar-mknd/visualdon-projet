@@ -62,13 +62,12 @@ While this is a frontend-only application, the structure loosely maps to Clean A
 - **Infrastructure Layer**: `d3.csv` and `fetch` APIs act as the infrastructure for data retrieval. `scripts/update-data.js` handles external data source integration and manifest generation.
 - **Presentation Layer**: React components (`src/components/`) handle the UI and user interaction.
 
-### Custom Hooks
-Logic for data fetching and state management is encapsulated in hooks (`useData`) to separate concerns and keep components clean.
+### State Management
+- **React Context**: Used for global state that rarely changes (e.g., `LanguageContext` for i18n).
+- **React Hooks**: `useState` and `useReducer` are used for local component state.
+- **Custom Hooks**: `useData` encapsulates the complex logic of data fetching and parsing.
 
-### Context API
-Global state (like Language) is shared using React Context to avoid prop drilling.
-
-## Extending the Application
+### Extending the Application
 
 ### Adding New Visualizations
 To add a new chart type (e.g., `LineChart`):

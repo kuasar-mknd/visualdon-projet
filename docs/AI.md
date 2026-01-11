@@ -17,4 +17,5 @@ If AI features are added in the future (e.g., for predictive emissions modeling 
 Although no AI models are currently used, any future integration should adhere to the following principles:
 - **Caching**: Cache AI responses aggressively (e.g., in LocalStorage or a backend proxy) to minimize API calls.
 - **Rate Limiting**: Implement client-side throttling (debouncing) on user inputs that trigger AI requests.
+- **Token Usage Monitoring**: Regularly audit token usage via provider dashboards to ensure alignment with budget caps.
 - **Budget Alerts**: Configure provider-side budget alerts (e.g., OpenAI Usage Limits) to prevent unexpected costs.

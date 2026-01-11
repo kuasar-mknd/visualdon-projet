@@ -23,12 +23,6 @@ cp .env.example .env
 The `.env.example` file contains commented-out placeholders for potential future configuration:
 
 ```bash
-# Application Base URL (optional, defaults to root)
-# VITE_BASE_URL=/
-
-# Analytics ID (if applicable)
-# VITE_ANALYTICS_ID=
-
-# Debug Mode (true/false)
-# VITE_DEBUG=false
+VITE_APP_TITLE=Global CO2 Emissions
+# Add other VITE_ variables as needed
 ```
