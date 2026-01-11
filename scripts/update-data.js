@@ -466,11 +466,22 @@ async function updateData() {
     const emissionsHash = await calculateFileHash(mtCO2Final);
     const perCapitaHash = await calculateFileHash(perCapitaFinal);
 
+    // Hash GeoJSON if available
+    let geoJsonHash = '';
+    const geoJsonPath = path.join(DATA_DIR, 'countries-coastline-10km.geo.json');
+    if (fs.existsSync(geoJsonPath)) {
+      geoJsonHash = await calculateFileHash(geoJsonPath);
+      console.log(`✓ GeoJSON hash calculated`);
+    } else {
+      console.warn('⚠️  GeoJSON file not found, skipping hash generation');
+    }
+
     const manifest = {
       emissions: mtCO2FinalName,
       perCapita: perCapitaFinalName,
       emissionsHash: emissionsHash,
       perCapitaHash: perCapitaHash,
+      geoJsonHash: geoJsonHash,
       version: zenodoData.version,
       lastUpdated: new Date().toISOString()
     };

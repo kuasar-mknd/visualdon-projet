@@ -24,7 +24,7 @@ const PlayControls = ({ isPlaying, setIsPlaying, category, setCategory }) => {
           aria-label={isPlaying ? t('aria.pause') : t('aria.play')}
           aria-keyshortcuts="Space"
           title={`${isPlaying ? t('pause') : t('play')} (Space)`}
-          className={`flex-1 py-3 px-6 rounded-xl font-semibold tracking-wide transition-all duration-300 shadow-sm hover:shadow-md focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none flex items-center justify-center gap-2 ${
+          className={`flex-1 py-3 px-6 rounded-xl font-semibold tracking-wide transition-all duration-300 shadow-sm hover:shadow-md focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none flex items-center justify-center gap-2 cursor-pointer ${
             isPlaying
               ? 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100'
               : 'bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100'

@@ -31,3 +31,45 @@ export const sanitizeString = (str) => {
     }
   });
 };
+
+/**
+ * Validates the manifest.json structure to ensure data integrity.
+ * @param {object} manifest - The manifest object to validate.
+ * @returns {boolean} - True if valid, false otherwise.
+ */
+export const validateManifest = (manifest) => {
+  if (!manifest || typeof manifest !== 'object') return false;
+
+  // Required keys for a valid manifest
+  const requiredKeys = [
+    'emissions',
+    'perCapita',
+    'emissionsHash',
+    'perCapitaHash',
+    'geoJsonHash'
+  ];
+
+  // Validate presence and type of keys
+  return requiredKeys.every(key =>
+    Object.prototype.hasOwnProperty.call(manifest, key) &&
+    typeof manifest[key] === 'string' &&
+    manifest[key].length > 0
+  );
+};
+
+/**
+ * Validates the GeoJSON structure.
+ * @param {object} geoJson - The GeoJSON object to validate.
+ * @returns {boolean} - True if valid, false otherwise.
+ */
+export const validateGeoJson = (geoJson) => {
+  if (!geoJson || typeof geoJson !== 'object') return false;
+
+  // Check basic FeatureCollection structure
+  if (geoJson.type !== 'FeatureCollection') return false;
+
+  // Check features array
+  if (!Array.isArray(geoJson.features)) return false;
+
+  return true;
+};
