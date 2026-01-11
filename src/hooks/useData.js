@@ -9,24 +9,28 @@ function fetchWithTimeout(promise, ms = 10000) {
   ]);
 }
 
-// Optimization: Custom row converter that is faster than d3.autoType
-// d3.autoType uses regex to infer types for every value. We know the schema.
-function fastRowConverter(d) {
-  for (const key in d) {
-    // Skip known string columns
-    if (key === 'Country' || key === 'ISO 3166-1 alpha-3') continue;
+// Optimization: Custom row builder that combines object creation and type conversion
+// This avoids creating an intermediate object with all string values, saving one iteration over keys per row.
+function fastRowBuilder(row, headers) {
+  const d = {};
+  for (let j = 0; j < headers.length; j++) {
+    const { key, index } = headers[j];
+    const val = row[index];
 
-    const val = d[key];
+    // Skip known string columns (assign directly)
+    if (key === 'Country' || key === 'ISO 3166-1 alpha-3') {
+        d[key] = val;
+        continue;
+    }
+
     if (val === '') {
       d[key] = null;
     } else {
       // Unary plus is the fastest way to convert valid numeric strings
       const num = +val;
-      // If it's NaN (e.g. "NA" or text), keep original string (match d3.autoType behavior partially)
-      // But for our dataset, we expect numbers.
-      // If result is NaN, check if it was actually a non-empty string that isn't a number.
+      // If it's NaN (e.g. "NA" or text), keep original string
       if (isNaN(num) && val !== 'NaN') {
-         // keep string
+         d[key] = val;
       } else {
          d[key] = num;
       }
@@ -52,7 +56,7 @@ async function verifyIntegrity(text, expectedHash) {
 
 // Helper to safely parse CSV without using new Function (eval) which violates CSP
 // d3.csv uses d3-dsv's objectConverter which uses new Function
-async function safeCsv(url, rowConverter, expectedHash) {
+async function safeCsv(url, rowBuilder, expectedHash) {
   const text = await fetchWithTimeout(d3.text(url));
 
   // Verify integrity if hash is provided
@@ -72,14 +76,19 @@ async function safeCsv(url, rowConverter, expectedHash) {
     .map((key, index) => ({ key, index }))
     .filter(({ key }) => key !== '__proto__' && key !== 'constructor' && key !== 'prototype');
 
+  // Optimization: Use rowBuilder to combine object creation and value conversion
   const data = body.map(row => {
+    if (rowBuilder) {
+        return rowBuilder(row, safeHeaders);
+    }
+
+    // Fallback if no builder provided (should not happen in current usage)
     const obj = {};
-    // Optimization: Manual loop is faster than reduce/forEach for hot paths
     for (let j = 0; j < safeHeaders.length; j++) {
       const { key, index } = safeHeaders[j];
       obj[key] = row[index];
     }
-    return rowConverter ? rowConverter(obj) : obj;
+    return obj;
   });
 
   // Attach columns property as d3.csv does, in case it's used
@@ -108,9 +117,9 @@ export function useData() {
 
         // Parallelize fetching
         const [emissions, geoJson, perCapita] = await Promise.all([
-          safeCsv(`/data/${manifest.emissions}`, fastRowConverter, manifest.emissionsHash),
+          safeCsv(`/data/${manifest.emissions}`, fastRowBuilder, manifest.emissionsHash),
           fetchWithTimeout(d3.json('/data/countries-coastline-10km.geo.json')),
-          safeCsv(`/data/${manifest.perCapita}`, fastRowConverter, manifest.perCapitaHash),
+          safeCsv(`/data/${manifest.perCapita}`, fastRowBuilder, manifest.perCapitaHash),
         ]);
 
         // Security Enhancement: Validate GeoJSON structure
