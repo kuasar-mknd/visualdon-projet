@@ -7,6 +7,7 @@ import { useResizeObserver } from '../hooks/useResizeObserver';
 import GlobeLegend from './globe/GlobeLegend';
 import GlobeTooltip from './globe/GlobeTooltip';
 import GlobePaths from './globe/GlobePaths';
+import GlobeHint from './globe/GlobeHint';
 
 // Create a custom interpolator for better visibility and meaning
 const customInterpolator = t => {
@@ -309,6 +310,7 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
        />
 
      <GlobeLegend />
+     <GlobeHint />
   </div>
   );
 };

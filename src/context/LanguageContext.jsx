@@ -46,6 +46,10 @@ export const translations = {
       globeDescription: "Interactive 3D globe showing CO2 emissions by country",
       openInNewTab: "(opens in a new tab)"
     },
+    globe: {
+      drag: "Drag to rotate",
+      zoom: "Scroll to zoom"
+    },
     chart: {
       selectCountryPrompt: "Select a country to view details",
       selectViewMode: "Select view mode",
@@ -96,6 +100,10 @@ export const translations = {
       skipToContent: "Aller au contenu principal",
       globeDescription: "Globe 3D interactif montrant les émissions de CO2 par pays",
       openInNewTab: "(ouvre un nouvel onglet)"
+    },
+    globe: {
+      drag: "Glisser pour tourner",
+      zoom: "Défiler pour zoomer"
     },
     chart: {
       selectCountryPrompt: "Sélectionnez un pays pour voir les détails",
