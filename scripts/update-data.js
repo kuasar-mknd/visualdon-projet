@@ -22,6 +22,7 @@ const __dirname = path.dirname(__filename);
 // Configuration
 const DATA_DIR = path.join(__dirname, '../public/data');
 const TEMP_DIR = path.join(__dirname, '../.temp');
+const MAX_DOWNLOAD_SIZE = 50 * 1024 * 1024; // 50MB limit for downloads
 
 // Zenodo Concept Record ID for GCP Fossil CO2 emissions (stable across versions)
 const ZENODO_CONCEPT_ID = '5569234';
@@ -93,7 +94,7 @@ function downloadFile(url, destPath) {
         // Handle redirects
         if (response.statusCode === 302 || response.statusCode === 301) {
           file.close();
-          fs.unlinkSync(destPath);
+          if (fs.existsSync(destPath)) fs.unlinkSync(destPath);
           redirects++;
           if (redirects > maxRedirects) {
             reject(new Error('Too many redirects'));
@@ -109,9 +110,30 @@ function downloadFile(url, destPath) {
         
         if (response.statusCode !== 200) {
           file.close();
-          fs.unlinkSync(destPath);
+          if (fs.existsSync(destPath)) fs.unlinkSync(destPath);
           return reject(new Error(`Failed to download: ${response.statusCode}`));
         }
+
+        // Security: Check Content-Length header if present
+        const contentLength = response.headers['content-length'];
+        if (contentLength && parseInt(contentLength, 10) > MAX_DOWNLOAD_SIZE) {
+          response.destroy();
+          file.close();
+          if (fs.existsSync(destPath)) fs.unlinkSync(destPath);
+          return reject(new Error(`File too large (Content-Length: ${contentLength} bytes)`));
+        }
+
+        // Security: Track downloaded bytes to prevent DoS via large files
+        let downloadedBytes = 0;
+        response.on('data', (chunk) => {
+          downloadedBytes += chunk.length;
+          if (downloadedBytes > MAX_DOWNLOAD_SIZE) {
+            response.destroy(); // Abort request
+            file.close();
+            if (fs.existsSync(destPath)) fs.unlinkSync(destPath);
+            reject(new Error(`File too large (exceeded ${MAX_DOWNLOAD_SIZE / 1024 / 1024}MB)`));
+          }
+        });
         
         response.pipe(file);
         file.on('finish', () => {
@@ -120,7 +142,7 @@ function downloadFile(url, destPath) {
         });
         
         file.on('error', (err) => {
-          fs.unlinkSync(destPath);
+          if (fs.existsSync(destPath)) fs.unlinkSync(destPath);
           reject(err);
         });
       });
