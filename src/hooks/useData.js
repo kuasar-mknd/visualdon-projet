@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import * as d3 from 'd3';
+import { text, json, csvParseRows } from 'd3';
 
 // Helper to fetch with timeout
 function fetchWithTimeout(promise, ms = 10000) {
@@ -57,14 +57,14 @@ async function verifyIntegrity(text, expectedHash) {
 // Helper to safely parse CSV without using new Function (eval) which violates CSP
 // d3.csv uses d3-dsv's objectConverter which uses new Function
 async function safeCsv(url, rowBuilder, expectedHash) {
-  const text = await fetchWithTimeout(d3.text(url));
+  const csvText = await fetchWithTimeout(text(url));
 
   // Verify integrity if hash is provided
   if (expectedHash) {
-    await verifyIntegrity(text, expectedHash);
+    await verifyIntegrity(csvText, expectedHash);
   }
 
-  const rows = d3.csvParseRows(text);
+  const rows = csvParseRows(csvText);
 
   if (rows.length === 0) return [];
 
@@ -110,26 +110,26 @@ export function useData() {
         // First load the manifest to get current filenames
         // Use a cache-busting strategy or check if we can rely on browser caching.
         // For now, we fetch manifest.json.
-        const manifest = await fetchWithTimeout(d3.json('/data/manifest.json'));
+        const manifest = await fetchWithTimeout(json('/data/manifest.json'));
         if (!manifest || !manifest.emissions || !manifest.perCapita) {
           throw new Error('Invalid manifest');
         }
 
         // Parallelize fetching
-        const [emissions, geoJson, perCapita] = await Promise.all([
+        const [emissions, geoJsonData, perCapita] = await Promise.all([
           safeCsv(`/data/${manifest.emissions}`, fastRowBuilder, manifest.emissionsHash),
-          fetchWithTimeout(d3.json('/data/countries-coastline-10km.geo.json')),
+          fetchWithTimeout(json('/data/countries-coastline-10km.geo.json')),
           safeCsv(`/data/${manifest.perCapita}`, fastRowBuilder, manifest.perCapitaHash),
         ]);
 
         // Security Enhancement: Validate GeoJSON structure
-        if (!geoJson || geoJson.type !== 'FeatureCollection' || !Array.isArray(geoJson.features)) {
+        if (!geoJsonData || geoJsonData.type !== 'FeatureCollection' || !Array.isArray(geoJsonData.features)) {
           throw new Error('Invalid GeoJSON data');
         }
 
         setData({
           emissions,
-          geoJson,
+          geoJson: geoJsonData,
           perCapita,
           loading: false,
         });

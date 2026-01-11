@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
-import * as d3 from 'd3';
+import { max as d3Max } from 'd3';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import LoadingPlaceholder from './components/common/LoadingPlaceholder';
@@ -48,7 +48,7 @@ function AppContent() {
 
   const maxPerCapita = useMemo(() => {
     if (!perCapita) return 10;
-    return d3.max(perCapita, d => d['Per Capita'] || 0) || 10;
+    return d3Max(perCapita, d => d['Per Capita'] || 0) || 10;
   }, [perCapita]);
 
   const [displayCountry, setDisplayCountry] = useState(null);

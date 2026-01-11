@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import * as d3 from 'd3';
+import { select, max, scaleLinear, scaleBand, easeCubicOut, interpolateNumber } from 'd3';
 import { useLanguage } from '../context/LanguageContext';
 import { fetchCountryDetails } from '../services/countryService';
 
@@ -86,7 +86,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect })
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
-    const svg = d3.select(svgRef.current);
+    const svg = select(svgRef.current);
 
     svg.attr("role", "graphics-document")
        .attr("aria-label", `${t('top10')} (${year})`);
@@ -145,11 +145,11 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect })
 
     g.selectAll(".no-data-message").remove();
 
-    const x = d3.scaleLinear()
-        .domain([0, d3.max(topData, d => d[category] || 0) || 0])
+    const x = scaleLinear()
+        .domain([0, max(topData, d => d[category] || 0) || 0])
         .range([0, innerWidth]);
 
-    const y = d3.scaleBand()
+    const y = scaleBand()
         .domain(topData.map(d => d["ISO 3166-1 alpha-3"]))
         .range([0, innerHeight])
         .padding(0.2);
@@ -158,7 +158,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect })
     // When playing, we need faster transitions (200ms) to match the tick rate and avoid "lag"
     // When paused, we use a smoother, longer transition (750ms)
     const transitionDuration = isPlaying ? 200 : 750;
-    const tTransition = svg.transition().duration(transitionDuration).ease(d3.easeCubicOut);
+    const tTransition = svg.transition().duration(transitionDuration).ease(easeCubicOut);
 
     const bars = g.selectAll(".bar-group")
         .data(topData, d => d["ISO 3166-1 alpha-3"]);
@@ -175,7 +175,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect })
          .duration(200)
          .style("opacity", 0.5);
 
-        d3.select(this)
+        select(this)
           .transition()
           .duration(200)
           .style("opacity", 1)
@@ -190,7 +190,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect })
          .duration(200)
          .style("opacity", 1);
 
-        d3.select(this)
+        select(this)
           .select(".bar-rect")
           .attr("stroke", "none");
     };
@@ -271,14 +271,25 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect })
         return `${name}: ${val}`;
     });
 
+    // Optimization: Avoid parseFloat on every frame by using a local stash
     update.select(".value-label")
+        .each(function() {
+             // Initialize _currentValue if missing (e.g. on new elements or after re-mount)
+             // Fallback to textContent parsing only if stash is missing
+             if (this._currentValue === undefined) {
+                 this._currentValue = parseFloat(this.textContent) || 0;
+             }
+        })
         .transition(tTransition)
         .attr("x", d => x(d[category] || 0) + 8)
         .style("opacity", 1)
         .tween("text", function(d) {
-            const i = d3.interpolateNumber(parseFloat(this.textContent) || 0, d[category] || 0);
+            const target = d[category] || 0;
+            const i = interpolateNumber(this._currentValue || 0, target);
             return function(t) {
-                this.textContent = i(t).toFixed(1);
+                const val = i(t);
+                this.textContent = val.toFixed(1);
+                this._currentValue = val; // Update stash for next transition
             };
         });
 
