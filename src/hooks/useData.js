@@ -10,36 +10,6 @@ function fetchWithTimeout(promise, ms = 10000) {
   ]);
 }
 
-// Optimization: Custom row builder that combines object creation and type conversion
-// This avoids creating an intermediate object with all string values, saving one iteration over keys per row.
-function fastRowBuilder(row, headers) {
-  const d = {};
-  for (let j = 0; j < headers.length; j++) {
-    const { key, index } = headers[j];
-    const val = row[index];
-
-    // Skip known string columns (assign directly)
-    if (key === 'Country' || key === 'ISO 3166-1 alpha-3') {
-        d[key] = val;
-        continue;
-    }
-
-    if (val === '') {
-      d[key] = null;
-    } else {
-      // Unary plus is the fastest way to convert valid numeric strings
-      const num = +val;
-      // If it's NaN (e.g. "NA" or text), keep original string
-      if (isNaN(num) && val !== 'NaN') {
-         d[key] = val;
-      } else {
-         d[key] = num;
-      }
-    }
-  }
-  return d;
-}
-
 // Helper to verify SHA-256 integrity of fetched content
 async function verifyIntegrity(text, expectedHash) {
   if (!expectedHash) return; // Skip if no hash provided (dev mode/legacy)
@@ -57,14 +27,8 @@ async function verifyIntegrity(text, expectedHash) {
 
 // Helper to safely fetch and verify JSON content (e.g., GeoJSON)
 async function safeJson(url, expectedHash) {
-  // We fetch as text first to verify the hash of the raw content
   const text = await fetchWithTimeout(d3.text(url));
-
-  if (expectedHash) {
-    await verifyIntegrity(text, expectedHash);
-  }
-
-  // Then parse the verified text
+  if (expectedHash) await verifyIntegrity(text, expectedHash);
   try {
     return JSON.parse(text);
   } catch {
@@ -73,43 +37,65 @@ async function safeJson(url, expectedHash) {
 }
 
 // Helper to safely parse CSV without using new Function (eval) which violates CSP
-// d3.csv uses d3-dsv's objectConverter which uses new Function
-async function safeCsv(url, rowBuilder, expectedHash) {
+// Optimized for "Structure of Arrays" style processing where possible
+async function safeCsv(url, expectedHash) {
   const text = await fetchWithTimeout(d3.text(url));
-
-  // Verify integrity if hash is provided
-  if (expectedHash) {
-    await verifyIntegrity(text, expectedHash);
-  }
+  if (expectedHash) await verifyIntegrity(text, expectedHash);
 
   const rows = d3.csvParseRows(text);
-
   if (rows.length === 0) return [];
 
   const header = rows[0];
   const body = rows.slice(1);
 
-  // Optimization: Pre-filter safe headers once instead of checking every key in every row
+  // Filter safe headers
   const safeHeaders = header
     .map((key, index) => ({ key, index }))
     .filter(({ key }) => key !== '__proto__' && key !== 'constructor' && key !== 'prototype');
 
-  // Optimization: Use rowBuilder to combine object creation and value conversion
+  // Optimization: Pre-classify columns to avoid branch checks inside the main loop.
+  // We identify which indices map to strings (direct assignment) and which to numbers (parsing).
+  const stringCols = [];
+  const numberCols = [];
+
+  for (const { key, index } of safeHeaders) {
+    if (key === 'Country' || key === 'ISO 3166-1 alpha-3') {
+      stringCols.push({ key, index });
+    } else {
+      numberCols.push({ key, index });
+    }
+  }
+
+  // Branch-less Row Builder Loop
+  // This avoids `if (key === ...)` for every single cell in the CSV (millions of checks).
   const data = body.map(row => {
-    if (rowBuilder) {
-        return rowBuilder(row, safeHeaders);
+    const obj = {};
+
+    // Fast path: String columns (Direct assignment)
+    for (let i = 0; i < stringCols.length; i++) {
+        const { key, index } = stringCols[i];
+        obj[key] = row[index];
     }
 
-    // Fallback if no builder provided (should not happen in current usage)
-    const obj = {};
-    for (let j = 0; j < safeHeaders.length; j++) {
-      const { key, index } = safeHeaders[j];
-      obj[key] = row[index];
+    // Fast path: Numeric columns (Parse & Assign)
+    for (let i = 0; i < numberCols.length; i++) {
+        const { key, index } = numberCols[i];
+        const val = row[index];
+        if (val === '') {
+            obj[key] = null;
+        } else {
+            const num = +val;
+            // Handle NaN cases (e.g. text in numeric column) by keeping original string
+            if (isNaN(num) && val !== 'NaN') {
+                obj[key] = val;
+            } else {
+                obj[key] = num;
+            }
+        }
     }
     return obj;
   });
 
-  // Attach columns property as d3.csv does, in case it's used
   data.columns = header;
   return data;
 }
@@ -125,23 +111,18 @@ export function useData() {
   useEffect(() => {
     async function loadData() {
       try {
-        // First load the manifest to get current filenames
         const manifest = await fetchWithTimeout(d3.json('/data/manifest.json'));
 
-        // Security Enhancement: Validate manifest structure
         if (!validateManifest(manifest)) {
           throw new Error('Invalid manifest structure or missing security hashes');
         }
 
-        // Parallelize fetching
-        // Note: verifyIntegrity uses crypto.subtle which is available in secure contexts (HTTPS/localhost)
         const [emissions, geoJson, perCapita] = await Promise.all([
-          safeCsv(`/data/${manifest.emissions}`, fastRowBuilder, manifest.emissionsHash),
+          safeCsv(`/data/${manifest.emissions}`, manifest.emissionsHash),
           safeJson('/data/countries-coastline-10km.geo.json', manifest.geoJsonHash),
-          safeCsv(`/data/${manifest.perCapita}`, fastRowBuilder, manifest.perCapitaHash),
+          safeCsv(`/data/${manifest.perCapita}`, manifest.perCapitaHash),
         ]);
 
-        // Security Enhancement: Validate GeoJSON structure
         if (!validateGeoJson(geoJson)) {
           throw new Error('Invalid GeoJSON data structure');
         }
@@ -153,7 +134,6 @@ export function useData() {
           loading: false,
         });
       } catch (err) {
-        // Log only the message to avoid leaking potential data structure details in the error object
         console.error("Error loading data:", err.message);
         setData(prev => ({ ...prev, loading: false }));
       }

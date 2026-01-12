@@ -25,4 +25,5 @@ const LoadingPlaceholder = () => {
   );
 };
 
-export default LoadingPlaceholder;
+// Optimization: Memoize the component to prevent unnecessary re-renders when used as a Suspense fallback.
+export default React.memo(LoadingPlaceholder);

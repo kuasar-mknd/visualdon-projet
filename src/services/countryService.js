@@ -2,56 +2,61 @@ import { isValidCountryCode } from '../utils/security';
 
 const CACHE_KEY = 'visualdon_country_cache';
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
-const MAX_CACHE_SIZE = 250; // Limit cache to ~250 countries to prevent localStorage exhaustion
+const MAX_CACHE_SIZE = 250; // Limit cache to ~250 countries
 
-// Optimization: In-memory cache to avoid frequent synchronous localStorage reads/parsing
-// This significantly reduces main-thread blocking during animations where fetchCountryDetails is called repeatedly.
+// Optimization: In-memory cache using Map for O(1) eviction policy (LRU by insertion order)
+// This is significantly faster than Object.keys().sort() which is O(N log N)
 let memoryCache = null;
+
+// Optimization: Track pending requests to deduplicate concurrent calls
+// If multiple components (e.g. Chart + Globe) request the same country simultaneously,
+// they will share the same Promise.
+const pendingRequests = new Map();
 
 const getCache = () => {
   if (memoryCache !== null) return memoryCache;
 
   try {
-    const cache = localStorage.getItem(CACHE_KEY);
-    if (!cache) {
-      memoryCache = {};
+    const rawCache = localStorage.getItem(CACHE_KEY);
+    if (!rawCache) {
+      memoryCache = new Map();
       return memoryCache;
     }
 
-    const parsed = JSON.parse(cache);
-    // Security Enhancement: Validate that parsed cache is actually an object
-    // to prevent crashes if localStorage contains "null" or other non-object JSON values
+    const parsed = JSON.parse(rawCache);
+    // Validate structure
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
       console.warn("Invalid cache structure detected, resetting cache");
-      memoryCache = {};
+      memoryCache = new Map();
       return memoryCache;
     }
 
-    memoryCache = parsed;
+    // Convert object to Map
+    memoryCache = new Map(Object.entries(parsed));
     return memoryCache;
   } catch (e) {
     console.error("Error reading cache:", e.message);
-    memoryCache = {};
+    memoryCache = new Map();
     return memoryCache;
   }
 };
 
 const setCache = (cache) => {
-  // Security Enhancement: Prevent unlimited growth of localStorage (DoS risk)
-  const keys = Object.keys(cache);
-  if (keys.length > MAX_CACHE_SIZE) {
-    // Sort keys by timestamp (oldest first) to implement LRU-like eviction
-    // Note: This is O(N log N) but N is small (250), so performance impact is negligible compared to network request
-    const sortedKeys = keys.sort((a, b) => (cache[a].timestamp || 0) - (cache[b].timestamp || 0));
-
-    // Remove oldest entries to bring size down to limit
-    const keysToRemove = sortedKeys.slice(0, keys.length - MAX_CACHE_SIZE);
-    keysToRemove.forEach(key => delete cache[key]);
+  // Optimization: Map preserves insertion order.
+  // To enforce size limit, we can just remove the first item (oldest inserted) using the iterator.
+  // This is O(1) compared to O(N log N) for sorting timestamps.
+  while (cache.size > MAX_CACHE_SIZE) {
+     const oldestKey = cache.keys().next().value;
+     cache.delete(oldestKey);
   }
 
   memoryCache = cache;
+
+  // Debounce LocalStorage write could be added here if needed, but for now we write on update.
   try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+    // Convert Map back to object for JSON storage
+    const obj = Object.fromEntries(cache);
+    localStorage.setItem(CACHE_KEY, JSON.stringify(obj));
   } catch (e) {
     console.error("Error writing cache:", e.message);
   }
@@ -60,69 +65,83 @@ const setCache = (cache) => {
 export const fetchCountryDetails = async (code, language) => {
   if (!code) return null;
   
-  // Security Enhancement: Validate input format
-  // Expected: ISO 3166-1 alpha-2 or alpha-3 code (2-3 letters/digits)
-  // This prevents URL injection and cache pollution with garbage keys
   if (!isValidCountryCode(code)) {
     console.warn(`Security: Invalid country code format rejected: ${code}`);
     return null;
   }
 
-  // Normalize code to 2 chars if possible, but API supports 3 chars too.
-  // Our data uses 3 char codes (ISO 3166-1 alpha-3).
-  // restcountries supports alpha codes.
-
   const cache = getCache();
   const now = Date.now();
   
-  if (cache[code] && (now - cache[code].timestamp < CACHE_EXPIRY)) {
-    // Return cached name based on language
-    const data = cache[code].data;
-    return getNameFromData(data, language);
+  // Check cache
+  const cached = cache.get(code);
+  if (cached && (now - cached.timestamp < CACHE_EXPIRY)) {
+    // Refresh LRU position by re-inserting
+    cache.delete(code);
+    cache.set(code, cached);
+    setCache(cache); // Persist updated order
+    return getNameFromData(cached.data, language);
+  }
+
+  // Check pending requests
+  const reqKey = `${code}`;
+  if (pendingRequests.has(reqKey)) {
+    return pendingRequests.get(reqKey).then(data => {
+        if (!data) return null;
+        return getNameFromData(data, language);
+    });
   }
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-  try {
-    // Sanitize input to prevent URL injection
-    const safeCode = encodeURIComponent(code);
-    const response = await fetch(`https://restcountries.com/v3.1/alpha/${safeCode}`, {
-      signal: controller.signal
-    });
+  const requestPromise = (async () => {
+    try {
+      const safeCode = encodeURIComponent(code);
+      const response = await fetch(`https://restcountries.com/v3.1/alpha/${safeCode}`, {
+        signal: controller.signal
+      });
 
-    if (!response.ok) throw new Error('Network response was not ok');
-    
-    const data = await response.json();
+      if (!response.ok) throw new Error('Network response was not ok');
 
-    // Security Enhancement: Validate API response structure before using it
-    if (!Array.isArray(data) || data.length === 0) {
-      throw new Error('Invalid API response format');
+      const data = await response.json();
+
+      if (!Array.isArray(data) || data.length === 0) {
+        throw new Error('Invalid API response format');
+      }
+
+      const countryData = data[0];
+
+      if (!countryData || !countryData.name) {
+        throw new Error('Missing country name data in response');
+      }
+
+      // Update cache
+      cache.delete(code); // Remove if exists (update)
+      cache.set(code, {
+        data: countryData,
+        timestamp: Date.now()
+      });
+      setCache(cache);
+
+      return countryData;
+    } catch (error) {
+      const safeLogCode = encodeURIComponent(code);
+      console.warn(`Failed to fetch data for ${safeLogCode}:`, error.message);
+      return null;
+    } finally {
+      clearTimeout(timeoutId);
+      pendingRequests.delete(reqKey);
     }
+  })();
 
-    const countryData = data[0]; // API returns array
+  pendingRequests.set(reqKey, requestPromise);
 
-    // Validate country data shape
-    if (!countryData || !countryData.name) {
-      throw new Error('Missing country name data in response');
-    }
-
-    // Update cache
-    cache[code] = {
-      data: countryData,
-      timestamp: now
-    };
-    setCache(cache);
-
-    return getNameFromData(countryData, language);
-  } catch (error) {
-    // Sanitize code for logging to prevent log injection
-    const safeLogCode = encodeURIComponent(code);
-    console.warn(`Failed to fetch data for ${safeLogCode}:`, error.message);
-    return null;
-  } finally {
-    clearTimeout(timeoutId);
-  }
+  // Safe handling of the promise result
+  return requestPromise.then(data => {
+      if (!data) return null;
+      return getNameFromData(data, language);
+  });
 };
 
 const getNameFromData = (data, language) => {
@@ -130,5 +149,5 @@ const getNameFromData = (data, language) => {
   if (language === 'fr' && data.translations && data.translations.fra) {
     return data.translations.fra.common;
   }
-  return data.name.common; // Default to common name (English usually)
+  return data.name.common;
 };
