@@ -48,6 +48,13 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
   const hoverTimeoutRef = useRef(null);
   const { language, t } = useLanguage();
 
+  // Optimization: Keep language in a ref to keep handleMouseEnter stable
+  // This prevents GlobePaths (wrapped in memo) from re-rendering 200+ paths when language changes
+  const languageRef = useRef(language);
+  useEffect(() => {
+    languageRef.current = language;
+  }, [language]);
+
   // Sync ref with state
   useEffect(() => {
     hoveredCountryIdRef.current = hoveredCountryId;
@@ -90,10 +97,11 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
       setHoveredCountryId(countryId);
       if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
       hoverTimeoutRef.current = setTimeout(async () => {
-          const name = await fetchCountryDetails(countryId, language);
+          // Use ref to avoid breaking callback stability
+          const name = await fetchCountryDetails(countryId, languageRef.current);
           setHoveredCountryName(name || featureName);
       }, 150);
-  }, [language]);
+  }, []);
 
   const handleMouseLeave = useCallback(() => {
       if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);

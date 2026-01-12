@@ -23,6 +23,6 @@ cp .env.example .env
 The `.env.example` file contains commented-out placeholders for potential future configuration:
 
 ```bash
-VITE_APP_TITLE=Global CO2 Emissions
+# VITE_APP_TITLE=Global CO2 Emissions
 # Add other VITE_ variables as needed
 ```
