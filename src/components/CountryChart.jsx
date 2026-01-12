@@ -98,7 +98,7 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
                 : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
             }`}
           >
-            🫧 {t('chart.bubbles')}
+            <span aria-hidden="true" className="mr-2">🫧</span>{t('chart.bubbles')}
           </button>
           <button
             onClick={() => setViewMode('lines')}
@@ -109,7 +109,7 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
                 : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
             }`}
           >
-            📈 {t('chart.stackedChart')}
+            <span aria-hidden="true" className="mr-2">📈</span>{t('chart.stackedChart')}
           </button>
         </div>
 
