@@ -45,7 +45,6 @@ jobs:
               pnpm run build
             fi
 
-      # Test step is conditional as per instructions (repo lacks test script)
       - name: Test
         if: ${{ hashFiles('package.json') != '' }}
         run: |

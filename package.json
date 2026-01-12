@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
+    "test": "node verification/verify-integrity.js",
     "preview": "vite preview",
     "update-data": "node scripts/update-data.js"
   },
