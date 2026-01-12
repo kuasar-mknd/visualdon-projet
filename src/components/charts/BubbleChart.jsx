@@ -23,7 +23,10 @@ const BubbleChart = ({
     const svg = d3.select(containerRef.current)
       .append("svg")
       .attr("width", width)
-      .attr("height", height);
+      .attr("height", height)
+      .attr("role", "graphics-document")
+      .attr("aria-roledescription", t('aria.bubbleChartRole') || "bubble chart")
+      .attr("aria-label", t('aria.bubbleChartDesc') || "Bubble chart");
 
     // Scales
     const xScale = d3.scaleLinear()

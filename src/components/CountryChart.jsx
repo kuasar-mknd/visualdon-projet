@@ -66,6 +66,7 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
         className="flex items-center justify-center h-full text-slate-600"
         role="status"
         aria-live="polite"
+        aria-atomic="true"
       >
         <p className="text-lg">{t('chart.selectCountryPrompt')}</p>
       </div>
@@ -78,6 +79,7 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
         className="flex items-center justify-center h-full text-slate-600"
         role="status"
         aria-live="polite"
+        aria-atomic="true"
       >
         <p className="text-lg">{t('noData')}</p>
       </div>

@@ -89,6 +89,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect })
     const svg = d3.select(svgRef.current);
 
     svg.attr("role", "graphics-document")
+       .attr("aria-roledescription", t('aria.barChartRole') || "bar chart")
        .attr("aria-label", `${t('top10')} (${year})`);
 
     if (svg.select("title").empty()) {
@@ -139,6 +140,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect })
          .attr("y", innerHeight / 2)
          .attr("text-anchor", "middle")
          .attr("fill", "#64748b")
+         .attr("role", "status")
          .text(t('noData'));
         return;
     }

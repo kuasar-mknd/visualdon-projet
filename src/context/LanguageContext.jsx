@@ -44,7 +44,16 @@ export const translations = {
       closeOverlay: "Close details",
       skipToContent: "Skip to main content",
       globeDescription: "Interactive 3D globe showing CO2 emissions by country",
-      openInNewTab: "(opens in a new tab)"
+      openInNewTab: "(opens in a new tab)",
+      switchToEnglish: "Switch to English",
+      switchToFrench: "Switch to French",
+      barChartDesc: "Bar chart of top 10 emitters",
+      barChartRole: "bar chart",
+      bubbleChartDesc: "Bubble chart showing emissions by sector",
+      bubbleChartRole: "bubble chart",
+      stackedAreaChartDesc: "Stacked area chart showing emissions by sector",
+      stackedAreaChartRole: "stacked area chart",
+      globeRoleDesc: "interactive 3D globe"
     },
     globe: {
       drag: "Drag to rotate",
@@ -99,7 +108,16 @@ export const translations = {
       closeOverlay: "Fermer les détails",
       skipToContent: "Aller au contenu principal",
       globeDescription: "Globe 3D interactif montrant les émissions de CO2 par pays",
-      openInNewTab: "(ouvre un nouvel onglet)"
+      openInNewTab: "(ouvre un nouvel onglet)",
+      switchToEnglish: "Passer en anglais",
+      switchToFrench: "Passer en français",
+      barChartDesc: "Graphique à barres des 10 plus gros émetteurs",
+      barChartRole: "graphique à barres",
+      bubbleChartDesc: "Graphique à bulles montrant les émissions par secteur",
+      bubbleChartRole: "graphique à bulles",
+      stackedAreaChartDesc: "Graphique en aires empilées montrant les émissions par secteur",
+      stackedAreaChartRole: "graphique en aires empilées",
+      globeRoleDesc: "globe 3D interactif"
     },
     globe: {
       drag: "Glisser pour tourner",

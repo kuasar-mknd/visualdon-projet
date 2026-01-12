@@ -24,7 +24,10 @@ const StackedAreaChart = ({
     const svg = d3.select(containerRef.current)
       .append("svg")
       .attr("width", width)
-      .attr("height", height);
+      .attr("height", height)
+      .attr("role", "graphics-document")
+      .attr("aria-roledescription", t('aria.stackedAreaChartRole') || "stacked area chart")
+      .attr("aria-label", t('aria.stackedAreaChartDesc') || "Stacked area chart");
 
     // Prepare stacked data
     const stackData = years.map(year => {

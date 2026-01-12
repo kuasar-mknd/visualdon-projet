@@ -258,6 +258,7 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
          height={dimensions.height}
          style={{background: 'radial-gradient(circle at 50% 50%, #f8fafc 0%, #e2e8f0 100%)'}}
          role="img"
+         aria-roledescription={t('aria.globeRoleDesc') || "interactive 3D globe"}
          aria-label={t('aria.globeDescription')}
        >
           <title>{t('aria.globeDescription')}</title>
