@@ -38,8 +38,8 @@ Node.js scripts for maintenance tasks.
 - **`update-data.js`**: Fetches the latest data from the Global Carbon Project and updates the CSV files in `public/data/`.
 
 ### `verification/`
-Contains scripts and artifacts for frontend verification.
-- **`verify_load.py`**: A Playwright (Python) script used to verify that the application loads correctly and renders the main chart components. This serves as a lightweight smoke test for the frontend.
+Contains scripts and artifacts for frontend verification and integrity.
+- **`verify-integrity.js`**: A Node.js script used to verify data consistency (manifests, CSVs) and environment setup.
 
 ## Data Flow
 1.  **Initialization**: On load, `App.jsx` initializes.
