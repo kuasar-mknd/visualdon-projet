@@ -1,4 +1,4 @@
-import { isValidCountryCode } from '../utils/security';
+import { isValidCountryCode } from '../utils/security.js';
 
 const CACHE_KEY = 'visualdon_country_cache';
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
@@ -7,6 +7,10 @@ const MAX_CACHE_SIZE = 250; // Limit cache to ~250 countries to prevent localSto
 // Optimization: In-memory cache to avoid frequent synchronous localStorage reads/parsing
 // This significantly reduces main-thread blocking during animations where fetchCountryDetails is called repeatedly.
 let memoryCache = null;
+
+// Optimization: In-flight request deduplication
+// Prevents multiple network requests for the same country code if called concurrently
+const pendingRequests = new Map();
 
 const getCache = () => {
   if (memoryCache !== null) return memoryCache;
@@ -81,47 +85,71 @@ export const fetchCountryDetails = async (code, language) => {
     return getNameFromData(data, language);
   }
 
+  // Check for existing in-flight request
+  if (pendingRequests.has(code)) {
+    try {
+        const countryData = await pendingRequests.get(code);
+        return getNameFromData(countryData, language);
+    } catch (e) { // eslint-disable-line no-unused-vars
+        // If the pending request failed, we'll try again (fall through)
+        // or return null depending on behavior.
+        // For now, let's just return null to match existing error behavior
+        return null;
+    }
+  }
+
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 5000);
 
+  const requestPromise = (async () => {
+    try {
+        // Sanitize input to prevent URL injection
+        const safeCode = encodeURIComponent(code);
+        const response = await fetch(`https://restcountries.com/v3.1/alpha/${safeCode}`, {
+          signal: controller.signal
+        });
+
+        if (!response.ok) throw new Error('Network response was not ok');
+
+        const data = await response.json();
+
+        // Security Enhancement: Validate API response structure before using it
+        if (!Array.isArray(data) || data.length === 0) {
+          throw new Error('Invalid API response format');
+        }
+
+        const countryData = data[0]; // API returns array
+
+        // Validate country data shape
+        if (!countryData || !countryData.name) {
+          throw new Error('Missing country name data in response');
+        }
+
+        // Update cache
+        cache[code] = {
+          data: countryData,
+          timestamp: now
+        };
+        setCache(cache);
+
+        return countryData;
+    } finally {
+        clearTimeout(timeoutId);
+        // Clean up pending request
+        pendingRequests.delete(code);
+    }
+  })();
+
+  pendingRequests.set(code, requestPromise);
+
   try {
-    // Sanitize input to prevent URL injection
-    const safeCode = encodeURIComponent(code);
-    const response = await fetch(`https://restcountries.com/v3.1/alpha/${safeCode}`, {
-      signal: controller.signal
-    });
-
-    if (!response.ok) throw new Error('Network response was not ok');
-    
-    const data = await response.json();
-
-    // Security Enhancement: Validate API response structure before using it
-    if (!Array.isArray(data) || data.length === 0) {
-      throw new Error('Invalid API response format');
-    }
-
-    const countryData = data[0]; // API returns array
-
-    // Validate country data shape
-    if (!countryData || !countryData.name) {
-      throw new Error('Missing country name data in response');
-    }
-
-    // Update cache
-    cache[code] = {
-      data: countryData,
-      timestamp: now
-    };
-    setCache(cache);
-
+    const countryData = await requestPromise;
     return getNameFromData(countryData, language);
   } catch (error) {
     // Sanitize code for logging to prevent log injection
     const safeLogCode = encodeURIComponent(code);
     console.warn(`Failed to fetch data for ${safeLogCode}:`, error.message);
     return null;
-  } finally {
-    clearTimeout(timeoutId);
   }
 };
 
