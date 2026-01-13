@@ -132,10 +132,10 @@ Common issues and solutions:
 ## ✅ Verification
 
 ### Automated Verification
-The project includes a comprehensive test suite and integrity checks.
+The project includes a comprehensive test suite that verifies data integrity, manifest consistency, and critical file existence.
 
 ```bash
-# Run integrity checks and unit tests
+# Run integrity checks (no browser required)
 pnpm test
 ```
 
