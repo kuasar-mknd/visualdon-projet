@@ -16,14 +16,14 @@ The source code is organized as follows:
 
 - **`components/`**: Reusable React components.
   - **`charts/`**: D3.js based visualization components (e.g., BubbleChart, StackedAreaChart).
-  - **`controls/`**: UI elements for user interaction (Play button, Slider).
+  - **`controls/`**: UI elements for user interaction (Play, Slider).
   - **`globe/`**: Components related to the 3D globe visualization.
   - **`layout/`**: Structural components like Header and Footer.
   - **`overlay/`**: UI overlays for detailed information.
 - **`context/`**: React Context definitions, primarily for state management that needs to be accessed globally (e.g., LanguageContext).
 - **`hooks/`**: Custom React hooks.
   - **`useData.js`**: A critical hook for fetching, parsing, and managing the emissions data.
-- **`services/`**: logic for external or internal services.
+- **`services/`**: Logic for external or internal services.
   - **`countryService.js`**: Handles country name translations and mapping.
 - **`utils/`**: Shared utility functions (e.g., security helpers).
 - **`App.jsx`**: The main application component that orchestrates the layout and state.
@@ -59,7 +59,9 @@ The application follows a component-based architecture where each UI element is 
 While this is a frontend-only application, the structure loosely maps to Clean Architecture principles:
 - **Domain Layer**: Implicitly defined by the data structures (emissions data) and types. `src/services/` contains domain-specific logic like country translation.
 - **Application Layer**: `src/hooks/` and `src/context/` manage the application state and business logic (e.g., filtering data by year).
-- **Infrastructure Layer**: `d3.csv` and `fetch` APIs act as the infrastructure for data retrieval. `scripts/update-data.js` handles external data source integration and manifest generation.
+- **Infrastructure Layer**:
+    - **Data Access**: `d3.csv` and `fetch` APIs.
+    - **External Integration**: `scripts/update-data.js` handles fetching from Zenodo (Global Carbon Project), acting as the infrastructure adapter for external data.
 - **Presentation Layer**: React components (`src/components/`) handle the UI and user interaction.
 
 ### State Management

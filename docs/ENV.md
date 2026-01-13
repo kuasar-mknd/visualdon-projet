@@ -1,11 +1,17 @@
 # Environment Variables
 
 ## Overview
-This application is a client-side React application built with Vite. It does not currently rely on specific environment variables for its core runtime functionality.
+This application is a client-side React application built with Vite. It minimizes reliance on runtime environment variables.
 
 ## Current Usage
-- **NO** custom `VITE_` environment variables are currently required to run the application locally or in production.
-- **NODE_ENV**: Handled automatically by Vite (`development` during `pnpm dev`, `production` during `pnpm build`).
+
+### Build-Time Variables
+These variables are used during the build process or injected into the application via Vite.
+
+- **`VITE_CLOUDFLARE_TOKEN`**: (Optional) The token for Cloudflare Web Analytics. If provided, it is injected into the HTML `head`.
+
+### Standard Variables
+- **`NODE_ENV`**: Managed by Vite (`development` vs `production`).
 
 ## Conventions
 If you need to add environment variables in the future:
@@ -20,9 +26,9 @@ For a quick start, you can copy the provided example file:
 cp .env.example .env
 ```
 
-The `.env.example` file contains commented-out placeholders for potential future configuration:
+The `.env.example` file contains placeholders:
 
 ```bash
-# VITE_APP_TITLE=Global CO2 Emissions
-# Add other VITE_ variables as needed
+# Cloudflare Web Analytics Token
+VITE_CLOUDFLARE_TOKEN=
 ```
