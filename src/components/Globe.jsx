@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useMemo, useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import * as d3 from 'd3';
+import { geoOrthographic, geoPath, select, zoom, zoomIdentity, drag, scaleSequentialLog, interpolateRgb } from 'd3';
 import { useLanguage } from '../context/LanguageContext';
 import { fetchCountryDetails } from '../services/countryService';
 import { useResizeObserver } from '../hooks/useResizeObserver';
@@ -12,11 +12,11 @@ import GlobeHint from './globe/GlobeHint';
 // Create a custom interpolator for better visibility and meaning
 const customInterpolator = t => {
   if (t < 0.33) {
-    return d3.interpolateRgb("#3b82f6", "#10b981")(t * 3);
+    return interpolateRgb("#3b82f6", "#10b981")(t * 3);
   } else if (t < 0.66) {
-    return d3.interpolateRgb("#10b981", "#fbbf24")((t - 0.33) * 3);
+    return interpolateRgb("#10b981", "#fbbf24")((t - 0.33) * 3);
   } else {
-    return d3.interpolateRgb("#fbbf24", "#ef4444")((t - 0.66) * 3);
+    return interpolateRgb("#fbbf24", "#ef4444")((t - 0.66) * 3);
   }
 };
 
@@ -30,8 +30,8 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
   // to avoid React re-renders on every frame.
   const widthRef = useRef(0);
   const heightRef = useRef(0);
-  const projectionRef = useRef(d3.geoOrthographic());
-  const pathGeneratorRef = useRef(d3.geoPath().projection(projectionRef.current));
+  const projectionRef = useRef(geoOrthographic());
+  const pathGeneratorRef = useRef(geoPath().projection(projectionRef.current));
   const rotationRef = useRef([0, 0]);
   const scaleRef = useRef(250);
   const hoveredCountryIdRef = useRef(null); // Ref to access current hover state in drag loop
@@ -70,7 +70,7 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
 
   const colorScale = useMemo(() => {
     const max = maxVal || 100;
-    return d3.scaleSequentialLog(customInterpolator)
+    return scaleSequentialLog(customInterpolator)
         .domain([0.1, max])
         .clamp(true);
   }, [maxVal]);
@@ -110,7 +110,7 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
   // This must be defined AFTER paths is defined.
   useEffect(() => {
     if (!svgRef.current) return;
-    const svg = d3.select(svgRef.current);
+    const svg = select(svgRef.current);
     countrySelectionRef.current = svg.selectAll("path.country-path");
     sphereSelectionRef.current = svg.selectAll("path.sphere-path");
   }, [geoJson]); // Update when geoJson changes (which implies paths change)
@@ -126,8 +126,8 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
 
      // Initial render of paths
      // Use cached selections if available
-     const countrySelection = countrySelectionRef.current || d3.select(svgRef.current).selectAll("path.country-path");
-     const sphereSelection = sphereSelectionRef.current || d3.select(svgRef.current).selectAll("path.sphere-path");
+     const countrySelection = countrySelectionRef.current || select(svgRef.current).selectAll("path.country-path");
+     const sphereSelection = sphereSelectionRef.current || select(svgRef.current).selectAll("path.sphere-path");
 
      if (!countrySelection.empty()) {
         countrySelection.attr("d", pathGeneratorRef.current);
@@ -141,7 +141,7 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
   useEffect(() => {
     if (!svgRef.current) return;
 
-    const svg = d3.select(svgRef.current);
+    const svg = select(svgRef.current);
 
     // Update function for high-performance rendering loop
     const updateGlobe = () => {
@@ -155,14 +155,14 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
             countrySelection.attr("d", path);
         } else {
             // Fallback just in case
-            d3.select(svgRef.current).selectAll("path.country-path").attr("d", path);
+            select(svgRef.current).selectAll("path.country-path").attr("d", path);
         }
 
         const sphereSelection = sphereSelectionRef.current;
         if (sphereSelection) {
             sphereSelection.attr("d", path({type: "Sphere"}));
         } else {
-             d3.select(svgRef.current).selectAll("path.sphere-path").attr("d", path({type: "Sphere"}));
+             select(svgRef.current).selectAll("path.sphere-path").attr("d", path({type: "Sphere"}));
         }
 
         // Update highlight path if exists
@@ -170,12 +170,12 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
         if (currentHoverId) {
              const feature = featureMap.get(currentHoverId);
              if (feature) {
-                 d3.select(svgRef.current).select(".highlight-path").attr("d", path(feature));
+                 select(svgRef.current).select(".highlight-path").attr("d", path(feature));
              }
         }
     };
 
-    const zoom = d3.zoom()
+    const zm = zoom()
       .scaleExtent([1, 5])
       .on("zoom", (event) => {
          if (event.sourceEvent && (event.sourceEvent.type === 'wheel' ||
@@ -186,7 +186,7 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
          }
       });
 
-    const drag = d3.drag()
+    const drg = drag()
       .on("start", () => svg.style("cursor", "grabbing"))
       .on("drag", (event) => {
         const sensitivity = 0.25;
@@ -197,9 +197,9 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
       .on("end", () => svg.style("cursor", "grab"));
 
     // Initialize zoom identity
-    svg.call(zoom.transform, d3.zoomIdentity.scale(scaleRef.current / 250));
-    svg.call(drag);
-    svg.call(zoom);
+    svg.call(zm.transform, zoomIdentity.scale(scaleRef.current / 250));
+    svg.call(drg);
+    svg.call(zm);
     svg.on("dblclick.zoom", null);
 
   }, [dimensions, featureMap]); // Re-bind if dimensions or featureMap changes
@@ -207,7 +207,7 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
   // Effect: Update 'fill' attribute (Data/Animation) directly via D3
   useEffect(() => {
       // Use cached selection if available
-      const selection = countrySelectionRef.current || d3.select(svgRef.current).selectAll("path.country-path");
+      const selection = countrySelectionRef.current || select(svgRef.current).selectAll("path.country-path");
 
       if (!geoJson || !data || selection.empty()) return;
 
@@ -230,7 +230,7 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
       // We need to update the highlight path's 'd' attribute using the current projection
       // which is stored in projectionRef.current (up to date with drag)
       const d = pathGeneratorRef.current(feature);
-      d3.select(svgRef.current).select(".highlight-path").attr("d", d);
+      select(svgRef.current).select(".highlight-path").attr("d", d);
 
   }, [hoveredCountryId, featureMap, dimensions]); // Trigger when hovered country changes
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import * as d3 from 'd3';
+import { text, json, csvParseRows } from 'd3';
 import { validateManifest, validateGeoJson } from '../utils/security';
 
 // Helper to fetch with timeout
@@ -58,15 +58,15 @@ async function verifyIntegrity(text, expectedHash) {
 // Helper to safely fetch and verify JSON content (e.g., GeoJSON)
 async function safeJson(url, expectedHash) {
   // We fetch as text first to verify the hash of the raw content
-  const text = await fetchWithTimeout(d3.text(url));
+  const t = await fetchWithTimeout(text(url));
 
   if (expectedHash) {
-    await verifyIntegrity(text, expectedHash);
+    await verifyIntegrity(t, expectedHash);
   }
 
   // Then parse the verified text
   try {
-    return JSON.parse(text);
+    return JSON.parse(t);
   } catch {
     throw new Error(`Failed to parse JSON from ${url}`);
   }
@@ -75,14 +75,14 @@ async function safeJson(url, expectedHash) {
 // Helper to safely parse CSV without using new Function (eval) which violates CSP
 // d3.csv uses d3-dsv's objectConverter which uses new Function
 async function safeCsv(url, rowBuilder, expectedHash) {
-  const text = await fetchWithTimeout(d3.text(url));
+  const t = await fetchWithTimeout(text(url));
 
   // Verify integrity if hash is provided
   if (expectedHash) {
-    await verifyIntegrity(text, expectedHash);
+    await verifyIntegrity(t, expectedHash);
   }
 
-  const rows = d3.csvParseRows(text);
+  const rows = csvParseRows(t);
 
   if (rows.length === 0) return [];
 
@@ -126,7 +126,7 @@ export function useData() {
     async function loadData() {
       try {
         // First load the manifest to get current filenames
-        const manifest = await fetchWithTimeout(d3.json('/data/manifest.json'));
+        const manifest = await fetchWithTimeout(json('/data/manifest.json'));
 
         // Security Enhancement: Validate manifest structure
         if (!validateManifest(manifest)) {
