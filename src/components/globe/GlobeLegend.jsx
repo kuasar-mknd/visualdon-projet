@@ -1,8 +1,20 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import PropTypes from 'prop-types';
 import { useLanguage } from '../../context/LanguageContext';
 
-const GlobeLegend = () => {
+const GlobeLegend = ({ maxVal, displayCategory }) => {
     const { t } = useLanguage();
+
+    const isPerCapita = displayCategory === 'Per Capita';
+    const unit = isPerCapita ? 'tCO₂/hab' : 'MtCO₂';
+
+    const formattedMax = useMemo(() => {
+        if (!maxVal) return '';
+        if (maxVal >= 1000) {
+            return (maxVal / 1000).toFixed(1) + 'k';
+        }
+        return Math.round(maxVal).toString();
+    }, [maxVal]);
 
     return (
         <div className="absolute bottom-4 left-4 bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200 p-4 text-slate-600 text-xs shadow-lg" role="region" aria-label={t('emissionsLabel')}>
@@ -22,7 +34,14 @@ const GlobeLegend = () => {
                  </div>
                  <div className="flex items-center gap-3" role="listitem">
                      <div className="w-3 h-3 rounded-full" style={{background: '#ef4444'}} aria-hidden="true"></div>
-                     <span className="text-slate-600">{t('legend.high')}</span>
+                     <span className="text-slate-600">
+                        {t('legend.high')}
+                        {formattedMax && (
+                             <span className="text-slate-400 text-[10px] ml-1.5 font-normal">
+                                (&gt; {formattedMax} {unit})
+                            </span>
+                        )}
+                     </span>
                  </div>
                  <div className="flex items-center gap-3 pt-1 border-t border-slate-200 mt-1" role="listitem">
                      <div className="w-3 h-3 rounded-full bg-slate-300" aria-hidden="true"></div>
@@ -31,6 +50,11 @@ const GlobeLegend = () => {
              </div>
          </div>
     );
+};
+
+GlobeLegend.propTypes = {
+    maxVal: PropTypes.number,
+    displayCategory: PropTypes.string,
 };
 
 export default React.memo(GlobeLegend);

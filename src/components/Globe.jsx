@@ -20,7 +20,7 @@ const customInterpolator = t => {
   }
 };
 
-const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
+const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCategory }) => {
   const svgRef = useRef(null);
 
   // Optimization: Use reusable ResizeObserver hook
@@ -315,9 +315,10 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect }) => {
           countryName={hoveredCountryName}
           value={hoveredValue}
           category={category}
+          displayCategory={displayCategory}
        />
 
-     <GlobeLegend />
+     <GlobeLegend maxVal={maxVal} displayCategory={displayCategory} />
      <GlobeHint />
   </div>
   );
@@ -332,6 +333,7 @@ Globe.propTypes = {
   category: PropTypes.string.isRequired,
   maxVal: PropTypes.number,
   onCountrySelect: PropTypes.func.isRequired,
+  displayCategory: PropTypes.string,
 };
 
 export default React.memo(Globe);
