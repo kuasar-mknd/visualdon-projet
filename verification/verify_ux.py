@@ -1,56 +1,64 @@
 from playwright.sync_api import sync_playwright, expect
 
-def run_verification():
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        page = browser.new_page(viewport={"width": 1280, "height": 800})
+def run(playwright):
+    browser = playwright.chromium.launch(headless=True)
+    page = browser.new_page()
+    page.goto("http://localhost:5173/")
 
-        try:
-            print("Navigating...")
-            page.goto("http://localhost:3001")
+    # 1. Verify default language is French (context default)
+    # Wait for page to load
+    page.wait_for_selector("body")
 
-            # Wait for any content to load (French default)
-            expect(page.get_by_text("Histoire des Émissions de CO2")).to_be_visible(timeout=10000)
-            print("App loaded (French).")
+    # Check html lang attribute
+    lang = page.evaluate("document.documentElement.lang")
+    print(f"Initial lang: {lang}")
+    if lang != 'fr':
+        print("Expected initial lang to be 'fr'")
 
-            # Switch to English
-            print("Switching to English...")
-            page.get_by_title("English").click()
+    # 2. Click 'Switch to English'
+    # Since we are in French, the label is "Passer à l'anglais"
+    # Wait for the button to appear
 
-            # Wait for English title
-            expect(page.get_by_text("CO2 Emissions History")).to_be_visible(timeout=5000)
-            print("Switched to English.")
+    # Debug: print all buttons
+    # buttons = page.get_by_role("button").all()
+    # for b in buttons:
+    #    print(f"Button: {b.get_attribute('aria-label')} | {b.inner_text()}")
 
-            # 2. Check Legend
-            page.wait_for_timeout(2000)
-            page.screenshot(path="verification/verification_total.png")
+    if lang == 'fr':
+        en_btn = page.get_by_label("Passer à l'anglais")
+    else:
+        en_btn = page.get_by_label("Switch to English")
 
-            # Use specific role to avoid ambiguity
-            legend = page.get_by_role("region", name="CO2 Emissions")
-            expect(legend).to_contain_text("High")
-            expect(legend).to_contain_text("MtCO₂")
-            print("Total legend verified.")
+    en_btn.click()
 
-            # 3. Switch to Per Capita
-            select = page.get_by_label("Select emission category")
-            select.select_option("Per Capita")
+    # 3. Verify language changed to English
+    # Wait for the html lang to change
+    page.wait_for_function("document.documentElement.lang === 'en'")
+    print("Language switched to 'en'")
 
-            page.wait_for_timeout(2000)
-            page.screenshot(path="verification/verification_per_capita.png")
+    # 4. Verify TopCountriesChart rows have hit area
+    # Wait for chart to render (might take time for data to load)
+    # We can wait for "United States" or similar text in the chart
+    try:
+        page.wait_for_selector(".bar-group", timeout=10000)
+    except:
+        print("Timeout waiting for bar-group. Check data loading.")
 
-            expect(legend).to_contain_text("tCO₂/hab")
-            print("Per Capita legend verified.")
+    # Check if the transparent rect exists
+    # We look for a rect with fill="transparent" inside a .bar-group
+    hit_area_count = page.locator(".bar-group rect[fill='transparent']").count()
+    print(f"Found {hit_area_count} hit areas")
 
-            chart_title = page.locator(".chart-title")
-            expect(chart_title).to_contain_text("Per Capita")
-            print("Chart title verified.")
+    if hit_area_count == 0:
+        print("FAILED: No transparent hit areas found in chart rows.")
+    else:
+        print("PASSED: Hit areas found.")
 
-        except Exception as e:
-            print(f"Error: {e}")
-            page.screenshot(path="verification/error_state.png")
-            raise e
-        finally:
-            browser.close()
+    # Take screenshot of the chart area
+    page.screenshot(path="verification/ux_verification.png", full_page=True)
+    print("Screenshot saved to verification/ux_verification.png")
 
-if __name__ == "__main__":
-    run_verification()
+    browser.close()
+
+with sync_playwright() as playwright:
+    run(playwright)

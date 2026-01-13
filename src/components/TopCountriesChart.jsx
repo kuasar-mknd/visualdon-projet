@@ -227,6 +227,12 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
           }
         });
 
+    // UX: Add a transparent hit area to make the entire row clickable, not just the bar/text
+    enter.append("rect")
+        .attr("width", innerWidth)
+        .attr("height", y.bandwidth())
+        .attr("fill", "transparent");
+
     enter.append("rect")
         .attr("class", "bar-rect")
         .attr("height", y.bandwidth())
