@@ -355,7 +355,14 @@ function arrayToCSV(data) {
   
   data.forEach(row => {
     const values = headers.map(h => {
-      const value = row[h] || '';
+      let value = row[h] || '';
+
+      // Security: Sanitize potential CSV Injection formulas
+      // If field starts with =, +, -, or @, prepend a single quote to force text interpretation
+      if (typeof value === 'string' && /^[=+\-@]/.test(value)) {
+          value = `'${value}`;
+      }
+
       if (value.toString().includes(',') || value.toString().includes('"')) {
         return `"${value.toString().replace(/"/g, '""')}"`;
       }

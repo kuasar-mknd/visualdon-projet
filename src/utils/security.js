@@ -46,7 +46,9 @@ export const validateManifest = (manifest) => {
     'perCapita',
     'emissionsHash',
     'perCapitaHash',
-    'geoJsonHash'
+    'geoJsonHash',
+    'version',
+    'lastUpdated'
   ];
 
   // Validate presence and type of keys
@@ -55,6 +57,15 @@ export const validateManifest = (manifest) => {
     typeof manifest[key] === 'string' &&
     manifest[key].length > 0
   );
+};
+
+/**
+ * Validates language code (whitelist).
+ * @param {string} lang - The language code.
+ * @returns {boolean} - True if valid.
+ */
+export const isValidLanguage = (lang) => {
+  return ['en', 'fr'].includes(lang);
 };
 
 /**
