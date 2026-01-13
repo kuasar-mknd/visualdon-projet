@@ -198,6 +198,7 @@ function AppContent() {
                   data={currentYearList}
                   year={year}
                   category={category === 'Per Capita' ? 'Total' : category}
+                  displayCategory={category}
                   isPlaying={isPlaying}
                   onCountrySelect={setSelectedCountry}
                />
@@ -214,6 +215,7 @@ function AppContent() {
                 data={currentYearMap}
                 geoJson={geoJson}
                 category={category === 'Per Capita' ? 'Total' : category}
+                displayCategory={category}
                 maxVal={currentMaxVal}
                 onCountrySelect={setSelectedCountry}
              />

@@ -4,7 +4,7 @@ import * as d3 from 'd3';
 import { useLanguage } from '../context/LanguageContext';
 import { fetchCountryDetails } from '../services/countryService';
 
-const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect }) => {
+const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, displayCategory }) => {
   const svgRef = useRef(null);
   const { t, language } = useLanguage();
   const [translatedNames, setTranslatedNames] = useState({});
@@ -88,14 +88,18 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect })
 
     const svg = d3.select(svgRef.current);
 
+    // Determine the display title based on displayCategory prop (fallback to category logic)
+    const isPerCapita = displayCategory === 'Per Capita' || category === 'Per Capita';
+    const titleText = `${t('top10')} (${year}) - ${isPerCapita ? t('perCapita') : t('total')}`;
+
     svg.attr("role", "graphics-document")
-       .attr("aria-label", `${t('top10')} (${year})`);
+       .attr("aria-label", titleText);
 
     if (svg.select("title").empty()) {
-        svg.append("title").text(`${t('top10')} (${year})`);
+        svg.append("title").text(titleText);
         svg.append("desc").text(t('subtitle'));
     } else {
-        svg.select("title").text(`${t('top10')} (${year})`);
+        svg.select("title").text(titleText);
     }
     
     let g = svg.select(".chart-group");
@@ -129,7 +133,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect })
     }
 
     svg.select(".chart-title")
-       .text(`${t('top10')} (${year}) - ${category === 'Total' ? t('total') : t('perCapita')}`);
+       .text(titleText);
 
     if (topData.length === 0) {
         g.selectAll("*").remove();
@@ -282,7 +286,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect })
             };
         });
 
-  }, [data, topData, year, category, t, translatedNames, isPlaying, onCountrySelect]);
+  }, [data, topData, year, category, t, translatedNames, isPlaying, onCountrySelect, displayCategory]);
 
   return <svg ref={svgRef} className="w-full h-full rounded-lg" />;
 };
@@ -297,6 +301,7 @@ TopCountriesChart.propTypes = {
   category: PropTypes.string.isRequired,
   isPlaying: PropTypes.bool,
   onCountrySelect: PropTypes.func,
+  displayCategory: PropTypes.string,
 };
 
 TopCountriesChart.defaultProps = {
