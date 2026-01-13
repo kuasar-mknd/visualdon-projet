@@ -22,7 +22,7 @@ const Timeline = ({ year, setYear, yearRange }) => {
   }, []);
 
   const handleYearChange = useCallback((e) => {
-    const val = parseInt(e.target.value);
+    const val = parseInt(e.target.value, 10);
     setLocalYear(val);
 
     // Debounce the global state update to prevent excessive re-renders of heavy charts

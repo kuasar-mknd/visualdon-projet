@@ -1,4 +1,4 @@
-import { isValidCountryCode } from '../utils/security.js';
+import { isValidCountryCode, isValidLanguage } from '../utils/security.js';
 
 const CACHE_KEY = 'visualdon_country_cache';
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
@@ -70,6 +70,12 @@ export const fetchCountryDetails = async (code, language) => {
   if (!isValidCountryCode(code)) {
     console.warn(`Security: Invalid country code format rejected: ${code}`);
     return null;
+  }
+
+  // Security Enhancement: Validate language
+  if (language && !isValidLanguage(language)) {
+      // Treat invalid language as undefined/null so we fallback to default
+      language = null;
   }
 
   // Normalize code to 2 chars if possible, but API supports 3 chars too.
