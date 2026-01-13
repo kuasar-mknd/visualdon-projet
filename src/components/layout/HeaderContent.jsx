@@ -22,6 +22,7 @@ const HeaderContent = () => {
               <button
                   onClick={() => language !== 'en' && toggleLanguage()}
                   aria-pressed={language === 'en'}
+                  aria-label={t('aria.switchToEnglish')}
                   title="English"
                   className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 outline-none cursor-pointer ${
                     language === 'en'
@@ -34,6 +35,7 @@ const HeaderContent = () => {
               <button
                   onClick={() => language !== 'fr' && toggleLanguage()}
                   aria-pressed={language === 'fr'}
+                  aria-label={t('aria.switchToFrench')}
                   title="Français"
                   className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 outline-none cursor-pointer ${
                     language === 'fr'

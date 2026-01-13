@@ -159,9 +159,8 @@ function AppContent() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-transparent text-slate-800" role="status" aria-live="polite">
-        <div className="text-2xl font-light tracking-widest animate-pulse uppercase">{t('loading')}</div>
-        <span className="sr-only">{t('loading')}</span>
+      <div className="h-screen w-full">
+        <LoadingPlaceholder />
       </div>
     );
   }

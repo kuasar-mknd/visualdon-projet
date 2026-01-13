@@ -41,6 +41,8 @@ export const translations = {
       selectYear: "Select year",
       yearLabel: "Year",
       toggleLanguage: "Switch language",
+      switchToEnglish: "Switch to English",
+      switchToFrench: "Switch to French",
       closeOverlay: "Close details",
       skipToContent: "Skip to main content",
       globeDescription: "Interactive 3D globe showing CO2 emissions by country",
@@ -96,6 +98,8 @@ export const translations = {
       selectYear: "Sélectionner l'année",
       yearLabel: "Année",
       toggleLanguage: "Changer de langue",
+      switchToEnglish: "Passer à l'anglais",
+      switchToFrench: "Passer au français",
       closeOverlay: "Fermer les détails",
       skipToContent: "Aller au contenu principal",
       globeDescription: "Globe 3D interactif montrant les émissions de CO2 par pays",
@@ -119,6 +123,11 @@ export const translations = {
 
 export const LanguageProvider = ({ children }) => {
   const [language, setLanguage] = useState('fr'); // Default to French as requested
+
+  // Accessibility: Update the HTML lang attribute when language changes
+  React.useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
 
   const toggleLanguage = () => {
     setLanguage(prev => prev === 'en' ? 'fr' : 'en');
