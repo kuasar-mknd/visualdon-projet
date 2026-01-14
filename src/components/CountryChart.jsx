@@ -1,4 +1,4 @@
-import React, { useState, Suspense } from 'react';
+import React, { useState, Suspense, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { useLanguage } from '../context/LanguageContext';
 import { useResizeObserver } from '../hooks/useResizeObserver';
@@ -32,6 +32,9 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
     defaultDimensions: { width: 500, height: 500 }
   });
 
+  const handleSetBubbles = useCallback(() => setViewMode('bubbles'), []);
+  const handleSetLines = useCallback(() => setViewMode('lines'), []);
+  const handleToggleSplit = useCallback((e) => setSplit(e.target.checked), []);
 
   // Transform data for charts
   const chartData = React.useMemo(() => {
@@ -90,7 +93,7 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
       <div className="flex items-center gap-3 mb-4 flex-wrap">
         <div role="group" aria-label={t('chart.selectViewMode')} className="flex gap-2">
           <button
-            onClick={() => setViewMode('bubbles')}
+            onClick={handleSetBubbles}
             aria-pressed={viewMode === 'bubbles'}
             className={`px-4 py-2 rounded-lg font-semibold transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none cursor-pointer ${
               viewMode === 'bubbles'
@@ -101,7 +104,7 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
             <span aria-hidden="true" className="mr-2">🫧</span>{t('chart.bubbles')}
           </button>
           <button
-            onClick={() => setViewMode('lines')}
+            onClick={handleSetLines}
             aria-pressed={viewMode === 'lines'}
             className={`px-4 py-2 rounded-lg font-semibold transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none cursor-pointer ${
               viewMode === 'lines'
@@ -118,7 +121,7 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
             <input 
               type="checkbox" 
               checked={split} 
-              onChange={(e) => setSplit(e.target.checked)}
+              onChange={handleToggleSplit}
               className="w-4 h-4 accent-blue-600 cursor-pointer outline-none"
             />
             <span className="text-slate-700 font-medium">{t('chart.splitBySector')}</span>

@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import * as d3 from 'd3';
+import { select, max, scaleLinear, scaleBand, easeCubicOut, interpolateNumber } from 'd3';
 import { useLanguage } from '../context/LanguageContext';
-import { fetchCountryDetails } from '../services/countryService';
+import { fetchCountriesBatch } from '../services/countryService';
 
 const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, displayCategory }) => {
   const svgRef = useRef(null);
+  const chartGroupRef = useRef(null);
+  const titleRef = useRef(null);
   const { t, language } = useLanguage();
   const [translatedNames, setTranslatedNames] = useState({});
 
@@ -53,23 +55,12 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
     if (neededCodes.length === 0) return;
 
     const fetchTranslations = async () => {
-      const newTranslations = {};
-      let hasNewData = false;
+      const batchResults = await fetchCountriesBatch(neededCodes, language);
 
-      await Promise.all(
-        neededCodes.map(async (code) => {
-          const name = await fetchCountryDetails(code, language);
-          if (name) {
-            newTranslations[code] = name;
-            hasNewData = true;
-          }
-        })
-      );
-
-      if (hasNewData) {
+      if (Object.keys(batchResults).length > 0) {
         setTranslatedNames(prev => ({
           ...prev,
-          ...newTranslations
+          ...batchResults
         }));
       }
     };
@@ -86,7 +77,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
-    const svg = d3.select(svgRef.current);
+    const svg = select(svgRef.current);
 
     // Determine the display title based on displayCategory prop (fallback to category logic)
     const isPerCapita = displayCategory === 'Per Capita' || category === 'Per Capita';
@@ -95,17 +86,13 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
     svg.attr("role", "graphics-document")
        .attr("aria-label", titleText);
 
-    if (svg.select("title").empty()) {
-        svg.append("title").text(titleText);
-        svg.append("desc").text(t('subtitle'));
-    } else {
-        svg.select("title").text(titleText);
-    }
-    
-    let g = svg.select(".chart-group");
-    if (g.empty()) {
+    // Initialize one-time elements
+    if (!chartGroupRef.current) {
         svg.attr("width", width).attr("height", height);
         
+        svg.append("title");
+        svg.append("desc").text(t('subtitle'));
+
         const defs = svg.append("defs");
         const gradient = defs.append("linearGradient")
             .attr("id", "barGradient")
@@ -117,11 +104,11 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
         gradient.append("stop").attr("offset", "0%").attr("stop-color", "#3b82f6");
         gradient.append("stop").attr("offset", "100%").attr("stop-color", "#10b981");
 
-        g = svg.append("g")
+        const g = svg.append("g")
             .attr("class", "chart-group")
             .attr("transform", `translate(${margin.left},${margin.top})`);
             
-        svg.append("text")
+        const title = svg.append("text")
            .attr("class", "chart-title")
            .attr("x", width / 2)
            .attr("y", 25)
@@ -130,10 +117,15 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
            .style("font-weight", "600")
            .style("fill", "#334155")
            .attr("aria-hidden", "true");
+
+        chartGroupRef.current = g;
+        titleRef.current = title;
     }
 
-    svg.select(".chart-title")
-       .text(titleText);
+    svg.select("title").text(titleText);
+    titleRef.current.text(titleText);
+
+    const g = chartGroupRef.current;
 
     if (topData.length === 0) {
         g.selectAll("*").remove();
@@ -149,11 +141,11 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
 
     g.selectAll(".no-data-message").remove();
 
-    const x = d3.scaleLinear()
-        .domain([0, d3.max(topData, d => d[category] || 0) || 0])
+    const x = scaleLinear()
+        .domain([0, max(topData, d => d[category] || 0) || 0])
         .range([0, innerWidth]);
 
-    const y = d3.scaleBand()
+    const y = scaleBand()
         .domain(topData.map(d => d["ISO 3166-1 alpha-3"]))
         .range([0, innerHeight])
         .padding(0.2);
@@ -162,7 +154,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
     // When playing, we need faster transitions (200ms) to match the tick rate and avoid "lag"
     // When paused, we use a smoother, longer transition (750ms)
     const transitionDuration = isPlaying ? 200 : 750;
-    const tTransition = svg.transition().duration(transitionDuration).ease(d3.easeCubicOut);
+    const tTransition = svg.transition().duration(transitionDuration).ease(easeCubicOut);
 
     const bars = g.selectAll(".bar-group")
         .data(topData, d => d["ISO 3166-1 alpha-3"]);
@@ -179,7 +171,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
          .duration(200)
          .style("opacity", 0.5);
 
-        d3.select(this)
+        select(this)
           .transition()
           .duration(200)
           .style("opacity", 1)
@@ -194,7 +186,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
          .duration(200)
          .style("opacity", 1);
 
-        d3.select(this)
+        select(this)
           .select(".bar-rect")
           .attr("stroke", "none");
     };
@@ -286,9 +278,15 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
         .attr("x", d => x(d[category] || 0) + 8)
         .style("opacity", 1)
         .tween("text", function(d) {
-            const i = d3.interpolateNumber(parseFloat(this.textContent) || 0, d[category] || 0);
+            const node = this;
+            const target = d[category] || 0;
+            // Optimization: Read cached value to avoid DOM read (layout thrashing)
+            const start = node._currentValue || 0;
+            const i = interpolateNumber(start, target);
             return function(t) {
-                this.textContent = i(t).toFixed(1);
+                const val = i(t);
+                node._currentValue = val;
+                node.textContent = val.toFixed(1);
             };
         });
 

@@ -61,6 +61,107 @@ const setCache = (cache) => {
   }
 };
 
+export const fetchCountriesBatch = async (codes, language) => {
+  if (!codes || !Array.isArray(codes) || codes.length === 0) return {};
+
+  const uniqueCodes = [...new Set(codes)];
+  const validCodes = uniqueCodes.filter(isValidCountryCode);
+
+  if (language && !isValidLanguage(language)) {
+      language = null;
+  }
+
+  const cache = getCache();
+  const now = Date.now();
+  const results = {};
+  const missingCodes = [];
+
+  // Check cache first
+  validCodes.forEach(code => {
+      if (cache[code] && (now - cache[code].timestamp < CACHE_EXPIRY)) {
+          results[code] = getNameFromData(cache[code].data, language);
+      } else {
+          missingCodes.push(code);
+      }
+  });
+
+  if (missingCodes.length === 0) {
+      return results;
+  }
+
+  // Use a unique key for the batch request to deduplicate
+  const batchKey = `BATCH_${missingCodes.sort().join(',')}`;
+
+  if (pendingRequests.has(batchKey)) {
+      try {
+           const batchData = await pendingRequests.get(batchKey);
+           Object.keys(batchData).forEach(code => {
+               results[code] = getNameFromData(batchData[code], language);
+           });
+           return results;
+      } catch (e) { // eslint-disable-line no-unused-vars
+           console.warn("Batch request failed, proceeding to manual fetch");
+      }
+  }
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout for batch
+
+  const requestPromise = (async () => {
+    try {
+        const param = missingCodes.map(c => encodeURIComponent(c)).join(',');
+        const response = await fetch(`https://restcountries.com/v3.1/alpha?codes=${param}`, {
+          signal: controller.signal
+        });
+
+        if (!response.ok) throw new Error('Network response was not ok');
+
+        const data = await response.json();
+
+        if (!Array.isArray(data)) {
+          throw new Error('Invalid API response format');
+        }
+
+        const newCacheData = {};
+
+        // API returns array of country objects.
+        // We need to map them back to the requested codes.
+        data.forEach(country => {
+            // Check both cca3 and cca2 to match what we asked for
+            const code3 = country.cca3;
+            const code2 = country.cca2;
+
+            if (missingCodes.includes(code3)) {
+                newCacheData[code3] = country;
+                cache[code3] = { data: country, timestamp: now };
+            } else if (missingCodes.includes(code2)) {
+                newCacheData[code2] = country;
+                cache[code2] = { data: country, timestamp: now };
+            }
+        });
+
+        setCache(cache);
+        return newCacheData;
+    } finally {
+        clearTimeout(timeoutId);
+        pendingRequests.delete(batchKey);
+    }
+  })();
+
+  pendingRequests.set(batchKey, requestPromise);
+
+  try {
+    const batchData = await requestPromise;
+    Object.keys(batchData).forEach(code => {
+      results[code] = getNameFromData(batchData[code], language);
+    });
+  } catch (error) {
+    console.warn(`Failed to fetch batch data:`, error.message);
+  }
+
+  return results;
+};
+
 export const fetchCountryDetails = async (code, language) => {
   if (!code) return null;
   
