@@ -1,0 +1,4 @@
+Contact: mailto:security@kuasar.xyz
+Expires: 2026-12-31T23:59:59.000Z
+Preferred-Languages: en, fr
+Policy: https://co2.kuasar.xyz/SECURITY.md

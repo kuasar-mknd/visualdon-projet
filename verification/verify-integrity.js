@@ -68,4 +68,12 @@ if (fs.existsSync(envExamplePath)) {
     logFail('.env.example missing');
 }
 
+// 3. Verify Security Policy
+const securityTxtPath = path.join(__dirname, '../public/.well-known/security.txt');
+if (fs.existsSync(securityTxtPath)) {
+    logPass('security.txt exists');
+} else {
+    logFail('security.txt missing in public/.well-known/');
+}
+
 console.log('\nAll integrity checks passed.');
