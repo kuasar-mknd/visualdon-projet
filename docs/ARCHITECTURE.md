@@ -62,6 +62,9 @@ While this is a frontend-only application, the structure loosely maps to Clean A
 - **Infrastructure Layer**:
     - **Data Access**: `d3.csv` and `fetch` APIs.
     - **External Integration**: `scripts/update-data.js` handles fetching from Zenodo (Global Carbon Project), acting as the infrastructure adapter for external data.
+    - **DevOps & Hosting**:
+        - **GitHub Actions**: Handles CI/CD pipelines (testing, linting) and automated data updates.
+        - **Cloudflare Pages**: Serves the static application and data assets, providing edge caching and global distribution.
 - **Presentation Layer**: React components (`src/components/`) handle the UI and user interaction.
 
 ### State Management

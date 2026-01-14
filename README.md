@@ -70,7 +70,7 @@ The application exposes its data via a static API. You can retrieve the current 
 curl -s https://visualdon-projet.pages.dev/data/manifest.json
 ```
 
-For full documentation on available data endpoints and schemas, see [docs/API.md](docs/API.md).
+For full documentation on available data endpoints, schemas, and caching strategies, see [docs/API.md](docs/API.md).
 
 ### Updating Data
 
@@ -136,6 +136,7 @@ The project includes a comprehensive test suite that verifies data integrity, ma
 
 ```bash
 # Run integrity checks (no browser required)
+# Note: This executes verification/verify-integrity.js
 pnpm test
 ```
 

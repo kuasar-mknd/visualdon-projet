@@ -39,6 +39,14 @@ You can inspect the current data manifest using curl:
 curl -s https://visualdon-projet.pages.dev/data/manifest.json | jq .
 ```
 
+## Performance & Caching
+
+Since the API consists of static files served via **Cloudflare Pages**, it leverages aggressive edge caching strategies to ensure low latency and high availability.
+
+- **Edge Caching**: Data files are cached at Cloudflare's edge locations worldwide.
+- **Cache Invalidation**: When a new deployment occurs (e.g., after `update-data` runs in CI), the cache is automatically purged, ensuring users receive the latest dataset immediately.
+- **Bandwidth Optimization**: The `manifest.json` file is small (~500B), allowing the client to determine if a full data download is necessary before fetching the larger CSV files (~2-5MB).
+
 ## Internal Services
 
 ### Country Service (`src/services/countryService.js`)

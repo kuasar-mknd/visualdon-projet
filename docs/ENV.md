@@ -19,6 +19,12 @@ If you need to add environment variables in the future:
 2.  Access them via `import.meta.env.VITE_MY_VAR`.
 3.  Add them to this file.
 
+## Future Integrations
+For future features requiring API keys (e.g., AI models or third-party services), please adhere to the following:
+
+- **Cost Control**: See `docs/AI.md` for guidelines on budgeting and rate limiting.
+- **Security**: Never commit real keys to the repository. Use GitHub Secrets for CI/CD and `.env` files for local development.
+
 ## Example `.env`
 For a quick start, you can copy the provided example file:
 
