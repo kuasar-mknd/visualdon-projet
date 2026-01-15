@@ -37,7 +37,12 @@ const BubbleChart = ({
     const svg = select(containerRef.current)
       .append("svg")
       .attr("width", width)
-      .attr("height", height);
+      .attr("height", height)
+      .attr("role", "graphics-document")
+      .attr("aria-label", t('chart.bubbleTitle'));
+
+    svg.append("title").text(t('chart.bubbleTitle'));
+    svg.append("desc").text(t('subtitle'));
 
     // Scales
     const xScale = scaleLinear()
@@ -110,7 +115,9 @@ const BubbleChart = ({
        .attr("text-anchor", "middle")
        .style("font-size", "18px")
        .style("font-weight", "600")
-       .style("fill", "#334155");
+       .style("fill", "#334155")
+       .attr("aria-hidden", "true")
+       .text(t('chart.bubbleTitle'));
 
     // Add clip path
     svg.append("defs")
