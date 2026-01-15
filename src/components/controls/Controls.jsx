@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import PlayControls from './PlayControls';
 import Timeline from './Timeline';
+import { isValidYear } from '../../utils/security';
 
 const Controls = ({ isPlaying, setIsPlaying, category, setCategory, year, setYear, yearRange }) => {
 
@@ -30,14 +31,16 @@ const Controls = ({ isPlaying, setIsPlaying, category, setCategory, year, setYea
           e.preventDefault();
           setYear(prev => {
              const current = prev || yearRange.min;
-             return Math.max(yearRange.min, current - 1);
+             const next = Math.max(yearRange.min, current - 1);
+             return isValidYear(next) ? next : current;
           });
           break;
         case 'ArrowRight':
           e.preventDefault();
           setYear(prev => {
              const current = prev || yearRange.min;
-             return Math.min(yearRange.max, current + 1);
+             const next = Math.min(yearRange.max, current + 1);
+             return isValidYear(next) ? next : current;
           });
           break;
       }

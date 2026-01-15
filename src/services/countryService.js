@@ -63,6 +63,12 @@ const setCache = (cache) => {
 
 export const fetchCountryDetails = async (code, language) => {
   if (!code) return null;
+
+  // Security Enhancement: Strict type and length check before regex
+  // Prevents potential ReDoS if massive strings are passed
+  if (typeof code !== 'string' || code.length > 5) {
+      return null;
+  }
   
   // Security Enhancement: Validate input format
   // Expected: ISO 3166-1 alpha-2 or alpha-3 code (2-3 letters/digits)

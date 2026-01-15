@@ -51,12 +51,19 @@ export const validateManifest = (manifest) => {
     'lastUpdated'
   ];
 
-  // Validate presence and type of keys
-  return requiredKeys.every(key =>
-    Object.prototype.hasOwnProperty.call(manifest, key) &&
-    typeof manifest[key] === 'string' &&
-    manifest[key].length > 0
-  );
+  // Validate presence, type, and format of keys
+  return requiredKeys.every(key => {
+    if (!Object.prototype.hasOwnProperty.call(manifest, key)) return false;
+    if (typeof manifest[key] !== 'string') return false;
+    if (manifest[key].length === 0) return false;
+
+    // Security Enhancement: Validate hash format (SHA-256 hex string)
+    if (key.endsWith('Hash')) {
+        return /^[a-f0-9]{64}$/i.test(manifest[key]);
+    }
+
+    return true;
+  });
 };
 
 /**
@@ -82,5 +89,37 @@ export const validateGeoJson = (geoJson) => {
   // Check features array
   if (!Array.isArray(geoJson.features)) return false;
 
+  // Security Enhancement: Validate at least one feature if present to ensure structure
+  if (geoJson.features.length > 0) {
+      const firstFeature = geoJson.features[0];
+      if (!firstFeature || typeof firstFeature !== 'object') return false;
+      if (firstFeature.type !== 'Feature') return false;
+      // Geometry and Properties are required by Spec
+      if (!Object.prototype.hasOwnProperty.call(firstFeature, 'geometry')) return false;
+      if (!Object.prototype.hasOwnProperty.call(firstFeature, 'properties')) return false;
+  }
+
   return true;
+};
+
+/**
+ * Validates if a year is within a reasonable range.
+ * @param {number} year - The year to validate.
+ * @returns {boolean} - True if valid.
+ */
+export const isValidYear = (year) => {
+    if (typeof year !== 'number' || isNaN(year)) return false;
+    // Data starts around 1750, allow future years slightly for forecasts or clock drift
+    const currentYear = new Date().getFullYear();
+    return year >= 1750 && year <= currentYear + 5;
+};
+
+/**
+ * Validates a hex color string.
+ * @param {string} color - The color string.
+ * @returns {boolean} - True if valid hex color.
+ */
+export const isValidColor = (color) => {
+    if (!color || typeof color !== 'string') return false;
+    return /^#[0-9A-F]{6}$/i.test(color);
 };

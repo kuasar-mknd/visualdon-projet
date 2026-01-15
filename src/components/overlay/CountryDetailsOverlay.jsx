@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import CountryChart from '../CountryChart';
 import { useLanguage } from '../../context/LanguageContext';
-import { sanitizeString } from '../../utils/security';
 
 const CountryDetailsOverlay = ({ selectedCountry, selectedCountryName, displayCountry, onClose, countryData }) => {
   const { t } = useLanguage();
@@ -60,7 +59,7 @@ const CountryDetailsOverlay = ({ selectedCountry, selectedCountryName, displayCo
         <div className="flex justify-between items-start gap-4 p-6 shrink-0">
             <h2 id="overlay-title" className="text-2xl font-bold text-slate-800 flex items-center gap-4 flex-1 min-w-0">
                 <span className="w-1.5 h-8 bg-blue-500 rounded-full shrink-0 shadow-sm"></span>
-                <span className="truncate">{sanitizeString(selectedCountryName) || displayCountry}</span>
+                <span className="truncate">{selectedCountryName || displayCountry}</span>
             </h2>
             <button 
                 ref={closeButtonRef}

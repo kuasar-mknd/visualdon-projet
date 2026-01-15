@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { useLanguage } from '../context/LanguageContext';
 import { useResizeObserver } from '../hooks/useResizeObserver';
 import LoadingPlaceholder from './common/LoadingPlaceholder';
+import { isValidCountryCode } from '../utils/security';
 
 const BubbleChart = React.lazy(() => import('./charts/BubbleChart'));
 const StackedAreaChart = React.lazy(() => import('./charts/StackedAreaChart'));
@@ -60,7 +61,10 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
     return emissionData.map(d => +d.Year).sort((a, b) => a - b);
   }, [emissionData, viewMode]);
 
-  if (!countryCode) {
+  // Security Enhancement: Validate countryCode
+  const safeCountryCode = (countryCode && isValidCountryCode(countryCode)) ? countryCode : null;
+
+  if (!safeCountryCode) {
     return (
       <div
         className="flex items-center justify-center h-full text-slate-600"
@@ -72,7 +76,7 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
     );
   }
 
-  if (!emissionData || emissionData.length === 0) {
+  if (!emissionData || !Array.isArray(emissionData) || emissionData.length === 0) {
     return (
       <div
         className="flex items-center justify-center h-full text-slate-600"

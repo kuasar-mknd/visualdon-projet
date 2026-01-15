@@ -134,7 +134,10 @@ export const LanguageProvider = ({ children }) => {
   };
 
   const t = (key) => {
-    if (typeof key !== 'string') return '';
+    if (typeof key !== 'string') {
+        console.warn('Security: t() called with non-string key');
+        return '';
+    }
     const keys = key.split('.');
     let value = translations[language];
     for (const k of keys) {
