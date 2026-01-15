@@ -32,22 +32,19 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Lint
-        if: ${{ hashFiles('package.json') != '' }}
         run: |
             if npm run | grep -q "lint"; then
               pnpm run lint
             fi
 
-      - name: Build
-        if: ${{ hashFiles('package.json') != '' }}
-        run: |
-            if npm run | grep -q "build"; then
-              pnpm run build
-            fi
-
       - name: Test
-        if: ${{ hashFiles('package.json') != '' }}
         run: |
             if npm run | grep -q "test"; then
               pnpm run test
+            fi
+
+      - name: Build
+        run: |
+            if npm run | grep -q "build"; then
+              pnpm run build
             fi

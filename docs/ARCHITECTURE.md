@@ -14,72 +14,80 @@ This project is a client-side Single Page Application (SPA) built with React 19 
 ### `src/`
 The source code is organized as follows:
 
-- **`components/`**: Reusable React components.
+- **`components/`**: Reusable React components (Presentation Layer).
   - **`charts/`**: D3.js based visualization components (e.g., BubbleChart, StackedAreaChart).
   - **`controls/`**: UI elements for user interaction (Play, Slider).
   - **`globe/`**: Components related to the 3D globe visualization.
   - **`layout/`**: Structural components like Header and Footer.
   - **`overlay/`**: UI overlays for detailed information.
-- **`context/`**: React Context definitions, primarily for state management that needs to be accessed globally (e.g., LanguageContext).
-- **`hooks/`**: Custom React hooks.
-  - **`useData.js`**: A critical hook for fetching, parsing, and managing the emissions data.
-- **`services/`**: Logic for external or internal services.
+- **`context/`**: React Context definitions for global state (e.g., `LanguageContext`).
+- **`hooks/`**: Custom React hooks for application logic (Application Layer).
+  - **`useData.js`**: Fetches, parses, and manages emissions data.
+- **`services/`**: Domain services (Domain Layer).
   - **`countryService.js`**: Handles country name translations and mapping.
 - **`utils/`**: Shared utility functions (e.g., security helpers).
-- **`App.jsx`**: The main application component that orchestrates the layout and state.
-- **`main.jsx`**: The entry point that mounts the React application.
+- **`App.jsx`**: The main application component that orchestrates layout and state.
+- **`main.jsx`**: The entry point.
 
 ### `public/`
-Static assets that are served directly.
-- **`data/`**: Contains the CSV files with CO₂ emissions data. These are fetched by the application at runtime.
+Static assets served directly.
+- **`data/`**: JSON manifest and CSV files with CO₂ emissions data.
 
 ### `scripts/`
-Node.js scripts for maintenance tasks.
-- **`update-data.js`**: Fetches the latest data from the Global Carbon Project and updates the CSV files in `public/data/`.
+Infrastructure scripts.
+- **`update-data.js`**: Fetches the latest data from the Global Carbon Project (Infrastructure/Adapter).
 
 ### `verification/`
-Contains scripts and artifacts for frontend verification and integrity.
-- **`verify-integrity.js`**: A Node.js script used to verify data consistency (manifests, CSVs) and environment setup.
+Quality assurance scripts.
+- **`verify-integrity.js`**: Validates data consistency and environment setup.
 
 ## Data Flow
 1.  **Initialization**: On load, `App.jsx` initializes.
-2.  **Data Fetching**: The `useData` hook is triggered. It fetches CSV files from `public/data/` using `d3-fetch` (or similar).
-3.  **Parsing**: Data is parsed and transformed into a usable format (likely an array of objects).
-4.  **State**: The parsed data is stored in the React state.
-5.  **Rendering**: Components (Charts, Globe) receive data via props and render the visualizations.
-6.  **Updates**: When the user interacts (e.g., moves the time slider), the state updates, triggering re-renders of the visualizations to show data for the selected year.
+2.  **Data Fetching**: The `useData` hook (Application Layer) requests the manifest and CSV files.
+3.  **Infrastructure Access**: `d3.fetch` (Infrastructure) retrieves files from `public/data/`.
+4.  **Parsing & Mapping**: Data is parsed and mapped to domain objects (Domain Layer).
+5.  **State**: Processed data is stored in React state.
+6.  **Rendering**: Components (Presentation Layer) receive data via props and render visualizations.
 
 ## Design Patterns
 
 ### Component Architecture
-The application follows a component-based architecture where each UI element is a self-contained unit.
-- **Container/Presenter**: Some components act as containers (fetching data/state) while others are purely presentational.
+The application follows a component-based architecture:
+- **Container Components**: Manage state and data fetching (e.g., `App.jsx`).
+- **Presentational Components**: Purely render UI based on props (e.g., `GlobeLegend`).
 
 ### Clean Architecture Mapping
-While this is a frontend-only application, the structure loosely maps to Clean Architecture principles:
-- **Domain Layer**: Implicitly defined by the data structures (emissions data) and types. `src/services/` contains domain-specific logic like country translation.
-- **Application Layer**: `src/hooks/` and `src/context/` manage the application state and business logic (e.g., filtering data by year).
-- **Infrastructure Layer**:
-    - **Data Access**: `d3.csv` and `fetch` APIs.
-    - **External Integration**: `scripts/update-data.js` handles fetching from Zenodo (Global Carbon Project), acting as the infrastructure adapter for external data.
-- **Presentation Layer**: React components (`src/components/`) handle the UI and user interaction.
+Although a frontend application, the structure aligns with Clean Architecture principles:
+
+- **Presentation Layer (`src/components/`)**:
+  - Responsible for UI rendering and user interaction.
+  - Depends on Application Layer (Hooks) and Domain Layer (Services).
+
+- **Application Layer (`src/hooks/`, `src/context/`)**:
+  - Orchestrates application flow (e.g., data loading, language switching).
+  - Contains use cases like "Load Emissions Data" (`useData`).
+
+- **Domain Layer (`src/services/`, Types)**:
+  - Encapsulates business rules and entities independent of UI.
+  - Example: `countryService.js` defines how country codes map to names.
+
+- **Infrastructure Layer (`scripts/`, `public/data/`, API calls)**:
+  - External concerns: Data fetching, CSV storage, API adaptations.
+  - The `update-data.js` script acts as an adapter to the Global Carbon Project's external API.
 
 ### State Management
-- **React Context**: Used for global state that rarely changes (e.g., `LanguageContext` for i18n).
-- **React Hooks**: `useState` and `useReducer` are used for local component state.
-- **Custom Hooks**: `useData` encapsulates the complex logic of data fetching and parsing.
+- **Global**: `LanguageContext` for i18n preferences.
+- **Local**: `useState` and `useReducer` for component-specific state (e.g., current year, selected country).
+- **Data**: `useData` custom hook encapsulates data fetching state (loading, error, data).
 
-### Extending the Application
+## Extending the Application
 
 ### Adding New Visualizations
-To add a new chart type (e.g., `LineChart`):
-1.  **Create Component**: Add `src/components/charts/LineChart.jsx`.
-2.  **Data Logic**: Use the `useData` hook to retrieve emissions data.
-3.  **D3 Integration**: Implement D3 logic within a `useEffect` hook (or `useLayoutEffect` for measurements).
-4.  **Register**: Import and add the component to `App.jsx` or a specific container.
+1.  **Create Component**: Add to `src/components/charts/`.
+2.  **Integrate Data**: Use props to pass data from `App.jsx`.
+3.  **Render**: Implement D3 or SVG logic.
 
 ### Adding New Data Sources
-To integrate a new dataset:
-1.  **Update Script**: Modify `scripts/update-data.js` to fetch and clean the new data.
-2.  **Manifest**: Ensure the new file is added to `manifest.json`.
-3.  **Hook**: Update `src/hooks/useData.js` to fetch the new file key from the manifest.
+1.  **Update Infrastructure**: Modify `scripts/update-data.js` to fetch new data.
+2.  **Update Domain**: Ensure `manifest.json` reflects the new file.
+3.  **Update Application**: Modify `useData.js` to load the new resource.

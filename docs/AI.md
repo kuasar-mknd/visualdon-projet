@@ -37,7 +37,18 @@ Future integrations must document:
 
 ## Cost Control & Best Practices
 Although no AI models are currently used, any future integration should adhere to the following principles:
-- **Caching**: Cache AI responses aggressively (e.g., in LocalStorage or a backend proxy) to minimize API calls.
-- **Rate Limiting**: Implement client-side throttling (debouncing) on user inputs that trigger AI requests.
-- **Token Usage Monitoring**: Regularly audit token usage via provider dashboards to ensure alignment with budget caps.
-- **Budget Alerts**: Configure provider-side budget alerts (e.g., OpenAI Usage Limits) to prevent unexpected costs.
+
+1.  **Caching Strategy**:
+    - Cache responses aggressively (LocalStorage for user-specific, CDN/Edge for global).
+    - Use `stale-while-revalidate` patterns where appropriate.
+
+2.  **Rate Limiting**:
+    - Implement client-side throttling (debouncing) on user inputs (minimum 500ms delay).
+    - Enforce per-user or per-IP limits if using a proxy backend.
+
+3.  **Token Usage Monitoring**:
+    - Regularly audit token usage via provider dashboards.
+    - Set hard caps on monthly budgets to prevent overrun.
+
+4.  **Budget Alerts**:
+    - Configure provider-side budget alerts (e.g., OpenAI Usage Limits) at 50%, 75%, and 90% of the budget.

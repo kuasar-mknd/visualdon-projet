@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ "main" ]
   schedule:
-    - cron: '21 16 * * 5'
+    - cron: '21 15 * * 1'
 
 jobs:
   analyze:
@@ -30,6 +30,8 @@ jobs:
       uses: github/codeql-action/init@v3
       with:
         languages: ${{ matrix.language }}
+        # If you have a custom build process, add it here.
+        # For most JS/TS projects, CodeQL auto-detects the build.
 
     - name: Autobuild
       uses: github/codeql-action/autobuild@v3
