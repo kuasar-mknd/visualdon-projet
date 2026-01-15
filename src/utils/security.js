@@ -2,6 +2,10 @@
  * Security utilities for input validation and sanitization.
  */
 
+// Optimization: Compile regex once at module level
+const COUNTRY_CODE_REGEX = /^[a-zA-Z0-9]{2,3}$/;
+const UNSAFE_CHARS_REGEX = /[<>"'&]/g;
+
 /**
  * Validates if a string is a valid ISO 3166-1 alpha-2 or alpha-3 country code.
  * @param {string} code - The country code to validate.
@@ -9,7 +13,7 @@
  */
 export const isValidCountryCode = (code) => {
   if (!code || typeof code !== 'string') return false;
-  return /^[a-zA-Z0-9]{2,3}$/.test(code);
+  return COUNTRY_CODE_REGEX.test(code);
 };
 
 /**
@@ -20,7 +24,7 @@ export const isValidCountryCode = (code) => {
  */
 export const sanitizeString = (str) => {
   if (typeof str !== 'string') return '';
-  return str.replace(/[<>"'&]/g, (char) => {
+  return str.replace(UNSAFE_CHARS_REGEX, (char) => {
     switch (char) {
       case '<': return '&lt;';
       case '>': return '&gt;';

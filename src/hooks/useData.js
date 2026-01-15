@@ -40,11 +40,12 @@ function fastRowBuilder(row, headers) {
   return d;
 }
 
+const encoder = new TextEncoder();
+
 // Helper to verify SHA-256 integrity of fetched content
 async function verifyIntegrity(text, expectedHash) {
   if (!expectedHash) return; // Skip if no hash provided (dev mode/legacy)
 
-  const encoder = new TextEncoder();
   const data = encoder.encode(text);
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
