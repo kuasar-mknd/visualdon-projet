@@ -52,11 +52,22 @@ export const validateManifest = (manifest) => {
   ];
 
   // Validate presence and type of keys
-  return requiredKeys.every(key =>
+  const keysValid = requiredKeys.every(key =>
     Object.prototype.hasOwnProperty.call(manifest, key) &&
     typeof manifest[key] === 'string' &&
     manifest[key].length > 0
   );
+
+  if (!keysValid) return false;
+
+  // Security Enhancement: Validate Hash Format (SHA-256 Hex)
+  const hashRegex = /^[a-f0-9]{64}$/i;
+  if (!hashRegex.test(manifest.emissionsHash)) return false;
+  if (!hashRegex.test(manifest.perCapitaHash)) return false;
+  // geoJsonHash might be empty if file missing (as per update-data.js logic), but if present should be valid
+  if (manifest.geoJsonHash && manifest.geoJsonHash.length > 0 && !hashRegex.test(manifest.geoJsonHash)) return false;
+
+  return true;
 };
 
 /**
@@ -82,5 +93,34 @@ export const validateGeoJson = (geoJson) => {
   // Check features array
   if (!Array.isArray(geoJson.features)) return false;
 
+  // Security Enhancement: Validate features structure
+  // Iterate all features to ensure no malformed data that could crash D3
+  for (const feature of geoJson.features) {
+      if (!feature || typeof feature !== 'object') return false;
+      if (feature.type !== 'Feature') return false;
+      if (!feature.geometry || typeof feature.geometry !== 'object') return false;
+      if (!feature.properties || typeof feature.properties !== 'object') return false;
+
+      // Check geometry type
+      const validGeometries = ['Point', 'MultiPoint', 'LineString', 'MultiLineString', 'Polygon', 'MultiPolygon', 'GeometryCollection'];
+      if (!validGeometries.includes(feature.geometry.type)) return false;
+  }
+
   return true;
+};
+
+/**
+ * Validates if a year is within a safe range.
+ * @param {number|string} year - The year to validate.
+ * @returns {boolean} - True if valid.
+ */
+export const isValidYear = (year) => {
+    const y = parseInt(year, 10);
+    if (isNaN(y)) return false;
+
+    const currentYear = new Date().getFullYear();
+    const minYear = 1750;
+    const maxYear = currentYear + 5; // Allow slightly into future for projections or data updates
+
+    return y >= minYear && y <= maxYear;
 };

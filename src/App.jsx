@@ -7,6 +7,7 @@ import Controls from './components/controls/Controls';
 import { useData } from './hooks/useData';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { fetchCountryDetails } from './services/countryService';
+import { isValidYear } from './utils/security';
 
 // Lazy load heavy visualization components
 const Globe = React.lazy(() => import('./components/Globe'));
@@ -59,12 +60,26 @@ function AppContent() {
   const currentMaxVal = category === 'Per Capita' ? maxPerCapita : maxEmissions;
   const { t, language } = useLanguage();
 
+  // Security Wrapper for Year State
+  const handleSetYear = useCallback((newYear) => {
+    setYear(prev => {
+      // Handle function updates
+      const next = typeof newYear === 'function' ? newYear(prev) : newYear;
+
+      // Allow internal logic to set null (initial state) or respect validation
+      if (next === null) return null;
+
+      // Validate year before updating state
+      return isValidYear(next) ? next : prev;
+    });
+  }, []);
+
   // Animation loop
   useEffect(() => {
     let interval;
     if (isPlaying) {
       interval = setInterval(() => {
-        setYear(prev => {
+        handleSetYear(prev => {
           if (prev >= yearRange.max) {
             setIsPlaying(false);
             return yearRange.max;
@@ -74,14 +89,14 @@ function AppContent() {
       }, 200);
     }
     return () => clearInterval(interval);
-  }, [isPlaying, yearRange.max]);
+  }, [isPlaying, yearRange.max, handleSetYear]);
 
   // Update year to max available when data loads (if currently at default or old max)
   useEffect(() => {
     if (yearRange.max > 0 && (year === null || year > yearRange.max || year < yearRange.min)) {
-       setYear(yearRange.max);
+       handleSetYear(yearRange.max);
     }
-  }, [yearRange, year]);
+  }, [yearRange, year, handleSetYear]);
 
   // Helper to group data by year
   const groupDataByYear = useCallback((data) => {
@@ -186,7 +201,7 @@ function AppContent() {
             category={category}
             setCategory={setCategory}
             year={year}
-            setYear={setYear}
+            setYear={handleSetYear}
             yearRange={yearRange}
           />
 
