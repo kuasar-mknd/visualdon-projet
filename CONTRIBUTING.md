@@ -62,7 +62,7 @@ Unsure where to start? Look for issues labeled:
 ### Prerequisites
 
 - Node.js 20.x or higher
-- npm 10.x or higher
+- pnpm 9.x or higher (recommended) or npm/yarn
 - Git
 
 ### Setup Steps
@@ -76,19 +76,19 @@ cd visualdon-projet
 git remote add upstream https://github.com/kuasar-mknd/visualdon-projet.git
 
 # Install dependencies
-npm install
+pnpm install
 
 # Start development server
-npm run dev
+pnpm run dev
 ```
 
 ### Available Scripts
 
-- `npm run dev` - Start development server with hot reload
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build locally
-- `npm run lint` - Run ESLint to check code quality
-- `npm run update-data` - Fetch latest CO₂ emissions data
+- `pnpm run dev` - Start development server with hot reload
+- `pnpm run build` - Build for production
+- `pnpm run preview` - Preview production build locally
+- `pnpm run lint` - Run ESLint to check code quality
+- `pnpm run update-data` - Fetch latest CO₂ emissions data
 
 ## 📏 Coding Standards
 
@@ -218,7 +218,21 @@ src/
 
 ## 🧪 Testing
 
-Currently, this project relies on manual testing. Contributions to add automated tests are highly welcome!
+This project includes automated integrity checks and linting, as well as manual testing steps.
+
+### Automated Checks
+
+Run the integrity verification script (checks manifests, data files, and environment):
+```bash
+pnpm test
+```
+
+Run the linter to ensure code quality:
+```bash
+pnpm lint
+```
+
+### Manual Testing
 
 **Manual testing checklist:**
 
