@@ -75,7 +75,11 @@ const StackedAreaChart = ({
 
     // Shared handlers
     const handleInteractionStart = function(event, d) {
-        select(this).attr('opacity', 1);
+        select(this)
+          .raise()
+          .attr('opacity', 1)
+          .attr('stroke', '#2563eb')
+          .attr('stroke-width', 3);
 
         // Highlight in legend
         svg.selectAll('.legend-row')
@@ -83,7 +87,9 @@ const StackedAreaChart = ({
     };
 
     const handleInteractionEnd = function() {
-        select(this).attr('opacity', 0.8);
+        select(this)
+          .attr('opacity', 0.8)
+          .attr('stroke', 'none');
         svg.selectAll('.legend-row').attr('opacity', 1);
     };
 
@@ -170,12 +176,20 @@ const StackedAreaChart = ({
         .on("mouseover focus", function(event, hoveredSector) {
           // Handle both MouseEvent and FocusEvent (where data is attached to element)
           const key = hoveredSector || select(this).datum();
+
+          select(this).select("rect")
+            .attr("stroke", "#2563eb")
+            .attr("stroke-width", 2);
+
           svg.selectAll('.area')
             .transition()
             .duration(200)
             .attr('opacity', d => d.key === key ? 1 : 0.2);
         })
         .on("mouseout blur", function() {
+          select(this).select("rect")
+            .attr("stroke", "none");
+
           svg.selectAll('.area')
             .transition()
             .duration(200)

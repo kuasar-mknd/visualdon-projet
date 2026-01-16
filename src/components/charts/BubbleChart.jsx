@@ -136,10 +136,11 @@ const BubbleChart = ({
     // Shared handlers for mouse and keyboard interactions
     const handleInteractionStart = function(event, d) {
         select(this)
+            .raise()
             .transition()
             .duration(200)
             .attr("opacity", 1)
-            .attr("stroke", "#1e293b")
+            .attr("stroke", "#2563eb")
             .attr("stroke-width", 3);
 
         // Remove existing tooltips to prevent duplicates
@@ -211,12 +212,19 @@ const BubbleChart = ({
             .attr("role", "button")
             .attr("aria-label", t(`sectors.${sector}`) || sector)
             .on("mouseover focus", function() {
+                select(this).select("circle")
+                    .attr("stroke", "#2563eb")
+                    .attr("stroke-width", 2);
+
                 bubbles.selectAll("circle")
                     .transition()
                     .duration(200)
                     .attr("opacity", d => d.sector === sector ? 1 : 0.2);
             })
             .on("mouseout blur", function() {
+                select(this).select("circle")
+                    .attr("stroke", "none");
+
                 bubbles.selectAll("circle")
                     .transition()
                     .duration(200)
