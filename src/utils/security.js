@@ -51,12 +51,25 @@ export const validateManifest = (manifest) => {
     'lastUpdated'
   ];
 
+  const sha256Regex = /^[a-f0-9]{64}$/;
+
   // Validate presence and type of keys
-  return requiredKeys.every(key =>
+  const hasKeys = requiredKeys.every(key =>
     Object.prototype.hasOwnProperty.call(manifest, key) &&
     typeof manifest[key] === 'string' &&
     manifest[key].length > 0
   );
+
+  if (!hasKeys) return false;
+
+  // STRICT VALIDATION: Check hash format
+  if (!sha256Regex.test(manifest.emissionsHash)) return false;
+  if (!sha256Regex.test(manifest.perCapitaHash)) return false;
+  // geoJsonHash might be empty if file missing (warned in generation script), but usually it's there.
+  // If it's not empty, it must be valid.
+  if (manifest.geoJsonHash && !sha256Regex.test(manifest.geoJsonHash)) return false;
+
+  return true;
 };
 
 /**
@@ -81,6 +94,16 @@ export const validateGeoJson = (geoJson) => {
 
   // Check features array
   if (!Array.isArray(geoJson.features)) return false;
+
+  // STRICT VALIDATION: Check at least one feature to ensure it's not a dummy array
+  // and check if features have geometry and properties
+  if (geoJson.features.length > 0) {
+      const sample = geoJson.features[0];
+      if (!sample || typeof sample !== 'object') return false;
+      if (!sample.type || sample.type !== 'Feature') return false;
+      if (!sample.geometry || typeof sample.geometry !== 'object') return false;
+      if (!sample.properties || typeof sample.properties !== 'object') return false;
+  }
 
   return true;
 };

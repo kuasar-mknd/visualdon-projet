@@ -24,14 +24,22 @@ function fastRowBuilder(row, headers) {
         continue;
     }
 
+    // STRICT VALIDATION: Force numeric types for known numeric columns
+    // This prevents "string numbers" from leaking into charts or logic where math is expected
+    const isNumericColumn = key === 'Year' || key === 'Total' || key === 'Per Capita' || key === 'Population';
+
     if (val === '') {
       d[key] = null;
     } else {
       // Unary plus is the fastest way to convert valid numeric strings
       const num = +val;
-      // If it's NaN (e.g. "NA" or text), keep original string
+      // If it's NaN (e.g. "NA" or text), keep original string UNLESS it's a known numeric column
       if (isNaN(num) && val !== 'NaN') {
-         d[key] = val;
+         if (isNumericColumn) {
+             d[key] = null; // Force null for bad numeric data
+         } else {
+             d[key] = val;
+         }
       } else {
          d[key] = num;
       }
