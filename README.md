@@ -1,6 +1,7 @@
 # 🌍 Global CO₂ Emissions Visualization
 
 [![Deployment Status](https://img.shields.io/badge/Cloudflare%20Pages-Deployed-orange?logo=cloudflare)](https://visualdon-projet.pages.dev)
+[![CI](https://github.com/kuasar-mknd/visualdon-projet/actions/workflows/ci.yml/badge.svg)](https://github.com/kuasar-mknd/visualdon-projet/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Data Source](https://zenodo.org/badge/DOI/10.5281/zenodo.7215364.svg)](https://doi.org/10.5281/zenodo.7215364)
 [![React](https://img.shields.io/badge/React-19.2.3-61DAFB?logo=react)](https://react.dev)
@@ -124,7 +125,7 @@ Common issues and solutions:
 
 - **Missing dependencies**: If you encounter errors about missing modules, ensure you have run `pnpm install`.
 - **Package Manager**: This project is optimized for `pnpm`. If you use `npm` or `yarn` and face issues, try deleting `node_modules` and installing with `pnpm`.
-- **Node version**: This project requires Node.js 20+. Use `node -v` to check your version.
+- **Node version**: This project requires Node.js 20+ (enforced by CI). Use `node -v` to check your version.
 - **Port already in use**: If `http://localhost:5173` is taken, Vite will automatically try the next available port (e.g., 5174). Check the console output.
 - **Data not loading**: If charts are empty, try running `pnpm run update-data` to fetch the latest dataset.
 - **Environment Issues**: Ensure your `.env` file (if present) does not contain conflicting variables. See [docs/ENV.md](docs/ENV.md) for details.
