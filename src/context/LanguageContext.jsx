@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 
 const LanguageContext = createContext();
@@ -129,11 +129,11 @@ export const LanguageProvider = ({ children }) => {
     document.documentElement.lang = language;
   }, [language]);
 
-  const toggleLanguage = () => {
+  const toggleLanguage = useCallback(() => {
     setLanguage(prev => prev === 'en' ? 'fr' : 'en');
-  };
+  }, []);
 
-  const t = (key) => {
+  const t = useCallback((key) => {
     if (typeof key !== 'string') return '';
     const keys = key.split('.');
     let value = translations[language];
@@ -145,10 +145,13 @@ export const LanguageProvider = ({ children }) => {
         return key;
     }
     return value;
-  };
+  }, [language]);
+
+  // Optimization: Memoize context value to prevent unnecessary re-renders of all consumers
+  const value = useMemo(() => ({ language, toggleLanguage, t }), [language, toggleLanguage, t]);
 
   return (
-    <LanguageContext.Provider value={{ language, toggleLanguage, t }}>
+    <LanguageContext.Provider value={value}>
       {children}
     </LanguageContext.Provider>
   );
