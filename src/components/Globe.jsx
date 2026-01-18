@@ -153,16 +153,11 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
         const countrySelection = countrySelectionRef.current;
         if (countrySelection) {
             countrySelection.attr("d", path);
-        } else {
-            // Fallback just in case
-            select(svgRef.current).selectAll("path.country-path").attr("d", path);
         }
 
         const sphereSelection = sphereSelectionRef.current;
         if (sphereSelection) {
             sphereSelection.attr("d", path({type: "Sphere"}));
-        } else {
-             select(svgRef.current).selectAll("path.sphere-path").attr("d", path({type: "Sphere"}));
         }
 
         // Update highlight path if exists
