@@ -3,32 +3,26 @@
 ## Overview
 This application is a client-side React application built with Vite. It minimizes reliance on runtime environment variables.
 
-## Current Usage
+## Validated Environment Variables
+The following variables are recognized by the build system and application code.
 
-### Build-Time Variables
-These variables are used during the build process or injected into the application via Vite.
+### Analytics
+- **`VITE_CLOUDFLARE_TOKEN`**: (Optional) The token for Cloudflare Web Analytics.
+    - **Usage**: Injected into `index.html` during the build process to configure the analytics beacon.
+    - **Example**: `VITE_CLOUDFLARE_TOKEN=1a2b3c4d...`
 
-- **`VITE_CLOUDFLARE_TOKEN`**: (Optional) The token for Cloudflare Web Analytics. If provided, it is injected into the HTML `head`.
+## Setup
+To configure your local environment:
 
-### Standard Variables
-- **`NODE_ENV`**: Managed by Vite (`development` vs `production`).
+1.  Copy the example file:
+    ```bash
+    cp .env.example .env
+    ```
 
-## Conventions
-If you need to add environment variables in the future:
-1.  Prefix them with `VITE_` to expose them to the client-side code.
-2.  Access them via `import.meta.env.VITE_MY_VAR`.
-3.  Add them to this file.
+2.  Edit `.env` to add your specific keys (if needed).
 
-## Example `.env`
-For a quick start, you can copy the provided example file:
-
-```bash
-cp .env.example .env
-```
-
-The `.env.example` file contains placeholders:
-
-```bash
-# Cloudflare Web Analytics Token
-VITE_CLOUDFLARE_TOKEN=
-```
+## Adding New Variables
+If you extend the application:
+1.  Prefix client-side variables with `VITE_`.
+2.  Add them to `.env.example`.
+3.  Document them in this file.

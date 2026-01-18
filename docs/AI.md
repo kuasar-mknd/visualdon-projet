@@ -28,16 +28,23 @@ Any AI adapter or service integration should return structured JSON to ensure ty
 }
 ```
 
-### Configuration Requirements
-Future integrations must document:
-- Model names and versions.
-- Provider details (e.g., OpenAI, Hugging Face).
-- API keys (via `VITE_` env vars if client-side, or backend proxies).
-- Cost control mechanisms.
+### Cost Control & Rate Limiting
+To prevent runaway costs and ensure performance, any future AI integration must implement:
 
-## Cost Control & Best Practices
-Although no AI models are currently used, any future integration should adhere to the following principles:
-- **Caching**: Cache AI responses aggressively (e.g., in LocalStorage or a backend proxy) to minimize API calls.
-- **Rate Limiting**: Implement client-side throttling (debouncing) on user inputs that trigger AI requests.
-- **Token Usage Monitoring**: Regularly audit token usage via provider dashboards to ensure alignment with budget caps.
-- **Budget Alerts**: Configure provider-side budget alerts (e.g., OpenAI Usage Limits) to prevent unexpected costs.
+1.  **Caching Strategy**:
+    - Responses must be cached (e.g., Cloudflare KV, Browser Cache, or LocalStorage) to minimize repetitive API calls.
+    - Use content-addressable keys (hashes of the prompt/input).
+
+2.  **Rate Limiting**:
+    - **Client-side**: Debounce user inputs (minimum 300ms) before triggering requests.
+    - **Server-side**: Implement token bucket or sliding window limits per IP.
+
+3.  **Budget Caps**:
+    - Set hard limits on provider dashboards (e.g., OpenAI Hard Limit $20/month).
+    - Monitor usage via automated alerts.
+
+### Environment Variables
+Model configurations must be strictly separated from code:
+- `AI_MODEL_NAME`
+- `AI_API_BASE_URL`
+- `AI_API_KEY` (Server-side only)

@@ -64,13 +64,34 @@ This project uses authoritative emissions data from the [Global Carbon Budget](h
 
 ### API Access
 
-The application exposes its data via a static API. You can retrieve the current dataset manifest using curl:
+The application exposes its data via a static API. This allows you to programmatically access the same datasets used by the visualization.
+
+#### 1. Fetch the Data Manifest
+First, retrieve the `manifest.json` to find the current filenames for the datasets.
 
 ```bash
 curl -s https://visualdon-projet.pages.dev/data/manifest.json
+# Output:
+# {
+#   "emissions": "GCB2025v15_MtCO2_flat.csv",
+#   "perCapita": "GCB_2025v15_percapita_flat-clean.csv",
+#   "version": "2025v15",
+#   "lastUpdated": "2025-12-27T00:04:57.161Z"
+# }
 ```
 
-For full documentation on available data endpoints and schemas, see [docs/API.md](docs/API.md).
+#### 2. Fetch the Datasets
+Using the filenames from the manifest, you can download the full CSV datasets.
+
+```bash
+# Fetch Emissions Data (replace filename with actual value from manifest)
+curl -O https://visualdon-projet.pages.dev/data/GCB2025v15_MtCO2_flat.csv
+
+# Fetch Per Capita Data
+curl -O https://visualdon-projet.pages.dev/data/GCB_2025v15_percapita_flat-clean.csv
+```
+
+For full documentation on data schemas, response formats, and error handling, see [docs/API.md](docs/API.md).
 
 ### Updating Data
 
@@ -122,11 +143,11 @@ visualdon-projet/
 
 Common issues and solutions:
 
-- **Missing dependencies**: If you encounter errors about missing modules, ensure you have run `pnpm install`.
-- **Package Manager**: This project is optimized for `pnpm`. If you use `npm` or `yarn` and face issues, try deleting `node_modules` and installing with `pnpm`.
-- **Node version**: This project requires Node.js 20+. Use `node -v` to check your version.
-- **Port already in use**: If `http://localhost:5173` is taken, Vite will automatically try the next available port (e.g., 5174). Check the console output.
-- **Data not loading**: If charts are empty, try running `pnpm run update-data` to fetch the latest dataset.
+- **Missing dependencies**: If you encounter errors about missing modules (e.g., `Module not found`), ensure you have run `pnpm install` in the root directory.
+- **Package Manager**: This project is optimized for `pnpm`. If you use `npm` or `yarn` and face lockfile issues, try deleting `node_modules` and installing with `pnpm`.
+- **Node version**: This project requires Node.js 20+. Use `node -v` to check your version. If older, use `nvm use 20`.
+- **Port already in use**: If `http://localhost:5173` is taken, Vite will automatically try the next available port (e.g., 5174). Check the terminal output for the correct URL.
+- **Data not loading**: If charts are empty, the local data files might be missing. Run `pnpm run update-data` to fetch the latest dataset.
 - **Environment Issues**: Ensure your `.env` file (if present) does not contain conflicting variables. See [docs/ENV.md](docs/ENV.md) for details.
 
 ## ✅ Verification

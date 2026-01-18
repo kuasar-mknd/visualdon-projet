@@ -16,28 +16,63 @@ To support versioned data without requiring code changes, the application uses a
 
 ### Data Files (`public/data/`)
 
-- **`manifest.json`**:
-  ```json
-  {
-    "emissions": "GCB2025v15_MtCO2_flat.csv",
-    "perCapita": "GCB_2025v15_percapita_flat-clean.csv",
-    "version": "2025v15",
-    "lastUpdated": "2025-12-27T00:04:57.161Z"
-  }
-  ```
-- **Emissions Data** (e.g., `GCB2025v15_MtCO2_flat.csv`):
-  - **Source**: Directly from Global Carbon Budget (Zenodo).
-  - **Columns**: `Country`, `ISO 3166-1 alpha-3`, `Year`, `Total`, `Coal`, `Oil`, `Gas`, `Cement`, `Flaring`, `Other`, `Per Capita`.
-- **Per Capita Data** (e.g., `GCB_2025v15_percapita_flat-clean.csv`):
-  - **Source**: Calculated during the update process.
-  - **Columns**: `Country`, `Year`, `Per Capita`.
+#### Manifest File
+**Endpoint**: `/data/manifest.json`
 
-### API Access Example
-You can inspect the current data manifest using curl:
-
-```bash
-curl -s https://visualdon-projet.pages.dev/data/manifest.json | jq .
+**Response Example** (JSON):
+```json
+{
+  "emissions": "GCB2025v15_MtCO2_flat.csv",
+  "perCapita": "GCB_2025v15_percapita_flat-clean.csv",
+  "version": "2025v15",
+  "lastUpdated": "2025-12-27T00:04:57.161Z"
+}
 ```
+
+#### Emissions Data
+**Endpoint**: `/data/{filename_from_manifest}` (e.g., `/data/GCB2025v15_MtCO2_flat.csv`)
+
+**Format**: CSV (Comma Separated Values)
+
+**Columns**:
+- `Country`: Country name (e.g., "Afghanistan").
+- `ISO 3166-1 alpha-3`: 3-letter country code (e.g., "AFG").
+- `Year`: Integer year (e.g., 2020).
+- `Total`: Total CO₂ emissions (MtCO₂).
+- `Coal`, `Oil`, `Gas`, `Cement`, `Flaring`, `Other`: Emissions by source.
+- `Per Capita`: Emissions per person (tCO₂).
+
+**Example Row**:
+```csv
+Country,ISO 3166-1 alpha-3,Year,Total,Coal,Oil,Gas,Cement,Flaring,Other,Per Capita
+Afghanistan,AFG,2020,12.160273,3.328381,6.862372,1.96952,0.032236,0,,0.29743
+```
+
+#### Per Capita Data
+**Endpoint**: `/data/{filename_from_manifest}` (e.g., `/data/GCB_2025v15_percapita_flat-clean.csv`)
+
+**Format**: CSV
+
+**Columns**:
+- `Country`: ISO 3166-1 alpha-3 code (e.g., "AFG").
+- `Year`: Integer year.
+- `Per Capita`: Emissions per person.
+
+**Example Row**:
+```csv
+Country,Year,Per Capita
+AFG,2020,0.29743
+```
+
+### Error Handling
+
+Since these are static files:
+- **404 Not Found**: The file does not exist. Check the `manifest.json` for the correct filename.
+- **200 OK**: The file was found and returned.
+
+### Authentication & CORS
+- **Authentication**: None required. All data is public.
+- **CORS**: The hosting platform (Cloudflare Pages) is configured to allow Cross-Origin Resource Sharing (CORS) for these static assets, allowing them to be consumed by other web applications.
 
 ## Internal Services
 
