@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useLanguage } from '../../context/LanguageContext';
 
@@ -33,6 +33,21 @@ const Timeline = ({ year, setYear, yearRange }) => {
     }, 50); // 50ms debounce is enough to catch drag events but feel responsive
   }, [setYear]);
 
+  // Generate tick marks every 10 years for easier snapping/visual guidance
+  const ticks = useMemo(() => {
+     const min = parseInt(yearRange.min, 10);
+     const max = parseInt(yearRange.max, 10);
+     if (isNaN(min) || isNaN(max)) return [];
+
+     const start = Math.ceil(min / 10) * 10;
+     const end = Math.floor(max / 10) * 10;
+     const list = [];
+     for (let y = start; y <= end; y += 10) {
+         list.push(y);
+     }
+     return list;
+  }, [yearRange]);
+
   return (
       <div className="px-1 group">
         <input
@@ -42,12 +57,18 @@ const Timeline = ({ year, setYear, yearRange }) => {
           value={localYear || yearRange.min}
           disabled={!year}
           onChange={handleYearChange}
+          list="timeline-ticks"
           aria-label={t('aria.selectYear')}
           aria-valuetext={`${t('aria.yearLabel')} ${localYear || yearRange.min}`}
           aria-keyshortcuts="ArrowLeft ArrowRight"
           title={`${t('aria.selectYear')} (←/→)`}
           className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
         />
+        <datalist id="timeline-ticks">
+           {ticks.map(tick => (
+               <option key={tick} value={tick} label={tick} />
+           ))}
+        </datalist>
         <div className="flex justify-between items-center text-xs font-mono text-slate-600 mt-2">
           <span>{yearRange.min}</span>
           <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100 transition-all duration-200 opacity-60 grayscale group-hover:opacity-100 group-hover:grayscale-0 group-hover:scale-110 group-focus-within:opacity-100 group-focus-within:grayscale-0 group-focus-within:scale-110">

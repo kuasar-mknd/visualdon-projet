@@ -110,7 +110,7 @@ const StackedAreaChart = ({
       .attr("transform", `translate(0, ${height - padding.bottom})`)
       .call(xAxis)
       .call(g => g.selectAll("text")
-          .attr("fill", "#64748b")
+          .attr("fill", "#475569")
           .attr("font-size", "11px"))
       .call(g => g.selectAll("line").attr("stroke", "#94a3b8"))
       .call(g => g.select(".domain").attr("stroke", "#94a3b8"));
@@ -120,7 +120,7 @@ const StackedAreaChart = ({
       .attr("transform", `translate(${padding.left}, 0)`)
       .call(yAxis)
       .call(g => g.selectAll("text")
-          .attr("fill", "#64748b")
+          .attr("fill", "#475569")
           .attr("font-size", "11px"))
       .call(g => g.selectAll("line").attr("stroke", "#94a3b8"))
       .call(g => g.select(".domain").attr("stroke", "#94a3b8"));

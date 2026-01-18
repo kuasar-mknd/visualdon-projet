@@ -20,8 +20,8 @@ const Controls = ({ isPlaying, setIsPlaying, category, setCategory, year, setYea
 
       switch (e.code) {
         case 'Space':
-          // Prevent default scroll behavior, but only if not on a button (native behavior)
-          if (e.target.tagName !== 'BUTTON') {
+          // Prevent default scroll behavior, but only if not on a button or link (native behavior)
+          if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'A') {
             e.preventDefault();
             setIsPlaying(prev => !prev);
           }
