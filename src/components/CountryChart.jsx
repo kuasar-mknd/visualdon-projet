@@ -125,7 +125,7 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
           </label>
         )}
 
-        <div className="text-xs text-slate-500 italic ml-auto">
+        <div className="text-xs text-slate-600 italic ml-auto">
           {viewMode === 'bubbles' ? t('chart.hoverBubbles') : t('chart.hoverZones')}
         </div>
       </div>
