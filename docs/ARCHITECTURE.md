@@ -1,85 +1,78 @@
-# Architecture
+# Architecture & Design
 
-## Overview
-This project is a client-side Single Page Application (SPA) built with React 19 and Vite. It visualizes global CO₂ emissions data using D3.js for charts and Three.js (via React components) for 3D globe elements. The application is designed to be performant, accessible, and responsive.
+This document outlines the architectural principles, directory structure, and design patterns used in the VisualDon-Projet application. It serves as a guide for developers to understand the codebase and how to extend it.
 
-## Core Technologies
-- **React 19**: UI library for building component-based user interfaces.
-- **Vite**: Next-generation frontend tooling for fast builds and hot module replacement.
-- **Tailwind CSS v4**: Utility-first CSS framework for styling.
-- **D3.js**: JavaScript library for manipulating documents based on data, used here for complex visualizations.
+## 🏗️ High-Level Architecture
 
-## Directory Structure
+The application is a **Single Page Application (SPA)** built with **React** and **Vite**, served statically via Cloudflare Pages. It follows a modular component-based architecture with a clear separation of concerns, inspired by Clean Architecture principles but adapted for a frontend-heavy context.
 
-### `src/`
-The source code is organized as follows:
+### Layers
 
-- **`components/`**: Reusable React components.
-  - **`charts/`**: D3.js based visualization components (e.g., BubbleChart, StackedAreaChart).
-  - **`controls/`**: UI elements for user interaction (Play, Slider).
-  - **`globe/`**: Components related to the 3D globe visualization.
-  - **`layout/`**: Structural components like Header and Footer.
-  - **`overlay/`**: UI overlays for detailed information.
-- **`context/`**: React Context definitions, primarily for state management that needs to be accessed globally (e.g., LanguageContext).
-- **`hooks/`**: Custom React hooks.
-  - **`useData.js`**: A critical hook for fetching, parsing, and managing the emissions data.
-- **`services/`**: Logic for external or internal services.
-  - **`countryService.js`**: Handles country name translations and mapping.
-- **`utils/`**: Shared utility functions (e.g., security helpers).
-- **`App.jsx`**: The main application component that orchestrates the layout and state.
-- **`main.jsx`**: The entry point that mounts the React application.
+1.  **Presentation Layer (`components/`)**:
+    *   Pure UI components responsible for rendering and user interaction.
+    *   Separated into feature-specific folders (charts, controls, globe, layout, overlay).
+    *   Passive components that receive data via props or context.
 
-### `public/`
-Static assets that are served directly.
-- **`data/`**: Contains the CSV files with CO₂ emissions data. These are fetched by the application at runtime.
+2.  **Application Layer (`hooks/`, `context/`)**:
+    *   **Hooks**: Encapsulate stateful logic and data transformations (e.g., `useData` for fetching CSVs, custom D3 hooks).
+    *   **Context**: Manages global state (e.g., `LanguageContext` for i18n).
+    *   This layer bridges the UI and the data/infrastructure.
 
-### `scripts/`
-Node.js scripts for maintenance tasks.
-- **`update-data.js`**: Fetches the latest data from the Global Carbon Project and updates the CSV files in `public/data/`.
+3.  **Infrastructure Layer (`services/`, `utils/`, `scripts/`)**:
+    *   **Services**: Handle external API calls (e.g., `countryService.js` for fetching translations).
+    *   **Utils**: Pure functions for security validation, formatting, and mathematical operations.
+    *   **Scripts**: Node.js scripts for build-time data processing and fetching.
 
-### `verification/`
-Contains scripts and artifacts for frontend verification and integrity.
-- **`verify-integrity.js`**: A Node.js script used to verify data consistency (manifests, CSVs) and environment setup.
+## 📂 Directory Structure
 
-## Data Flow
-1.  **Initialization**: On load, `App.jsx` initializes.
-2.  **Data Fetching**: The `useData` hook is triggered. It fetches CSV files from `public/data/` using `d3-fetch` (or similar).
-3.  **Parsing**: Data is parsed and transformed into a usable format (likely an array of objects).
-4.  **State**: The parsed data is stored in the React state.
-5.  **Rendering**: Components (Charts, Globe) receive data via props and render the visualizations.
-6.  **Updates**: When the user interacts (e.g., moves the time slider), the state updates, triggering re-renders of the visualizations to show data for the selected year.
+```text
+src/
+├── components/          # Presentation Layer
+│   ├── charts/          # D3.js visualizations (Bubble, StackedArea, TopCountries)
+│   ├── controls/        # Interactive elements (PlayButton, Slider, Timeline)
+│   ├── globe/           # 3D Globe (Three.js/D3 hybrid)
+│   ├── layout/          # App shell (Header, Footer, MainLayout)
+│   └── overlay/         # Data overlays (DetailsPanel, Loading)
+├── context/             # Global State (LanguageContext)
+├── hooks/               # Application Logic (useData, useResizeObserver)
+├── services/            # Data Services (countryService)
+├── utils/               # Utilities (security, formatting)
+├── App.jsx              # Root Component
+└── main.jsx             # Entry Point
+```
 
-## Design Patterns
+## 🧩 Key Design Patterns
 
-### Component Architecture
-The application follows a component-based architecture where each UI element is a self-contained unit.
-- **Container/Presenter**: Some components act as containers (fetching data/state) while others are purely presentational.
+### Data Loading Strategy
+Data is loaded via a **Manifest-based pattern**.
+1.  The app fetches `manifest.json` first.
+2.  It uses the hashes in the manifest to fetch versioned CSV files (`emissions.csv`, `per_capita.csv`).
+3.  This ensures cache busting and data integrity.
 
-### Clean Architecture Mapping
-While this is a frontend-only application, the structure loosely maps to Clean Architecture principles:
-- **Domain Layer**: Implicitly defined by the data structures (emissions data) and types. `src/services/` contains domain-specific logic like country translation.
-- **Application Layer**: `src/hooks/` and `src/context/` manage the application state and business logic (e.g., filtering data by year).
-- **Infrastructure Layer**:
-    - **Data Access**: `d3.csv` and `fetch` APIs.
-    - **External Integration**: `scripts/update-data.js` handles fetching from Zenodo (Global Carbon Project), acting as the infrastructure adapter for external data.
-- **Presentation Layer**: React components (`src/components/`) handle the UI and user interaction.
+### Visualization Architecture
+*   **Hybrid Approach**: Uses React for DOM structure and D3.js/Three.js for the actual rendering canvas/SVG.
+*   **Refs**: `useRef` is used to hand over DOM elements to D3/Three.js, bypassing React's virtual DOM for performance-critical rendering.
+*   **Memoization**: Extensive use of `React.memo`, `useMemo`, and `useCallback` to prevent unnecessary re-renders during high-frequency updates (e.g., animation loop).
 
-### State Management
-- **React Context**: Used for global state that rarely changes (e.g., `LanguageContext` for i18n).
-- **React Hooks**: `useState` and `useReducer` are used for local component state.
-- **Custom Hooks**: `useData` encapsulates the complex logic of data fetching and parsing.
+### Security
+*   **Input Validation**: All external data (CSVs, APIs) is validated against strict schemas (see `utils/security.js`).
+*   **Sanitization**: User inputs and fetched strings are sanitized before rendering.
+*   **Dependency Review**: Automated workflows check for vulnerable dependencies.
 
-### Extending the Application
+## ➕ Extending the Application
 
-### Adding New Visualizations
-To add a new chart type (e.g., `LineChart`):
-1.  **Create Component**: Add `src/components/charts/LineChart.jsx`.
-2.  **Data Logic**: Use the `useData` hook to retrieve emissions data.
-3.  **D3 Integration**: Implement D3 logic within a `useEffect` hook (or `useLayoutEffect` for measurements).
-4.  **Register**: Import and add the component to `App.jsx` or a specific container.
+### Adding a New Chart
+1.  Create a new component in `src/components/charts/`.
+2.  Use `useData` hook to access global emissions data.
+3.  Implement D3 logic within a `useEffect` targeting a `ref`.
+4.  Add the component to `src/components/overlay/DetailsPanel.jsx` or a new layout area.
 
-### Adding New Data Sources
-To integrate a new dataset:
-1.  **Update Script**: Modify `scripts/update-data.js` to fetch and clean the new data.
-2.  **Manifest**: Ensure the new file is added to `manifest.json`.
-3.  **Hook**: Update `src/hooks/useData.js` to fetch the new file key from the manifest.
+### Adding a New Data Source
+1.  Update `scripts/update-data.js` to fetch and normalize the new dataset.
+2.  Add validation logic in `src/utils/security.js`.
+3.  Update `src/hooks/useData.js` to load the new CSV.
+4.  Expose the data via the hook to components.
+
+### Adding a Language
+1.  Update `src/context/LanguageContext.jsx` with the new language dictionary.
+2.  Add a toggle button in `src/components/layout/HeaderContent.jsx`.

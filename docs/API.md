@@ -1,61 +1,75 @@
-# API & Data Documentation
+# API Documentation
 
-## Overview
-This application is a **frontend-only** visualization tool. It does not communicate with a traditional backend API for its core functionality during runtime. Instead, it relies on static data files served from the `public/data` directory, managed via a manifest file.
+The VisualDon-Projet is a static Single Page Application (SPA). It does not have a traditional REST backend. Instead, it serves data via static files (CSV/JSON) that serve as a read-only API.
 
-This document describes the structure of these data files, which serve as the "API" for the application.
+## 📡 Data Endpoints
 
-## Data Architecture
+Base URL: `https://visualdon-projet.pages.dev/data/` (or `/data/` locally)
 
-### Data Loading Strategy
-To support versioned data without requiring code changes, the application uses a **Manifest-based loading strategy**:
+### 1. Data Manifest
+Returns the metadata and integrity hashes for the current dataset version.
 
-1.  **Manifest**: The app first fetches `public/data/manifest.json`.
-2.  **Dynamic Resolution**: This JSON file contains the specific filenames for the current dataset version.
-3.  **Data Fetching**: The app then fetches the CSV files specified in the manifest.
+*   **URL**: `/data/manifest.json`
+*   **Method**: `GET`
+*   **Response**:
+    ```json
+    {
+      "version": "2024.11.20",
+      "lastUpdated": "2024-11-20T10:00:00Z",
+      "files": {
+        "emissions": "emissions.csv",
+        "perCapita": "per_capita.csv"
+      },
+      "hashes": {
+        "emissionsHash": "sha256-...",
+        "perCapitaHash": "sha256-..."
+      }
+    }
+    ```
 
-### Data Files (`public/data/`)
+### 2. Emissions Data
+The core dataset containing absolute CO₂ emissions by country and year.
 
-- **`manifest.json`**:
-  ```json
-  {
-    "emissions": "GCB2025v15_MtCO2_flat.csv",
-    "perCapita": "GCB_2025v15_percapita_flat-clean.csv",
-    "version": "2025v15",
-    "lastUpdated": "2025-12-27T00:04:57.161Z"
-  }
-  ```
-- **Emissions Data** (e.g., `GCB2025v15_MtCO2_flat.csv`):
-  - **Source**: Directly from Global Carbon Budget (Zenodo).
-  - **Columns**: `Country`, `ISO 3166-1 alpha-3`, `Year`, `Total`, `Coal`, `Oil`, `Gas`, `Cement`, `Flaring`, `Other`, `Per Capita`.
-- **Per Capita Data** (e.g., `GCB_2025v15_percapita_flat-clean.csv`):
-  - **Source**: Calculated during the update process.
-  - **Columns**: `Country`, `Year`, `Per Capita`.
+*   **URL**: `/data/emissions.csv`
+*   **Method**: `GET`
+*   **Format**: CSV
+*   **Columns**:
+    *   `Entity`: Country Name (String)
+    *   `Code`: ISO 3166-1 alpha-3 code (String)
+    *   `Year`: Year (Integer, 1750-Present)
+    *   `Total`: Total CO₂ Emissions (Float)
+    *   `Coal`, `Oil`, `Gas`, `Cement`, `Flaring`, `Other`: Breakdown by source (Float)
 
-### API Access Example
-You can inspect the current data manifest using curl:
+### 3. Per Capita Data
+Population-adjusted emissions data.
 
-```bash
-curl -s https://visualdon-projet.pages.dev/data/manifest.json | jq .
-```
+*   **URL**: `/data/per_capita.csv`
+*   **Method**: `GET`
+*   **Format**: CSV
+*   **Columns**:
+    *   `Entity`: Country Name (String)
+    *   `Code`: ISO 3166-1 alpha-3 code (String)
+    *   `Year`: Year (Integer)
+    *   `Per Capita`: CO₂ emissions per person in tonnes (Float)
 
-## Internal Services
+## 🌍 External APIs
 
-### Country Service (`src/services/countryService.js`)
-A utility service module running in the browser to handle country data normalization and translation.
-- **Functionality**:
-  - Maps ISO codes to Country names.
-  - Provides translations for country names (English/French).
-- **Usage**: Imported directly by React components.
+The application consumes the following external APIs on the client side:
 
-## External Scripts
+### REST Countries
+Used for fetching French translations of country names.
 
-### Data Update Script (`scripts/update-data.js`)
-This Node.js script is used at **build/maintenance time** to fetch the latest data.
-- **Source**: Fetches from the Global Carbon Budget Zenodo repository using a stable Concept ID.
-- **Execution**: `pnpm run update-data`
-- **Output**:
-  - Downloads the latest CSV files.
-  - Calculates per-capita data if needed.
-  - Generates `manifest.json`.
-  - Updates files in `public/data/`.
+*   **URL**: `https://restcountries.com/v3.1/alpha?codes={codes}`
+*   **Method**: `GET`
+*   **Usage**: The app batches requests (e.g., 20 codes at a time) to avoid rate limits.
+*   **Response**: Array of country objects containing `translations`.
+
+## ⚠️ Error Handling
+
+Since the "API" consists of static files:
+*   **404 Not Found**: Indicates a missing data file or incorrect manifest configuration.
+*   **Integrity Error**: The app calculates the SHA-256 hash of downloaded CSVs and compares them against `manifest.json`. If they mismatch, the app will refuse to load data to prevent tampering.
+
+## 🔐 Authentication
+
+No authentication is required for read access to public data.

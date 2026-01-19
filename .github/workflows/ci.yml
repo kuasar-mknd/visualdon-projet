@@ -5,49 +5,49 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-  workflow_dispatch:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
 
-      - name: Use Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
+    - name: Install pnpm
+      uses: pnpm/action-setup@v3
+      with:
+        version: 9
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+    - name: Get pnpm store directory
+      shell: bash
+      run: |
+        echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
-      - name: Lint
-        if: ${{ hashFiles('package.json') != '' }}
-        run: |
-            if npm run | grep -q "lint"; then
-              pnpm run lint
-            fi
+    - name: Setup pnpm cache
+      uses: actions/cache@v4
+      with:
+        path: ${{ env.STORE_PATH }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
 
-      - name: Build
-        if: ${{ hashFiles('package.json') != '' }}
-        run: |
-            if npm run | grep -q "build"; then
-              pnpm run build
-            fi
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
 
-      - name: Test
-        if: ${{ hashFiles('package.json') != '' }}
-        run: |
-            if npm run | grep -q "test"; then
-              pnpm run test
-            fi
+    - name: Lint
+      if: success()
+      run: pnpm run lint --if-present
+
+    - name: Build
+      if: success()
+      run: pnpm run build --if-present
+
+    - name: Test
+      if: success()
+      run: pnpm run test --if-present

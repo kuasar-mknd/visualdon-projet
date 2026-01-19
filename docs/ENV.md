@@ -1,34 +1,32 @@
 # Environment Variables
 
-## Overview
-This application is a client-side React application built with Vite. It minimizes reliance on runtime environment variables.
+This document lists all environment variables used by the application.
 
-## Current Usage
+## 🔐 Configuration
 
-### Build-Time Variables
-These variables are used during the build process or injected into the application via Vite.
+The application is a client-side SPA, so most configuration is build-time or static.
 
-- **`VITE_CLOUDFLARE_TOKEN`**: (Optional) The token for Cloudflare Web Analytics. If provided, it is injected into the HTML `head`.
+### Variables
 
-### Standard Variables
-- **`NODE_ENV`**: Managed by Vite (`development` vs `production`).
+| Variable | Description | Required | Scope |
+|---|---|---|---|
+| `VITE_CLOUDFLARE_TOKEN` | Token for Cloudflare Web Analytics. Injected into `index.html`. | No | Build (Client) |
 
-## Conventions
-If you need to add environment variables in the future:
-1.  Prefix them with `VITE_` to expose them to the client-side code.
-2.  Access them via `import.meta.env.VITE_MY_VAR`.
-3.  Add them to this file.
+> **Note**: Variables prefixed with `VITE_` are exposed to the browser. Do not store secrets in them.
 
-## Example `.env`
-For a quick start, you can copy the provided example file:
+## 🛠️ Setup
 
-```bash
-cp .env.example .env
-```
+1.  Copy `.env.example` to `.env`.
+2.  Fill in the values (if needed).
 
-The `.env.example` file contains placeholders:
+### .env.example
 
-```bash
-# Cloudflare Web Analytics Token
+```ini
+# Cloudflare Web Analytics Token (Optional)
 VITE_CLOUDFLARE_TOKEN=
 ```
+
+## 🔍 Validation
+
+The application validates critical configuration on startup or build.
+*   **Analytics**: If `VITE_CLOUDFLARE_TOKEN` is missing, analytics script injection is skipped gracefully.

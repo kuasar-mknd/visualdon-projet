@@ -12,22 +12,22 @@ An interactive 3D globe visualization exploring global CO₂ emissions from 1750
 
 ## ✨ Features
 
-- **🌐 Interactive 3D Globe**: Explore emissions data on a fully interactive, rotatable globe with zoom controls
-- **📊 Dynamic Visualizations**: Real-time charts showing top emitters and country-specific breakdowns by sector
-- **⏱️ Time Travel**: Animate through 270+ years of emissions history with play/pause controls
-- **🌍 Bilingual Support**: Switch seamlessly between English and French interfaces
-- **📈 Cloudflare Analytics**: Integrated privacy-first web analytics
-- **🔍 SEO Optimized**: Metadata, Sitemap, and Robots.txt for better discoverability
-- **📱 Responsive Design**: Optimized for desktop, tablet, and mobile devices
-- **♿ Accessible**: Built with accessibility best practices and semantic HTML
-- **🔄 Auto-updating Data**: Automated monthly data updates from the Global Carbon Budget
+- **🌐 Interactive 3D Globe**: Explore emissions data on a fully interactive, rotatable globe with zoom controls.
+- **📊 Dynamic Visualizations**: Real-time charts showing top emitters and country-specific breakdowns by sector.
+- **⏱️ Time Travel**: Animate through 270+ years of emissions history with play/pause controls.
+- **🌍 Bilingual Support**: Switch seamlessly between English and French interfaces.
+- **📈 Cloudflare Analytics**: Integrated privacy-first web analytics.
+- **🔍 SEO Optimized**: Metadata, Sitemap, and Robots.txt for better discoverability.
+- **📱 Responsive Design**: Optimized for desktop, tablet, and mobile devices.
+- **♿ Accessible**: Built with accessibility best practices and semantic HTML.
+- **🔄 Auto-updating Data**: Automated monthly data updates from the Global Carbon Budget.
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js 20.x or higher
-- pnpm (or npm/yarn)
+- **Node.js 20.x** or higher (Checked via `engines` in `package.json`)
+- **pnpm** 9+ (Recommended over npm/yarn)
 
 ### Installation
 
@@ -43,7 +43,7 @@ pnpm install
 pnpm run dev
 ```
 
-The application will be available at `http://localhost:5173`
+The application will be available at `http://localhost:5173`.
 
 ### Building for Production
 
@@ -58,9 +58,9 @@ This project uses authoritative emissions data from the [Global Carbon Budget](h
 
 ### Data Sources
 
-- **Territorial Emissions**: Country-level CO₂ emissions by source (coal, oil, gas, cement, flaring)
-- **Per Capita Emissions**: Population-adjusted emissions data
-- **Coverage**: 1750–2024 (updated annually)
+- **Territorial Emissions**: Country-level CO₂ emissions by source (coal, oil, gas, cement, flaring).
+- **Per Capita Emissions**: Population-adjusted emissions data.
+- **Coverage**: 1750–2024 (updated annually).
 
 ### API Access
 
