@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import * as d3 from 'd3';
 import { useLanguage } from '../context/LanguageContext';
-import { fetchCountryDetails } from '../services/countryService';
+import { fetchCountriesBatch } from '../services/countryService';
 
 const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, displayCategory }) => {
   const svgRef = useRef(null);
@@ -52,29 +52,15 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
 
     if (neededCodes.length === 0) return;
 
-    const fetchTranslations = async () => {
-      const newTranslations = {};
-      let hasNewData = false;
-
-      await Promise.all(
-        neededCodes.map(async (code) => {
-          const name = await fetchCountryDetails(code, language);
-          if (name) {
-            newTranslations[code] = name;
-            hasNewData = true;
-          }
-        })
-      );
-
-      if (hasNewData) {
-        setTranslatedNames(prev => ({
-          ...prev,
-          ...newTranslations
-        }));
-      }
-    };
-
-    fetchTranslations();
+    // Optimization: Use batch fetch to reduce N+1 network requests
+    fetchCountriesBatch(neededCodes, language).then(newTranslations => {
+        if (Object.keys(newTranslations).length > 0) {
+            setTranslatedNames(prev => ({
+                ...prev,
+                ...newTranslations
+            }));
+        }
+    });
   }, [topData, language, translatedNames]);
 
   useEffect(() => {

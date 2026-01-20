@@ -25,4 +25,4 @@ const LoadingPlaceholder = () => {
   );
 };
 
-export default LoadingPlaceholder;
+export default React.memo(LoadingPlaceholder);

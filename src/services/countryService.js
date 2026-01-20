@@ -159,6 +159,83 @@ export const fetchCountryDetails = async (code, language) => {
   }
 };
 
+export const fetchCountriesBatch = async (codes, language) => {
+  if (!codes || !Array.isArray(codes) || codes.length === 0) return {};
+
+  // Deduplicate and validate codes
+  const uniqueCodes = [...new Set(codes.filter(isValidCountryCode))];
+  if (uniqueCodes.length === 0) return {};
+
+  if (language && !isValidLanguage(language)) {
+      language = null;
+  }
+
+  const cache = getCache();
+  const now = Date.now();
+  const results = {};
+  const missingCodes = [];
+
+  // Check cache first
+  uniqueCodes.forEach(code => {
+    if (cache[code] && (now - cache[code].timestamp < CACHE_EXPIRY)) {
+      results[code] = getNameFromData(cache[code].data, language);
+    } else {
+      missingCodes.push(code);
+    }
+  });
+
+  if (missingCodes.length === 0) {
+    return results;
+  }
+
+  // Fetch missing codes in a single batch
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout for batch
+
+  try {
+    const codesParam = missingCodes.map(c => encodeURIComponent(c)).join(',');
+    const response = await fetch(`https://restcountries.com/v3.1/alpha?codes=${codesParam}`, {
+        signal: controller.signal
+    });
+
+    if (!response.ok) throw new Error('Batch network response was not ok');
+
+    const data = await response.json();
+
+    if (!Array.isArray(data)) {
+        throw new Error('Invalid batch API response format');
+    }
+
+    data.forEach(countryData => {
+        // Map back to our requested code (cca3)
+        const code = countryData.cca3;
+
+        if (code) {
+             // Update cache
+             cache[code] = {
+                data: countryData,
+                timestamp: now
+             };
+             // Add to results if it was one of our requested codes (or if we want to store it anyway)
+             // We only care about returning what was asked for.
+             if (missingCodes.includes(code)) {
+                 results[code] = getNameFromData(countryData, language);
+             }
+        }
+    });
+
+    setCache(cache);
+
+  } catch (error) {
+    console.warn(`Failed to fetch batch data:`, error.message);
+    // Return partial results from cache (if any)
+  } finally {
+    clearTimeout(timeoutId);
+  }
+
+  return results;
+};
+
 const getNameFromData = (data, language) => {
   if (!data) return null;
   if (language === 'fr' && data.translations && data.translations.fra) {
