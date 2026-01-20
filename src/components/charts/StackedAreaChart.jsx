@@ -37,7 +37,12 @@ const StackedAreaChart = ({
     const svg = select(containerRef.current)
       .append("svg")
       .attr("width", width)
-      .attr("height", height);
+      .attr("height", height)
+      .attr("role", "graphics-document")
+      .attr("aria-label", t('chart.stackedChart'));
+
+    svg.append("title").text(t('chart.stackedChart'));
+    svg.append("desc").text(t('chart.hoverZones'));
 
     // Prepare stacked data
     const stackData = years.map(year => {
@@ -110,7 +115,7 @@ const StackedAreaChart = ({
       .attr("transform", `translate(0, ${height - padding.bottom})`)
       .call(xAxis)
       .call(g => g.selectAll("text")
-          .attr("fill", "#64748b")
+          .attr("fill", "#475569")
           .attr("font-size", "11px"))
       .call(g => g.selectAll("line").attr("stroke", "#94a3b8"))
       .call(g => g.select(".domain").attr("stroke", "#94a3b8"));
@@ -120,7 +125,7 @@ const StackedAreaChart = ({
       .attr("transform", `translate(${padding.left}, 0)`)
       .call(yAxis)
       .call(g => g.selectAll("text")
-          .attr("fill", "#64748b")
+          .attr("fill", "#475569")
           .attr("font-size", "11px"))
       .call(g => g.selectAll("line").attr("stroke", "#94a3b8"))
       .call(g => g.select(".domain").attr("stroke", "#94a3b8"));
@@ -152,7 +157,8 @@ const StackedAreaChart = ({
       .attr("text-anchor", "middle")
       .style("font-size", "18px")
       .style("font-weight", "600")
-      .style("fill", "#334155");
+      .style("fill", "#334155")
+      .text(t('chart.stackedChart'));
 
     // Legend
     const legend = svg.append("g")

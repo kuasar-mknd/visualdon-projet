@@ -142,7 +142,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
          .attr("x", innerWidth / 2)
          .attr("y", innerHeight / 2)
          .attr("text-anchor", "middle")
-         .attr("fill", "#64748b")
+         .attr("fill", "#475569")
          .text(t('noData'));
         return;
     }

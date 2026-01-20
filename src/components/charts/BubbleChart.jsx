@@ -37,7 +37,12 @@ const BubbleChart = ({
     const svg = select(containerRef.current)
       .append("svg")
       .attr("width", width)
-      .attr("height", height);
+      .attr("height", height)
+      .attr("role", "graphics-document")
+      .attr("aria-label", t('chart.bubbles'));
+
+    svg.append("title").text(t('chart.bubbles'));
+    svg.append("desc").text(t('chart.hoverBubbles'));
 
     // Scales
     const xScale = scaleLinear()
@@ -65,7 +70,7 @@ const BubbleChart = ({
         .attr("transform", `translate(0, ${height - padding.bottom})`)
         .call(xAxis)
         .call(g => g.selectAll("text")
-            .attr("fill", "#64748b")
+            .attr("fill", "#475569")
             .attr("font-size", "11px"))
         .call(g => g.selectAll("line").attr("stroke", "#94a3b8"))
         .call(g => g.select(".domain").attr("stroke", "#94a3b8"));
@@ -77,7 +82,7 @@ const BubbleChart = ({
         .style("display", split ? "none" : "block") 
         .call(yAxis)
         .call(g => g.selectAll("text")
-            .attr("fill", "#64748b")
+            .attr("fill", "#475569")
             .attr("font-size", "11px"))
         .call(g => g.selectAll("line").attr("stroke", "#94a3b8"))
         .call(g => g.select(".domain").attr("stroke", "#94a3b8"));
@@ -110,7 +115,8 @@ const BubbleChart = ({
        .attr("text-anchor", "middle")
        .style("font-size", "18px")
        .style("font-weight", "600")
-       .style("fill", "#334155");
+       .style("fill", "#334155")
+       .text(t('chart.bubbles'));
 
     // Add clip path
     svg.append("defs")
