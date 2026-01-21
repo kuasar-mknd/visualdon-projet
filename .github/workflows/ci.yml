@@ -14,6 +14,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -31,23 +32,25 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Lint
-        if: ${{ hashFiles('package.json') != '' }}
+      - name: Check scripts
+        id: check-scripts
         run: |
-            if npm run | grep -q "lint"; then
-              pnpm run lint
-            fi
+          node -e '
+            const pkg = require("./package.json");
+            const scripts = pkg.scripts || {};
+            if (scripts.lint) console.log("has_lint=true");
+            if (scripts.build) console.log("has_build=true");
+            if (scripts.test) console.log("has_test=true");
+          ' >> $GITHUB_OUTPUT
+
+      - name: Lint
+        if: steps.check-scripts.outputs.has_lint == 'true'
+        run: pnpm run lint
 
       - name: Build
-        if: ${{ hashFiles('package.json') != '' }}
-        run: |
-            if npm run | grep -q "build"; then
-              pnpm run build
-            fi
+        if: steps.check-scripts.outputs.has_build == 'true'
+        run: pnpm run build
 
       - name: Test
-        if: ${{ hashFiles('package.json') != '' }}
-        run: |
-            if npm run | grep -q "test"; then
-              pnpm run test
-            fi
+        if: steps.check-scripts.outputs.has_test == 'true'
+        run: pnpm run test

@@ -6,13 +6,13 @@
 [![React](https://img.shields.io/badge/React-19.2.3-61DAFB?logo=react)](https://react.dev)
 [![Vite](https://img.shields.io/badge/Vite-7.3.0-646CFF?logo=vite)](https://vitejs.dev)
 
-An interactive 3D globe visualization exploring global CO₂ emissions from 1750 to 2024. Built with React, D3.js, and Three.js, this project transforms complex climate data into an engaging, accessible experience.
+An interactive 3D globe visualization exploring global CO₂ emissions from 1750 to 2024. Built with React and D3.js, this project transforms complex climate data into an engaging, accessible experience.
 
 ![Preview](wireframes/preview.png)
 
 ## ✨ Features
 
-- **🌐 Interactive 3D Globe**: Explore emissions data on a fully interactive, rotatable globe with zoom controls
+- **🌐 Interactive 3D Globe**: Explore emissions data on a fully interactive, rotatable globe (D3 Orthographic) with zoom controls
 - **📊 Dynamic Visualizations**: Real-time charts showing top emitters and country-specific breakdowns by sector
 - **⏱️ Time Travel**: Animate through 270+ years of emissions history with play/pause controls
 - **🌍 Bilingual Support**: Switch seamlessly between English and French interfaces
@@ -84,7 +84,7 @@ Data updates are also automated via GitHub Actions, running monthly. See [DATA_U
 ## 🛠️ Technology Stack
 
 - **Frontend**: React 19.2 with hooks
-- **Visualization**: D3.js for charts, Three.js for 3D globe
+- **Visualization**: D3.js (Charts & Globe)
 - **Styling**: Tailwind CSS 4
 - **Build Tool**: Vite 7
 - **Deployment**: Cloudflare Pages

@@ -8,7 +8,7 @@ This application is a client-side React application built with Vite. It minimize
 ### Build-Time Variables
 These variables are used during the build process or injected into the application via Vite.
 
-- **`VITE_CLOUDFLARE_TOKEN`**: (Optional) The token for Cloudflare Web Analytics. If provided, it is injected into the HTML `head`.
+- **`VITE_CLOUDFLARE_TOKEN`**: (Optional) The token for Cloudflare Web Analytics. If provided, it is injected into `index.html` via Vite's HTML env replacement.
 
 ### Standard Variables
 - **`NODE_ENV`**: Managed by Vite (`development` vs `production`).
