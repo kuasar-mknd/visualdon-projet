@@ -11,7 +11,7 @@ const YearDisplay = ({ year }) => {
             aria-live="polite"
             aria-atomic="true"
         >
-            <div className="text-3xl font-mono font-bold text-blue-600 leading-none">{year || '...'}</div>
+            <div className="text-3xl font-mono font-bold text-blue-600 leading-none tabular-nums">{year || '...'}</div>
             <div className="text-xs text-slate-600 uppercase tracking-widest font-semibold leading-none">{t('year')}</div>
         </div>
     );

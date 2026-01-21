@@ -25,6 +25,11 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
   const [split, setSplit] = useState(false);
   const [viewMode, setViewMode] = useState('bubbles'); // 'bubbles' or 'lines'
 
+  // Stable handlers to prevent re-renders of child components using memo
+  const handleSetViewModeBubbles = React.useCallback(() => setViewMode('bubbles'), []);
+  const handleSetViewModeLines = React.useCallback(() => setViewMode('lines'), []);
+  const handleSetSplit = React.useCallback((e) => setSplit(e.target.checked), []);
+
   // Optimization: Replaced manual ResizeObserver logic with a reusable hook
   // This reduces code duplication and ensures consistent behavior.
   const [containerRef, dimensions] = useResizeObserver({
@@ -90,7 +95,7 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
       <div className="flex items-center gap-3 mb-4 flex-wrap">
         <div role="group" aria-label={t('chart.selectViewMode')} className="flex gap-2">
           <button
-            onClick={() => setViewMode('bubbles')}
+            onClick={handleSetViewModeBubbles}
             aria-pressed={viewMode === 'bubbles'}
             className={`px-4 py-2 rounded-lg font-semibold transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none cursor-pointer ${
               viewMode === 'bubbles'
@@ -101,7 +106,7 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
             <span aria-hidden="true" className="mr-2">🫧</span>{t('chart.bubbles')}
           </button>
           <button
-            onClick={() => setViewMode('lines')}
+            onClick={handleSetViewModeLines}
             aria-pressed={viewMode === 'lines'}
             className={`px-4 py-2 rounded-lg font-semibold transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none cursor-pointer ${
               viewMode === 'lines'
@@ -118,7 +123,7 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
             <input 
               type="checkbox" 
               checked={split} 
-              onChange={(e) => setSplit(e.target.checked)}
+              onChange={handleSetSplit}
               className="w-4 h-4 accent-blue-600 cursor-pointer outline-none"
             />
             <span className="text-slate-700 font-medium">{t('chart.splitBySector')}</span>

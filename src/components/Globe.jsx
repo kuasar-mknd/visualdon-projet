@@ -204,22 +204,36 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
 
   }, [dimensions, featureMap]); // Re-bind if dimensions or featureMap changes
 
-  // Effect: Update 'fill' attribute (Data/Animation) directly via D3
+  // Effect: Bind data to selection (Geometry)
+  // This runs only when the geometry (geoJson) changes, preventing expensive data re-binding on every animation frame.
   useEffect(() => {
-      // Use cached selection if available
+    if (!svgRef.current || !geoJson) return;
+
+    // Ensure selection is up to date and bind data
+    const selection = countrySelectionRef.current || select(svgRef.current).selectAll("path.country-path");
+
+    if (!selection.empty()) {
+       selection.data(geoJson.features);
+    }
+  }, [geoJson]);
+
+  // Effect: Update 'fill' attribute (Paint)
+  // This runs on every animation frame (data change) but uses the already-bound data.
+  useEffect(() => {
       const selection = countrySelectionRef.current || select(svgRef.current).selectAll("path.country-path");
 
-      if (!geoJson || !data || selection.empty()) return;
+      if (!data || selection.empty()) return;
 
       selection
-        .data(geoJson.features)
         .attr("fill", d => {
+            // d is available because it was bound in the previous effect or initially
+            if (!d) return '#475569';
             const countryId = d.properties.A3 || d.id;
             const countryData = data.get(countryId);
             const value = countryData ? (countryData[category] || 0) : 0;
             return (value > 0) ? colorScale(value) : '#475569';
         });
-  }, [geoJson, data, category, colorScale]);
+  }, [data, category, colorScale]);
 
   // Effect: Update Highlight Path Position on Interaction
   useEffect(() => {

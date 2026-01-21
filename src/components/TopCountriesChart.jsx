@@ -285,6 +285,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
         .transition(tTransition)
         .attr("x", d => x(d[category] || 0) + 8)
         .style("opacity", 1)
+        .style("font-variant-numeric", "tabular-nums") // Prevent jitter
         .tween("text", function(d) {
             const i = d3.interpolateNumber(parseFloat(this.textContent) || 0, d[category] || 0);
             return function(t) {
