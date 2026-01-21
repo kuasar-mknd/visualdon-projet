@@ -59,7 +59,11 @@ export const translations = {
       stackedChart: "Stacked Chart",
       splitBySector: "Split by Sector",
       hoverBubbles: "Hover over bubbles or legend",
-      hoverZones: "Hover over zones or legend"
+      hoverZones: "Hover over zones or legend",
+      bubbleTitle: "Emissions per Sector",
+      bubbleDesc: "Bubble chart showing CO2 emissions by sector over time. Each bubble represents a sector in a specific year.",
+      stackedTitle: "Emissions Evolution",
+      stackedDesc: "Stacked area chart showing the evolution of CO2 emissions by sector over time."
     }
   },
   fr: {
@@ -116,7 +120,11 @@ export const translations = {
       stackedChart: "Graphique empilé",
       splitBySector: "Séparer par secteur",
       hoverBubbles: "Survolez les bulles ou la légende",
-      hoverZones: "Survolez les zones ou la légende"
+      hoverZones: "Survolez les zones ou la légende",
+      bubbleTitle: "Émissions par Secteur",
+      bubbleDesc: "Graphique à bulles montrant les émissions de CO2 par secteur au fil du temps.",
+      stackedTitle: "Évolution des Émissions",
+      stackedDesc: "Graphique en aires empilées montrant l'évolution des émissions de CO2 par secteur au fil du temps."
     }
   }
 };

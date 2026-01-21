@@ -75,7 +75,14 @@ const StackedAreaChart = ({
 
     // Shared handlers
     const handleInteractionStart = function(event, d) {
-        select(this).attr('opacity', 1);
+        const el = select(this);
+        el.raise(); // Bring to front
+
+        el.transition()
+          .duration(200)
+          .attr('opacity', 1)
+          .attr('stroke', '#ffffff')
+          .attr('stroke-width', 2);
 
         // Highlight in legend
         svg.selectAll('.legend-row')
@@ -83,7 +90,12 @@ const StackedAreaChart = ({
     };
 
     const handleInteractionEnd = function() {
-        select(this).attr('opacity', 0.8);
+        select(this)
+          .transition()
+          .duration(200)
+          .attr('opacity', 0.8)
+          .attr('stroke', 'none');
+
         svg.selectAll('.legend-row').attr('opacity', 1);
     };
 
@@ -146,13 +158,21 @@ const StackedAreaChart = ({
       .text("Année");
 
     // Title
+    const chartTitle = t('chart.stackedTitle') || 'Emissions Evolution';
+    const chartDesc = t('chart.stackedDesc') || 'Stacked area chart showing the evolution of CO2 emissions by sector over time.';
+
+    svg.append("title").text(chartTitle);
+    svg.append("desc").text(chartDesc);
+
     svg.append("text")
       .attr("x", width / 2)
       .attr("y", 25)
       .attr("text-anchor", "middle")
       .style("font-size", "18px")
       .style("font-weight", "600")
-      .style("fill", "#334155");
+      .style("fill", "#334155")
+      .attr("aria-hidden", "true")
+      .text(chartTitle);
 
     // Legend
     const legend = svg.append("g")

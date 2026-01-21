@@ -104,13 +104,21 @@ const BubbleChart = ({
         .text("Année");
 
     // Title
+    const chartTitle = t('chart.bubbleTitle') || 'Emissions per Sector';
+    const chartDesc = t('chart.bubbleDesc') || 'Bubble chart showing CO2 emissions by sector over time. Each bubble represents a sector in a specific year.';
+
+    svg.append("title").text(chartTitle);
+    svg.append("desc").text(chartDesc);
+
     svg.append("text")
        .attr("x", width / 2)
        .attr("y", 25)
        .attr("text-anchor", "middle")
        .style("font-size", "18px")
        .style("font-weight", "600")
-       .style("fill", "#334155");
+       .style("fill", "#334155")
+       .attr("aria-hidden", "true")
+       .text(chartTitle);
 
     // Add clip path
     svg.append("defs")
@@ -135,6 +143,9 @@ const BubbleChart = ({
 
     // Shared handlers for mouse and keyboard interactions
     const handleInteractionStart = function(event, d) {
+        // Raise the element to ensure the border is visible on top of overlapping elements
+        select(this).raise();
+
         select(this)
             .transition()
             .duration(200)
