@@ -142,7 +142,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
          .attr("x", innerWidth / 2)
          .attr("y", innerHeight / 2)
          .attr("text-anchor", "middle")
-         .attr("fill", "#64748b")
+         .attr("fill", "#475569")
          .text(t('noData'));
         return;
     }
@@ -226,6 +226,14 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
             if (onCountrySelect) onCountrySelect(d["ISO 3166-1 alpha-3"]);
           }
         });
+
+    // Add title for native tooltip
+    enter.append("title")
+         .text(d => {
+            const name = translatedNames[d["ISO 3166-1 alpha-3"]] || d.Country;
+            const val = (d[category] || 0).toFixed(1);
+            return `${name}: ${val}`;
+         });
 
     // UX: Add a transparent hit area to make the entire row clickable, not just the bar/text
     enter.append("rect")

@@ -27,7 +27,7 @@ const HeaderContent = () => {
                   className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 outline-none cursor-pointer ${
                     language === 'en'
                       ? 'bg-white text-blue-600 shadow-sm ring-1 ring-black/5'
-                      : 'text-slate-500 hover:text-slate-700'
+                      : 'text-slate-600 hover:text-slate-800'
                   }`}
               >
                   EN
@@ -40,7 +40,7 @@ const HeaderContent = () => {
                   className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 outline-none cursor-pointer ${
                     language === 'fr'
                       ? 'bg-white text-blue-600 shadow-sm ring-1 ring-black/5'
-                      : 'text-slate-500 hover:text-slate-700'
+                      : 'text-slate-600 hover:text-slate-800'
                   }`}
               >
                   FR

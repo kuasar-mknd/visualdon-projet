@@ -17,6 +17,7 @@ const GlobePaths = ({ geoJson, onCountrySelect, onHover, onLeave }) => {
                 role="button"
                 tabIndex="0"
                 aria-label={feature.properties.NAME || countryId}
+                title={feature.properties.NAME || countryId}
                 data-id={countryId}
                 data-name={feature.properties.NAME}
                 onClick={(e) => {
