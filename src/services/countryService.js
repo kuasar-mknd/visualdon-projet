@@ -1,4 +1,4 @@
-import { isValidCountryCode, isValidLanguage } from '../utils/security.js';
+import { isValidCountryCode, isValidLanguage, validateCacheStructure } from '../utils/security.js';
 
 const CACHE_KEY = 'visualdon_country_cache';
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
@@ -25,8 +25,8 @@ const getCache = () => {
     const parsed = JSON.parse(cache);
     // Security Enhancement: Validate that parsed cache is actually an object
     // to prevent crashes if localStorage contains "null" or other non-object JSON values
-    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-      console.warn("Invalid cache structure detected, resetting cache");
+    if (!validateCacheStructure(parsed)) {
+      console.warn("Security: Invalid cache structure detected, resetting cache");
       memoryCache = {};
       return memoryCache;
     }

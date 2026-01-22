@@ -84,3 +84,24 @@ export const validateGeoJson = (geoJson) => {
 
   return true;
 };
+
+/**
+ * Validates the structure of the country cache object.
+ * @param {object} cache - The cache object to validate.
+ * @returns {boolean} - True if valid, false otherwise.
+ */
+export const validateCacheStructure = (cache) => {
+  if (!cache || typeof cache !== 'object' || Array.isArray(cache)) return false;
+
+  // It's okay to have an empty cache
+  if (Object.keys(cache).length === 0) return true;
+
+  // Validate values are objects with required fields
+  return Object.values(cache).every(entry =>
+    entry &&
+    typeof entry === 'object' &&
+    typeof entry.timestamp === 'number' &&
+    entry.data &&
+    typeof entry.data === 'object'
+  );
+};
