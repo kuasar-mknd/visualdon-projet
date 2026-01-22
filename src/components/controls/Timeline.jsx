@@ -40,6 +40,8 @@ const Timeline = ({ year, setYear, yearRange }) => {
           min={yearRange.min}
           max={yearRange.max}
           value={localYear || yearRange.min}
+          step="1"
+          autoComplete="off"
           disabled={!year}
           onChange={handleYearChange}
           aria-label={t('aria.selectYear')}

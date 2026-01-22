@@ -30,7 +30,7 @@ const HeaderContent = () => {
                       : 'text-slate-500 hover:text-slate-700'
                   }`}
               >
-                  EN
+                  <span lang="en">EN</span>
               </button>
               <button
                   onClick={() => language !== 'fr' && toggleLanguage()}
@@ -43,7 +43,7 @@ const HeaderContent = () => {
                       : 'text-slate-500 hover:text-slate-700'
                   }`}
               >
-                  FR
+                  <span lang="fr">FR</span>
               </button>
           </div>
       </div>

@@ -261,6 +261,7 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
          aria-label={t('aria.globeDescription')}
        >
           <title>{t('aria.globeDescription')}</title>
+          <desc>Interactive 3D globe: Drag to rotate, scroll to zoom, click countries for details.</desc>
           <defs>
             <radialGradient id="oceanGradient" cx="50%" cy="50%" r="50%">
                 <stop offset="0%" stopColor="#dbeafe" stopOpacity="1" />

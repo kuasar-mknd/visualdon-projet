@@ -139,6 +139,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
         g.selectAll("*").remove();
         g.append("text")
          .attr("class", "no-data-message")
+         .attr("role", "status")
          .attr("x", innerWidth / 2)
          .attr("y", innerHeight / 2)
          .attr("text-anchor", "middle")
