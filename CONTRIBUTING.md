@@ -76,19 +76,19 @@ cd visualdon-projet
 git remote add upstream https://github.com/kuasar-mknd/visualdon-projet.git
 
 # Install dependencies
-npm install
+pnpm install
 
 # Start development server
-npm run dev
+pnpm run dev
 ```
 
 ### Available Scripts
 
-- `npm run dev` - Start development server with hot reload
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build locally
-- `npm run lint` - Run ESLint to check code quality
-- `npm run update-data` - Fetch latest CO₂ emissions data
+- `pnpm run dev` - Start development server with hot reload
+- `pnpm run build` - Build for production
+- `pnpm run preview` - Preview production build locally
+- `pnpm run lint` - Run ESLint to check code quality
+- `pnpm run update-data` - Fetch latest CO₂ emissions data
 
 ## 📏 Coding Standards
 
@@ -102,7 +102,7 @@ npm run dev
 
 ### Code Style
 
-We use ESLint to enforce code style. Run `npm run lint` before committing.
+We use ESLint to enforce code style. Run `pnpm run lint` before committing.
 
 **Key conventions:**
 
@@ -218,7 +218,17 @@ src/
 
 ## 🧪 Testing
 
-Currently, this project relies on manual testing. Contributions to add automated tests are highly welcome!
+This project uses **Playwright** and custom scripts for verifying data integrity and application stability.
+
+### Automated Checks
+
+Run the integrity checks (manifest validation, CSV consistency) before submitting a PR:
+
+```bash
+pnpm test
+```
+
+### Manual Testing
 
 **Manual testing checklist:**
 
