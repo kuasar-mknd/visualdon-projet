@@ -20,6 +20,9 @@ The source code is organized as follows:
   - **`globe/`**: Components related to the 3D globe visualization.
   - **`layout/`**: Structural components like Header and Footer.
   - **`overlay/`**: UI overlays for detailed information.
+  - **`Globe.jsx`**: Main 3D Globe component.
+  - **`TopCountriesChart.jsx`**: Bar chart visualization for top emitters.
+  - **`CountryChart.jsx`**: Detailed chart for selected country.
 - **`context/`**: React Context definitions, primarily for state management that needs to be accessed globally (e.g., LanguageContext).
 - **`hooks/`**: Custom React hooks.
   - **`useData.js`**: A critical hook for fetching, parsing, and managing the emissions data.
