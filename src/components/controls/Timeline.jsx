@@ -39,6 +39,7 @@ const Timeline = ({ year, setYear, yearRange }) => {
           type="range"
           min={yearRange.min}
           max={yearRange.max}
+          step="1"
           value={localYear || yearRange.min}
           disabled={!year}
           onChange={handleYearChange}

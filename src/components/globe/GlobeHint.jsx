@@ -6,7 +6,7 @@ const GlobeHint = () => {
 
   return (
     <div
-      className="absolute bottom-4 right-4 flex flex-col gap-2 items-end select-none opacity-60 hover:opacity-100 transition-opacity"
+      className="absolute bottom-4 right-4 flex flex-col gap-2 items-end select-none opacity-80 hover:opacity-100 transition-opacity"
       aria-hidden="true"
     >
        <div className="flex items-center gap-2 text-xs text-slate-600 font-medium bg-white/60 px-3 py-1.5 rounded-full backdrop-blur-md border border-white/50 shadow-sm cursor-help">

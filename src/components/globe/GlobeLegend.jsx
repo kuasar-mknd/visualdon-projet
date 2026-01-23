@@ -37,7 +37,7 @@ const GlobeLegend = ({ maxVal, displayCategory }) => {
                      <span className="text-slate-600">
                         {t('legend.high')}
                         {formattedMax && (
-                             <span className="text-slate-400 text-[10px] ml-1.5 font-normal">
+                             <span className="text-slate-500 text-[10px] ml-1.5 font-normal">
                                 (&gt; {formattedMax} {unit})
                             </span>
                         )}
