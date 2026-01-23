@@ -96,7 +96,10 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
       hoverTimeoutRef.current = setTimeout(async () => {
           // Use ref to avoid breaking callback stability
           const name = await fetchCountryDetails(countryId, languageRef.current);
-          setHoveredCountryName(name || featureName);
+          // Fix race condition: Ensure we are still hovering the same country
+          if (hoveredCountryIdRef.current === countryId) {
+             setHoveredCountryName(name || featureName);
+          }
       }, 150);
   }, []);
 
@@ -293,7 +296,7 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
                 stroke="none"
             />
             {/* Center glow - static relative to viewport */}
-            <circle cx={dimensions.width/2} cy={dimensions.height/2} r={scaleRef.current} fill="#60a5fa" opacity="0.1" filter="url(#glow)" />
+            <circle cx={dimensions.width/2} cy={dimensions.height/2} r={scaleRef.current} fill="#60a5fa" opacity="0.1" filter="url(#glow)" style={{pointerEvents: 'none'}} />
 
             <GlobePaths
                geoJson={geoJson}

@@ -29,6 +29,9 @@ const getCache = () => {
       console.warn("Invalid cache structure detected, resetting cache");
       memoryCache = {};
       return memoryCache;
+    } else {
+      // Security Enhancement: Prevent prototype pollution via local storage
+      Object.setPrototypeOf(parsed, null);
     }
 
     memoryCache = parsed;

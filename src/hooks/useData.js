@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { text, json, csvParseRows } from 'd3';
-import { validateManifest, validateGeoJson } from '../utils/security';
+import { validateManifest, validateGeoJson, isValidFilename } from '../utils/security';
 
 // Helper to fetch with timeout
 function fetchWithTimeout(promise, ms = 10000) {
@@ -131,6 +131,11 @@ export function useData() {
         // Security Enhancement: Validate manifest structure
         if (!validateManifest(manifest)) {
           throw new Error('Invalid manifest structure or missing security hashes');
+        }
+
+        // Sentinel Enhancement: Validate filenames
+        if (!isValidFilename(manifest.emissions) || !isValidFilename(manifest.perCapita)) {
+             throw new Error('Security Error: Invalid filenames in manifest');
         }
 
         // Parallelize fetching

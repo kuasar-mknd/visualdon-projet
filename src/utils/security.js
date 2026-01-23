@@ -9,7 +9,24 @@
  */
 export const isValidCountryCode = (code) => {
   if (!code || typeof code !== 'string') return false;
-  return /^[a-zA-Z0-9]{2,3}$/.test(code);
+  // ISO 3166-1 alpha-2, alpha-3, or numeric
+  return /^[A-Za-z]{2,3}$|^\d{3}$/.test(code);
+};
+
+/**
+ * Validates a filename to ensure it's safe and prevents path traversal.
+ * Allowed characters: alphanumeric, dot, underscore, dash.
+ * @param {string} filename - The filename to validate.
+ * @returns {boolean} - True if valid, false otherwise.
+ */
+export const isValidFilename = (filename) => {
+  if (!filename || typeof filename !== 'string') return false;
+  // Allow alphanumeric, dot, underscore, dash.
+  // Must not start or end with a dot (hidden files or current dir).
+  // Must not contain consecutive dots (parent dir traversal ..).
+  if (filename.startsWith('.') || filename.endsWith('.')) return false;
+  if (filename.includes('..')) return false;
+  return /^[a-zA-Z0-9._-]+$/.test(filename);
 };
 
 /**
