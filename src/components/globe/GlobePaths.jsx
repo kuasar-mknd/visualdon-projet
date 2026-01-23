@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 const GlobePaths = ({ geoJson, onCountrySelect, onHover, onLeave }) => {
   // Optimization: Render static paths once.
+  // Dependencies reduced to just geoJson because handlers are delegated.
   const paths = useMemo(() => {
     if (!geoJson) return [];
 
@@ -19,26 +20,55 @@ const GlobePaths = ({ geoJson, onCountrySelect, onHover, onLeave }) => {
                 aria-label={feature.properties.NAME || countryId}
                 data-id={countryId}
                 data-name={feature.properties.NAME}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onCountrySelect(countryId);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      onCountrySelect(countryId);
-                  }
-                }}
-                onFocus={() => onHover(countryId, feature.properties.NAME)}
-                onBlur={onLeave}
-                onMouseEnter={() => onHover(countryId, feature.properties.NAME)}
-                onMouseLeave={onLeave}
             />
         );
     });
-  }, [geoJson, onCountrySelect, onHover, onLeave]);
+  }, [geoJson]);
 
-  return <g>{paths}</g>;
+  const handleClick = (e) => {
+     const target = e.target.closest('[data-id]');
+     if (target) {
+         e.stopPropagation();
+         onCountrySelect(target.getAttribute('data-id'));
+     }
+  };
+
+  const handleKeyDown = (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+          const target = e.target.closest('[data-id]');
+          if (target) {
+              e.preventDefault();
+              onCountrySelect(target.getAttribute('data-id'));
+          }
+      }
+  };
+
+  const handleHover = (e) => {
+       const target = e.target.closest('[data-id]');
+       if (target) {
+           onHover(target.getAttribute('data-id'), target.getAttribute('data-name'));
+       }
+  };
+
+  const handleLeave = (e) => {
+       const target = e.target.closest('[data-id]');
+       if (target) {
+           onLeave();
+       }
+  };
+
+  return (
+    <g
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      onMouseOver={handleHover}
+      onMouseOut={handleLeave}
+      onFocus={handleHover}
+      onBlur={handleLeave}
+    >
+        {paths}
+    </g>
+  );
 };
 
 GlobePaths.propTypes = {

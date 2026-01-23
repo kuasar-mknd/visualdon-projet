@@ -1,11 +1,13 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import * as d3 from 'd3';
 import { useLanguage } from '../context/LanguageContext';
-import { fetchCountryDetails } from '../services/countryService';
+import { fetchCountryDetails, getCountryNameSync } from '../services/countryService';
+import { useResizeObserver } from '../hooks/useResizeObserver';
 
 const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, displayCategory }) => {
-  const svgRef = useRef(null);
+  // Optimization: Use resize observer to avoid layout thrashing
+  const [svgRef, dimensions] = useResizeObserver({ debounceTime: 100 });
   const { t, language } = useLanguage();
   const [translatedNames, setTranslatedNames] = useState({});
 
@@ -46,21 +48,41 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
 
   // Fetch translated country names when topData changes
   useEffect(() => {
-    const neededCodes = topData
-      .map(d => d["ISO 3166-1 alpha-3"])
-      .filter(code => !translatedNames[code]);
+    const neededCodes = [];
+    const newTranslations = {};
+    let hasImmediateData = false;
 
+    // First pass: Check synchronous cache
+    topData.forEach(d => {
+        const code = d["ISO 3166-1 alpha-3"];
+        if (translatedNames[code]) return; // Already have it
+
+        const cachedName = getCountryNameSync(code, language);
+        if (cachedName) {
+            newTranslations[code] = cachedName;
+            hasImmediateData = true;
+        } else {
+            neededCodes.push(code);
+        }
+    });
+
+    // If we found cached names, update state immediately (or next tick)
+    if (hasImmediateData) {
+        setTranslatedNames(prev => ({ ...prev, ...newTranslations }));
+    }
+
+    // Second pass: Fetch missing codes
     if (neededCodes.length === 0) return;
 
     const fetchTranslations = async () => {
-      const newTranslations = {};
+      const fetchedTranslations = {};
       let hasNewData = false;
 
       await Promise.all(
         neededCodes.map(async (code) => {
           const name = await fetchCountryDetails(code, language);
           if (name) {
-            newTranslations[code] = name;
+            fetchedTranslations[code] = name;
             hasNewData = true;
           }
         })
@@ -69,7 +91,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
       if (hasNewData) {
         setTranslatedNames(prev => ({
           ...prev,
-          ...newTranslations
+          ...fetchedTranslations
         }));
       }
     };
@@ -78,10 +100,9 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
   }, [topData, language, translatedNames]);
 
   useEffect(() => {
-    if (!data || !svgRef.current) return;
+    if (!data || !svgRef.current || dimensions.width === 0) return;
 
-    const width = svgRef.current.clientWidth;
-    const height = svgRef.current.clientHeight || 400;
+    const { width, height } = dimensions;
     const margin = {top: 40, right: 80, bottom: 40, left: 140};
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
@@ -292,7 +313,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
             };
         });
 
-  }, [data, topData, year, category, t, translatedNames, isPlaying, onCountrySelect, displayCategory]);
+  }, [data, topData, year, category, t, translatedNames, isPlaying, onCountrySelect, displayCategory, dimensions]);
 
   return <svg ref={svgRef} className="w-full h-full rounded-lg" />;
 };

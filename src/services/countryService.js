@@ -61,6 +61,15 @@ const setCache = (cache) => {
   }
 };
 
+export const getCountryNameSync = (code, language) => {
+  if (!code) return null;
+  const cache = getCache();
+  if (cache[code]) {
+    return getNameFromData(cache[code].data, language);
+  }
+  return null;
+};
+
 export const fetchCountryDetails = async (code, language) => {
   if (!code) return null;
   
