@@ -126,60 +126,68 @@ const BubbleChart = ({
     const bubblesGroup = svg.append("g")
       .attr("clip-path", "url(#chart-clip)");
 
+    // Optimization: Event Delegation for Bubbles
+    bubblesGroup
+       .on("mouseover focusin", function(event) {
+            const target = event.target.closest(".bubble");
+            if (!target) return;
+            const d = select(target).datum();
+
+            // Interaction Start Logic
+            select(target)
+                .transition()
+                .duration(200)
+                .attr("opacity", 1)
+                .attr("stroke", "#1e293b")
+                .attr("stroke-width", 3);
+
+            // Remove existing tooltips to prevent duplicates
+            svg.selectAll(".tooltip").remove();
+
+            const tooltip = svg.append("g")
+                .attr("class", "tooltip")
+                .attr("transform", `translate(${xScale(d.year)}, ${yScale(d.value) - sizeScale(d.value) - 10})`);
+
+            const text = `${t(`sectors.${d.sector}`)}: ${d.value.toFixed(1)} MtCO₂`;
+            const bbox = {width: text.length * 7, height: 20};
+
+            tooltip.append("rect")
+                .attr("x", -bbox.width / 2 - 5)
+                .attr("y", -bbox.height - 5)
+                .attr("width", bbox.width + 10)
+                .attr("height", bbox.height + 10)
+                .attr("fill", "#1e293b")
+                .attr("rx", 4)
+                .attr("stroke", d.color)
+                .attr("stroke-width", 2);
+
+            tooltip.append("text")
+                .attr("text-anchor", "middle")
+                .attr("y", -bbox.height / 2)
+                .attr("fill", "white")
+                .attr("font-size", "13px")
+                .attr("font-weight", "500")
+                .text(text);
+       })
+       .on("mouseout focusout", function(event) {
+            const target = event.target.closest(".bubble");
+            if (!target) return;
+
+            select(target)
+                .transition()
+                .duration(200)
+                .attr("opacity", 0.7)
+                .attr("stroke-width", 2);
+
+            svg.selectAll(".tooltip").remove();
+       });
+
     // Bubbles
     const bubbles = bubblesGroup.selectAll(".bubble")
         .data(chartData)
         .enter()
         .append("g")
         .attr("class", "bubble-group");
-
-    // Shared handlers for mouse and keyboard interactions
-    const handleInteractionStart = function(event, d) {
-        select(this)
-            .transition()
-            .duration(200)
-            .attr("opacity", 1)
-            .attr("stroke", "#1e293b")
-            .attr("stroke-width", 3);
-
-        // Remove existing tooltips to prevent duplicates
-        svg.selectAll(".tooltip").remove();
-
-        const tooltip = svg.append("g")
-            .attr("class", "tooltip")
-            .attr("transform", `translate(${xScale(d.year)}, ${yScale(d.value) - sizeScale(d.value) - 10})`);
-
-        const text = `${t(`sectors.${d.sector}`)}: ${d.value.toFixed(1)} MtCO₂`;
-        const bbox = {width: text.length * 7, height: 20};
-
-        tooltip.append("rect")
-            .attr("x", -bbox.width / 2 - 5)
-            .attr("y", -bbox.height - 5)
-            .attr("width", bbox.width + 10)
-            .attr("height", bbox.height + 10)
-            .attr("fill", "#1e293b")
-            .attr("rx", 4)
-            .attr("stroke", d.color)
-            .attr("stroke-width", 2);
-
-        tooltip.append("text")
-            .attr("text-anchor", "middle")
-            .attr("y", -bbox.height / 2)
-            .attr("fill", "white")
-            .attr("font-size", "13px")
-            .attr("font-weight", "500")
-            .text(text);
-    };
-
-    const handleInteractionEnd = function() {
-        select(this)
-            .transition()
-            .duration(200)
-            .attr("opacity", 0.7)
-            .attr("stroke-width", 2);
-
-        svg.selectAll(".tooltip").remove();
-    };
 
     bubbles.append("circle")
         .attr("class", "bubble")
@@ -193,41 +201,52 @@ const BubbleChart = ({
         .style("cursor", "pointer")
         .attr("tabindex", "0")
         .attr("role", "button")
-        .attr("aria-label", d => `${t(`sectors.${d.sector}`)}: ${d.value.toFixed(1)} MtCO₂`)
-        .on("mouseover", handleInteractionStart)
-        .on("focus", handleInteractionStart)
-        .on("mouseout", handleInteractionEnd)
-        .on("blur", handleInteractionEnd);
+        .attr("aria-label", d => `${t(`sectors.${d.sector}`)}: ${d.value.toFixed(1)} MtCO₂`);
+        // Removed individual listeners
 
     // Legend
     const legend = svg.append("g")
         .attr("transform", `translate(${width - padding.right + 20}, ${padding.top})`);
     
+    // Optimization: Event Delegation for Legend
+    legend
+        .on("mouseover focusin", function(event) {
+            const target = event.target.closest(".legend-row");
+            if (!target) return;
+            const sector = select(target).datum();
+
+            bubbles.selectAll("circle")
+                .transition()
+                .duration(200)
+                .attr("opacity", d => d.sector === sector ? 1 : 0.2);
+        })
+        .on("mouseout focusout", function(event) {
+            const target = event.target.closest(".legend-row");
+            if (!target) return;
+
+            bubbles.selectAll("circle")
+                .transition()
+                .duration(200)
+                .attr("opacity", 0.7);
+        })
+        .on("keydown", function(event) {
+             const target = event.target.closest(".legend-row");
+             if (target && (event.key === "Enter" || event.key === " ")) {
+                 event.preventDefault();
+                 // No persistent state to toggle, but prevents scrolling
+             }
+         });
+
     Object.entries(colorMapping).forEach(([sector, color], i) => {
         const legendRow = legend.append("g")
+            .attr("class", "legend-row") // Added class for delegation
+            .datum(sector) // Bind data
             .attr("transform", `translate(0, ${i * 28})`)
             .style("cursor", "pointer")
             .attr("tabindex", "0")
             .attr("role", "button")
-            .attr("aria-label", t(`sectors.${sector}`) || sector)
-            .on("mouseover focus", function() {
-                bubbles.selectAll("circle")
-                    .transition()
-                    .duration(200)
-                    .attr("opacity", d => d.sector === sector ? 1 : 0.2);
-            })
-            .on("mouseout blur", function() {
-                bubbles.selectAll("circle")
-                    .transition()
-                    .duration(200)
-                    .attr("opacity", 0.7);
-            })
-            .on("keydown", function(event) {
-                if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    // No persistent state to toggle, but prevents scrolling
-                }
-            });
+            .attr("aria-label", t(`sectors.${sector}`) || sector);
+            // Removed individual listeners
 
         legendRow.append("circle")
             .attr("cx", 8)

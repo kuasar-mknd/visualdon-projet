@@ -73,22 +73,29 @@ const StackedAreaChart = ({
       .y1(d => yScale(d[1]))
       .curve(curveMonotoneX);
 
-    // Shared handlers
-    const handleInteractionStart = function(event, d) {
-        select(this).attr('opacity', 1);
+    // Create group for areas
+    const areaGroup = svg.append("g").attr("class", "areas");
 
-        // Highlight in legend
-        svg.selectAll('.legend-row')
-          .attr('opacity', row => row === d.key ? 1 : 0.3);
-    };
-
-    const handleInteractionEnd = function() {
-        select(this).attr('opacity', 0.8);
-        svg.selectAll('.legend-row').attr('opacity', 1);
-    };
+    // Optimization: Event Delegation for Areas
+    areaGroup.on("mouseover focusin", function(event) {
+        const target = event.target.closest(".area");
+        if (target) {
+             const d = select(target).datum();
+             select(target).attr('opacity', 1);
+             svg.selectAll('.legend-row')
+               .attr('opacity', row => row === d.key ? 1 : 0.3);
+        }
+    })
+    .on("mouseout focusout", function(event) {
+        const target = event.target.closest(".area");
+        if (target) {
+            select(target).attr('opacity', 0.8);
+            svg.selectAll('.legend-row').attr('opacity', 1);
+        }
+    });
 
     // Draw areas
-    svg.selectAll('.area')
+    areaGroup.selectAll('.area')
       .data(series)
       .join('path')
       .attr('class', 'area')
@@ -98,11 +105,7 @@ const StackedAreaChart = ({
       .style('cursor', 'pointer')
       .attr("tabindex", "0")
       .attr("role", "button")
-      .attr("aria-label", d => t(`sectors.${d.key}`) || d.key)
-      .on('mouseover', handleInteractionStart)
-      .on('focus', handleInteractionStart)
-      .on('mouseout', handleInteractionEnd)
-      .on('blur', handleInteractionEnd);
+      .attr("aria-label", d => t(`sectors.${d.key}`) || d.key);
 
     // Axes
     const xAxis = axisBottom(xScale).tickFormat(format("d")).ticks(10);
@@ -158,6 +161,35 @@ const StackedAreaChart = ({
     const legend = svg.append("g")
       .attr("transform", `translate(${width - padding.right + 20}, ${padding.top})`);
     
+    // Optimization: Event Delegation for Legend
+    legend
+      .on("mouseover focusin", function(event) {
+          const target = event.target.closest(".legend-row");
+          if (!target) return;
+          const key = select(target).datum();
+
+          svg.selectAll('.area')
+            .transition()
+            .duration(200)
+            .attr('opacity', d => d.key === key ? 1 : 0.2);
+      })
+      .on("mouseout focusout", function(event) {
+          const target = event.target.closest(".legend-row");
+          if (!target) return;
+
+          svg.selectAll('.area')
+            .transition()
+            .duration(200)
+            .attr('opacity', 0.8);
+      })
+      .on("keydown", function(event) {
+           const target = event.target.closest(".legend-row");
+           if (target && (event.key === "Enter" || event.key === " ")) {
+               event.preventDefault();
+               // Visual feedback is handled by focus
+           }
+      });
+
     sectors.forEach((sector, i) => {
       const legendRow = legend.append("g")
         .attr("class", "legend-row")
@@ -166,27 +198,7 @@ const StackedAreaChart = ({
         .style("cursor", "pointer")
         .attr("tabindex", "0")
         .attr("role", "button")
-        .attr("aria-label", t(`sectors.${sector}`) || sector)
-        .on("mouseover focus", function(event, hoveredSector) {
-          // Handle both MouseEvent and FocusEvent (where data is attached to element)
-          const key = hoveredSector || select(this).datum();
-          svg.selectAll('.area')
-            .transition()
-            .duration(200)
-            .attr('opacity', d => d.key === key ? 1 : 0.2);
-        })
-        .on("mouseout blur", function() {
-          svg.selectAll('.area')
-            .transition()
-            .duration(200)
-            .attr('opacity', 0.8);
-        })
-        .on("keydown", function(event) {
-             if (event.key === "Enter" || event.key === " ") {
-                 event.preventDefault();
-                 // Visual feedback is handled by focus
-             }
-         });
+        .attr("aria-label", t(`sectors.${sector}`) || sector);
 
       legendRow.append("rect")
         .attr("width", 16)
@@ -223,5 +235,4 @@ StackedAreaChart.propTypes = {
   colorMapping: PropTypes.object.isRequired
 };
 
-// Optimization: Memoize the component to prevent re-renders when parent re-renders but props are same.
 export default React.memo(StackedAreaChart);

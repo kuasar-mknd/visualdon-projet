@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 
 const GlobePaths = ({ geoJson, onCountrySelect, onHover, onLeave }) => {
@@ -19,26 +19,62 @@ const GlobePaths = ({ geoJson, onCountrySelect, onHover, onLeave }) => {
                 aria-label={feature.properties.NAME || countryId}
                 data-id={countryId}
                 data-name={feature.properties.NAME}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onCountrySelect(countryId);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      onCountrySelect(countryId);
-                  }
-                }}
-                onFocus={() => onHover(countryId, feature.properties.NAME)}
-                onBlur={onLeave}
-                onMouseEnter={() => onHover(countryId, feature.properties.NAME)}
-                onMouseLeave={onLeave}
             />
         );
     });
-  }, [geoJson, onCountrySelect, onHover, onLeave]);
+  }, [geoJson]);
 
-  return <g>{paths}</g>;
+  // Optimization: Event Delegation
+  // Attach listeners to the parent group instead of individual paths to reduce memory overhead.
+  const handleClick = useCallback((e) => {
+      const target = e.target.closest('[data-id]');
+      if (target) {
+          e.stopPropagation();
+          onCountrySelect(target.dataset.id);
+      }
+  }, [onCountrySelect]);
+
+  const handleKeyDown = useCallback((e) => {
+      const target = e.target.closest('[data-id]');
+      if (target && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          onCountrySelect(target.dataset.id);
+      }
+  }, [onCountrySelect]);
+
+  const handleMouseOver = useCallback((e) => {
+      const target = e.target.closest('[data-id]');
+      if (target) {
+          onHover(target.dataset.id, target.dataset.name);
+      }
+  }, [onHover]);
+
+  const handleMouseOut = useCallback((e) => {
+      const target = e.target.closest('[data-id]');
+      if (target) {
+          onLeave();
+      }
+  }, [onLeave]);
+
+  const handleFocus = useCallback((e) => {
+       const target = e.target.closest('[data-id]');
+       if (target) {
+           onHover(target.dataset.id, target.dataset.name);
+       }
+  }, [onHover]);
+
+  return (
+      <g
+        onClick={handleClick}
+        onKeyDown={handleKeyDown}
+        onMouseOver={handleMouseOver}
+        onMouseOut={handleMouseOut}
+        onFocus={handleFocus}
+        onBlur={onLeave}
+      >
+        {paths}
+      </g>
+  );
 };
 
 GlobePaths.propTypes = {

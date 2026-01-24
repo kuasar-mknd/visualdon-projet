@@ -173,31 +173,47 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
         .attr("transform", `translate(0, ${innerHeight})`)
         .remove();
 
-    const handleInteractionStart = function() {
-        g.selectAll(".bar-group")
-         .transition()
-         .duration(200)
-         .style("opacity", 0.5);
+    // Optimization: Event Delegation
+    // Attach listeners to the chart group once instead of to every individual bar.
+    g.on("mouseover focusin", (event) => {
+        const target = event.target.closest(".bar-group");
+        if (!target) return;
 
-        d3.select(this)
+        // Dim others
+        g.selectAll(".bar-group").transition().duration(200).style("opacity", 0.5);
+
+        // Highlight target
+        d3.select(target)
           .transition()
           .duration(200)
           .style("opacity", 1)
           .select(".bar-rect")
           .attr("stroke", "#1e293b")
           .attr("stroke-width", 2);
-    };
+    })
+    .on("mouseout focusout", (event) => {
+        const target = event.target.closest(".bar-group");
+        if (!target) return;
 
-    const handleInteractionEnd = function() {
-        g.selectAll(".bar-group")
-         .transition()
-         .duration(200)
-         .style("opacity", 1);
-
-        d3.select(this)
-          .select(".bar-rect")
-          .attr("stroke", "none");
-    };
+        // Reset all
+        g.selectAll(".bar-group").transition().duration(200).style("opacity", 1);
+        d3.select(target).select(".bar-rect").attr("stroke", "none");
+    })
+    .on("click", (event) => {
+        const target = event.target.closest(".bar-group");
+        if (target) {
+            const d = d3.select(target).datum();
+            if (onCountrySelect && d) onCountrySelect(d["ISO 3166-1 alpha-3"]);
+        }
+    })
+    .on("keydown", (event) => {
+        const target = event.target.closest(".bar-group");
+        if (target && (event.key === "Enter" || event.key === " ")) {
+            event.preventDefault();
+            const d = d3.select(target).datum();
+            if (onCountrySelect && d) onCountrySelect(d["ISO 3166-1 alpha-3"]);
+        }
+    });
 
     const enter = bars.enter()
         .append("g")
@@ -212,19 +228,6 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
             const name = translatedNames[d["ISO 3166-1 alpha-3"]] || d.Country;
             const val = (d[category] || 0).toFixed(1);
             return `${name}: ${val}`;
-        })
-        .on("mouseover", handleInteractionStart)
-        .on("mouseout", handleInteractionEnd)
-        .on("focus", handleInteractionStart)
-        .on("blur", handleInteractionEnd)
-        .on("click", (event, d) => {
-          if (onCountrySelect) onCountrySelect(d["ISO 3166-1 alpha-3"]);
-        })
-        .on("keydown", (event, d) => {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            if (onCountrySelect) onCountrySelect(d["ISO 3166-1 alpha-3"]);
-          }
         });
 
     // UX: Add a transparent hit area to make the entire row clickable, not just the bar/text
