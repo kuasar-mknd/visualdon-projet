@@ -39,6 +39,15 @@ You can inspect the current data manifest using curl:
 curl -s https://visualdon-projet.pages.dev/data/manifest.json | jq .
 ```
 
+### Authentication
+The data API is public and requires no authentication. Files are served statically via the hosting provider (Cloudflare Pages).
+
+### Error Handling
+Since the API consists of static files, error states are limited to standard HTTP status codes:
+- **404 Not Found**: The requested file or manifest version does not exist.
+- **200 OK**: The file exists and is returned successfully.
+- **Network Errors**: Client-side network failures should be handled by the consuming application.
+
 ## Internal Services
 
 ### Country Service (`src/services/countryService.js`)
