@@ -39,6 +39,9 @@ const BubbleChart = ({
       .attr("width", width)
       .attr("height", height);
 
+    svg.append("title").text(t('chart.bubbleTitle'));
+    svg.append("desc").text(t('chart.hoverBubbles'));
+
     // Scales
     const xScale = scaleLinear()
         .domain(extent(chartData, d => d.year))
@@ -110,7 +113,8 @@ const BubbleChart = ({
        .attr("text-anchor", "middle")
        .style("font-size", "18px")
        .style("font-weight", "600")
-       .style("fill", "#334155");
+       .style("fill", "#334155")
+       .text(t('chart.bubbleTitle'));
 
     // Add clip path
     svg.append("defs")

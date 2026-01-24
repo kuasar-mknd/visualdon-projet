@@ -39,6 +39,9 @@ const StackedAreaChart = ({
       .attr("width", width)
       .attr("height", height);
 
+    svg.append("title").text(t('chart.stackedTitle'));
+    svg.append("desc").text(t('chart.hoverZones'));
+
     // Prepare stacked data
     const stackData = years.map(year => {
       const yearData = emissionData.find(d => +d.Year === year);
@@ -75,7 +78,10 @@ const StackedAreaChart = ({
 
     // Shared handlers
     const handleInteractionStart = function(event, d) {
-        select(this).attr('opacity', 1);
+        select(this)
+          .attr('opacity', 1)
+          .attr('stroke', '#1e293b')
+          .attr('stroke-width', 2);
 
         // Highlight in legend
         svg.selectAll('.legend-row')
@@ -83,7 +89,9 @@ const StackedAreaChart = ({
     };
 
     const handleInteractionEnd = function() {
-        select(this).attr('opacity', 0.8);
+        select(this)
+          .attr('opacity', 0.8)
+          .attr('stroke', 'none');
         svg.selectAll('.legend-row').attr('opacity', 1);
     };
 
@@ -152,7 +160,8 @@ const StackedAreaChart = ({
       .attr("text-anchor", "middle")
       .style("font-size", "18px")
       .style("font-weight", "600")
-      .style("fill", "#334155");
+       .style("fill", "#334155")
+       .text(t('chart.stackedTitle'));
 
     // Legend
     const legend = svg.append("g")

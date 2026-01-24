@@ -137,17 +137,8 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
 
     if (topData.length === 0) {
         g.selectAll("*").remove();
-        g.append("text")
-         .attr("class", "no-data-message")
-         .attr("x", innerWidth / 2)
-         .attr("y", innerHeight / 2)
-         .attr("text-anchor", "middle")
-         .attr("fill", "#64748b")
-         .text(t('noData'));
         return;
     }
-
-    g.selectAll(".no-data-message").remove();
 
     const x = d3.scaleLinear()
         .domain([0, d3.max(topData, d => d[category] || 0) || 0])
@@ -294,7 +285,16 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
 
   }, [data, topData, year, category, t, translatedNames, isPlaying, onCountrySelect, displayCategory]);
 
-  return <svg ref={svgRef} className="w-full h-full rounded-lg" />;
+  return (
+    <div className="w-full h-full relative">
+      <svg ref={svgRef} className="w-full h-full rounded-lg" />
+      {topData.length === 0 && (
+        <div className="absolute inset-0 flex items-center justify-center text-slate-500" role="status" aria-live="polite">
+          {t('noData')}
+        </div>
+      )}
+    </div>
+  );
 };
 
 TopCountriesChart.propTypes = {
