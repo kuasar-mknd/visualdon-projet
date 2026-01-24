@@ -17,3 +17,8 @@
 **Vulnerability:** Downloading datasets from external sources (even trusted ones like Zenodo) without integrity verification leaves the application vulnerable to Man-in-the-Middle (MitM) attacks or compromised servers serving malicious files.
 **Learning:** Supply chain security isn't just about NPM packages; it applies to data pipelines too. A compromised data file could lead to persistent XSS (if content is rendered) or skewed visualization logic.
 **Prevention:** Always verify cryptographic checksums (MD5/SHA) of downloaded assets against a trusted metadata source before processing or storing them.
+
+## 2025-12-23 - Development vs. Production CSP (Vite HMR)
+**Vulnerability:** Strictly applying production CSP (which blocks `unsafe-inline`) to the local development environment breaks Vite's Hot Module Replacement (HMR) and overlay scripts.
+**Learning:** Security headers must be environment-aware. While ensuring parity is good, toolchains often require relaxed permissions (like `unsafe-inline` scripts) to function.
+**Prevention:** Configure `vite.config.js` to explicitly allow `'unsafe-inline'` in `script-src` and `style-src` for the dev server, while maintaining strict policies in production configuration (`vercel.json` or `_headers`).

@@ -1,4 +1,4 @@
-import { isValidCountryCode, isValidLanguage } from '../utils/security.js';
+import { isValidCountryCode, isValidLanguage, validateCountryData, validateCacheStructure } from '../utils/security.js';
 
 const CACHE_KEY = 'visualdon_country_cache';
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
@@ -23,13 +23,19 @@ const getCache = () => {
     }
 
     const parsed = JSON.parse(cache);
+
     // Security Enhancement: Validate that parsed cache is actually an object
     // to prevent crashes if localStorage contains "null" or other non-object JSON values
-    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    // Also validates deeper structure (keys/values)
+    if (!validateCacheStructure(parsed)) {
       console.warn("Invalid cache structure detected, resetting cache");
+      localStorage.removeItem(CACHE_KEY);
       memoryCache = {};
       return memoryCache;
     }
+
+    // Security Enhancement: Prevent prototype pollution
+    Object.setPrototypeOf(parsed, null);
 
     memoryCache = parsed;
     return memoryCache;
@@ -127,8 +133,8 @@ export const fetchCountryDetails = async (code, language) => {
         const countryData = data[0]; // API returns array
 
         // Validate country data shape
-        if (!countryData || !countryData.name) {
-          throw new Error('Missing country name data in response');
+        if (!validateCountryData(countryData)) {
+          throw new Error('Invalid country data shape in response');
         }
 
         // Update cache
