@@ -1,11 +1,13 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import * as d3 from 'd3';
+import { select, max, scaleLinear, scaleBand, easeCubicOut, interpolateNumber } from 'd3';
 import { useLanguage } from '../context/LanguageContext';
 import { fetchCountryDetails } from '../services/countryService';
+import { useResizeObserver } from '../hooks/useResizeObserver';
 
 const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, displayCategory }) => {
-  const svgRef = useRef(null);
+  // Optimization: Use reusable ResizeObserver hook to prevent layout thrashing
+  const [svgRef, dimensions] = useResizeObserver({ debounceTime: 100 });
   const { t, language } = useLanguage();
   const [translatedNames, setTranslatedNames] = useState({});
 
@@ -78,15 +80,14 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
   }, [topData, language, translatedNames]);
 
   useEffect(() => {
-    if (!data || !svgRef.current) return;
+    if (!data || !svgRef.current || dimensions.width === 0) return;
 
-    const width = svgRef.current.clientWidth;
-    const height = svgRef.current.clientHeight || 400;
+    const { width, height } = dimensions;
     const margin = {top: 40, right: 80, bottom: 40, left: 140};
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
-    const svg = d3.select(svgRef.current);
+    const svg = select(svgRef.current);
 
     // Determine the display title based on displayCategory prop (fallback to category logic)
     const isPerCapita = displayCategory === 'Per Capita' || category === 'Per Capita';
@@ -149,11 +150,11 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
 
     g.selectAll(".no-data-message").remove();
 
-    const x = d3.scaleLinear()
-        .domain([0, d3.max(topData, d => d[category] || 0) || 0])
+    const x = scaleLinear()
+        .domain([0, max(topData, d => d[category] || 0) || 0])
         .range([0, innerWidth]);
 
-    const y = d3.scaleBand()
+    const y = scaleBand()
         .domain(topData.map(d => d["ISO 3166-1 alpha-3"]))
         .range([0, innerHeight])
         .padding(0.2);
@@ -162,7 +163,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
     // When playing, we need faster transitions (200ms) to match the tick rate and avoid "lag"
     // When paused, we use a smoother, longer transition (750ms)
     const transitionDuration = isPlaying ? 200 : 750;
-    const tTransition = svg.transition().duration(transitionDuration).ease(d3.easeCubicOut);
+    const tTransition = svg.transition().duration(transitionDuration).ease(easeCubicOut);
 
     const bars = g.selectAll(".bar-group")
         .data(topData, d => d["ISO 3166-1 alpha-3"]);
@@ -179,7 +180,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
          .duration(200)
          .style("opacity", 0.5);
 
-        d3.select(this)
+        select(this)
           .transition()
           .duration(200)
           .style("opacity", 1)
@@ -194,7 +195,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
          .duration(200)
          .style("opacity", 1);
 
-        d3.select(this)
+        select(this)
           .select(".bar-rect")
           .attr("stroke", "none");
     };
@@ -286,13 +287,13 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
         .attr("x", d => x(d[category] || 0) + 8)
         .style("opacity", 1)
         .tween("text", function(d) {
-            const i = d3.interpolateNumber(parseFloat(this.textContent) || 0, d[category] || 0);
+            const i = interpolateNumber(parseFloat(this.textContent) || 0, d[category] || 0);
             return function(t) {
                 this.textContent = i(t).toFixed(1);
             };
         });
 
-  }, [data, topData, year, category, t, translatedNames, isPlaying, onCountrySelect, displayCategory]);
+  }, [data, topData, year, category, t, translatedNames, isPlaying, onCountrySelect, displayCategory, dimensions]);
 
   return <svg ref={svgRef} className="w-full h-full rounded-lg" />;
 };
