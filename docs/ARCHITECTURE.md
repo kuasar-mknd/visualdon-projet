@@ -1,7 +1,9 @@
 # Architecture
 
 ## Overview
-This project is a client-side Single Page Application (SPA) built with React 19 and Vite. It visualizes global CO₂ emissions data using D3.js for charts and Three.js (via React components) for 3D globe elements. The application is designed to be performant, accessible, and responsive.
+This project is a **client-side Single Page Application (SPA)** built with React 19 and Vite. It serves static assets and visualizes global CO₂ emissions data using D3.js and Three.js.
+
+**Note:** There is **no runtime backend** (e.g., Node.js, Python, or Go server). The application fetches static CSV and JSON files directly from the `public/data` directory, which serves as the API.
 
 ## Core Technologies
 - **React 19**: UI library for building component-based user interfaces.
@@ -56,13 +58,15 @@ The application follows a component-based architecture where each UI element is 
 - **Container/Presenter**: Some components act as containers (fetching data/state) while others are purely presentational.
 
 ### Clean Architecture Mapping
-While this is a frontend-only application, the structure loosely maps to Clean Architecture principles:
-- **Domain Layer**: Implicitly defined by the data structures (emissions data) and types. `src/services/` contains domain-specific logic like country translation.
-- **Application Layer**: `src/hooks/` and `src/context/` manage the application state and business logic (e.g., filtering data by year).
+Although this is a frontend-only application, the codebase is organized to separate concerns, loosely following Clean Architecture:
+
+- **Domain Layer**: Defined by the data structures (emissions data schema) and business rules (e.g., country name normalization in `src/services/`).
+- **Application Layer**: Managed by `src/hooks/` (e.g., `useData`) and `src/context/`, which handle state and use-case logic (e.g., filtering by year, changing language).
 - **Infrastructure Layer**:
-    - **Data Access**: `d3.csv` and `fetch` APIs.
-    - **External Integration**: `scripts/update-data.js` handles fetching from Zenodo (Global Carbon Project), acting as the infrastructure adapter for external data.
-- **Presentation Layer**: React components (`src/components/`) handle the UI and user interaction.
+    - **Data Access**: `d3.csv` and native `fetch` used to retrieve static files.
+    - **Build Tools**: Vite and Cloudflare Pages serve as the infrastructure for delivery.
+    - **External Integration**: `scripts/update-data.js` acts as an adapter to fetch and normalize data from Zenodo (Global Carbon Project) during build/maintenance time.
+- **Presentation Layer**: React components (`src/components/`) are responsible solely for UI rendering and user interaction.
 
 ### State Management
 - **React Context**: Used for global state that rarely changes (e.g., `LanguageContext` for i18n).

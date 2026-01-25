@@ -1,3 +1,4 @@
+# DocOps: Scan PRs for vulnerable dependencies
 name: 'Dependency Review'
 on: [pull_request]
 

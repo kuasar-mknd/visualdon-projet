@@ -145,6 +145,12 @@ To ensure code quality and prevent regressions, run the linter:
 pnpm lint
 ```
 
+### Security
+This repository uses GitHub Actions for continuous security monitoring:
+- **CodeQL**: Scans for security vulnerabilities in the codebase.
+- **Dependency Review**: Checks for vulnerable dependencies in Pull Requests.
+- **Dependabot**: Automatically opens PRs to update outdated dependencies.
+
 ## 🤝 Contributing
 
 We welcome contributions from the community! Whether you're fixing bugs, improving documentation, or proposing new features, your help is appreciated.

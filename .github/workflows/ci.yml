@@ -13,16 +13,18 @@ concurrency:
 
 jobs:
   build:
+    name: Lint, Build & Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 9
 
-      - name: Use Node.js 20
+      - name: Setup Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -34,20 +36,20 @@ jobs:
       - name: Lint
         if: ${{ hashFiles('package.json') != '' }}
         run: |
-            if npm run | grep -q "lint"; then
-              pnpm run lint
-            fi
+          if npm run | grep -q "lint"; then
+            pnpm run lint
+          fi
 
       - name: Build
         if: ${{ hashFiles('package.json') != '' }}
         run: |
-            if npm run | grep -q "build"; then
-              pnpm run build
-            fi
+          if npm run | grep -q "build"; then
+            pnpm run build
+          fi
 
       - name: Test
         if: ${{ hashFiles('package.json') != '' }}
         run: |
-            if npm run | grep -q "test"; then
-              pnpm run test
-            fi
+          if npm run | grep -q "test"; then
+            pnpm run test
+          fi
