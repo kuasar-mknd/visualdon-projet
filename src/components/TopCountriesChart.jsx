@@ -119,6 +119,8 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
 
         g = svg.append("g")
             .attr("class", "chart-group")
+            .attr("role", "list")
+            .attr("aria-label", t('top10'))
             .attr("transform", `translate(${margin.left},${margin.top})`);
             
         svg.append("text")
@@ -139,6 +141,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
         g.selectAll("*").remove();
         g.append("text")
          .attr("class", "no-data-message")
+         .attr("role", "status")
          .attr("x", innerWidth / 2)
          .attr("y", innerHeight / 2)
          .attr("text-anchor", "middle")
