@@ -17,3 +17,8 @@
 **Vulnerability:** Downloading datasets from external sources (even trusted ones like Zenodo) without integrity verification leaves the application vulnerable to Man-in-the-Middle (MitM) attacks or compromised servers serving malicious files.
 **Learning:** Supply chain security isn't just about NPM packages; it applies to data pipelines too. A compromised data file could lead to persistent XSS (if content is rendered) or skewed visualization logic.
 **Prevention:** Always verify cryptographic checksums (MD5/SHA) of downloaded assets against a trusted metadata source before processing or storing them.
+
+## 2025-12-22 - Header Synchronization & Dev Parity
+**Vulnerability:** Inconsistent security headers between development, production (Vercel), and fallback (Netlify/Static) led to "it works on my machine" security gaps and potential deployment surprises where strict headers break the app.
+**Learning:** `vite.config.js` headers only affect the dev server but are crucial for early detection of mixed content or CSP issues. However, strict CSP (blocking `unsafe-inline` scripts) breaks Vite's HMR, requiring a deliberate relaxation in dev/preview config while maintaining strictness in production.
+**Prevention:** Maintain strict synchronization of `Permissions-Policy` and `Content-Security-Policy` across `vercel.json` (Production), `public/_headers` (Fallback/Netlify), `index.html` (Meta Fallback), and `vite.config.js` (Dev Parity), explicitly documenting any dev-only relaxations.
