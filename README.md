@@ -1,6 +1,6 @@
 # 🌍 Global CO₂ Emissions Visualization
 
-[![Deployment Status](https://img.shields.io/badge/Cloudflare%20Pages-Deployed-orange?logo=cloudflare)](https://visualdon-projet.pages.dev)
+[![Deployment Status](https://img.shields.io/badge/Cloudflare%20Pages-Deployed-orange?logo=cloudflare)](https://co2.kuasar.xyz)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Data Source](https://zenodo.org/badge/DOI/10.5281/zenodo.7215364.svg)](https://doi.org/10.5281/zenodo.7215364)
 [![React](https://img.shields.io/badge/React-19.2.3-61DAFB?logo=react)](https://react.dev)
@@ -67,7 +67,7 @@ This project uses authoritative emissions data from the [Global Carbon Budget](h
 The application exposes its data via a static API. You can retrieve the current dataset manifest using curl:
 
 ```bash
-curl -s https://visualdon-projet.pages.dev/data/manifest.json
+curl -s https://co2.kuasar.xyz/data/manifest.json
 ```
 
 For full documentation on available data endpoints and schemas, see [docs/API.md](docs/API.md).
@@ -194,7 +194,7 @@ This visualization is based on the Global Carbon Budget dataset, which provides 
 
 ## 🔗 Links
 
-- **Live Demo**: [https://visualdon-projet.pages.dev](https://visualdon-projet.pages.dev)
+- **Live Demo**: [https://co2.kuasar.xyz](https://co2.kuasar.xyz)
 - **Report Issues**: [GitHub Issues](https://github.com/kuasar-mknd/visualdon-projet/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/kuasar-mknd/visualdon-projet/discussions)
 

@@ -36,7 +36,7 @@ To support versioned data without requiring code changes, the application uses a
 You can inspect the current data manifest using curl:
 
 ```bash
-curl -s https://visualdon-projet.pages.dev/data/manifest.json | jq .
+curl -s https://co2.kuasar.xyz/data/manifest.json | jq .
 ```
 
 ## Internal Services
