@@ -1,11 +1,13 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import * as d3 from 'd3';
 import { useLanguage } from '../context/LanguageContext';
 import { fetchCountryDetails } from '../services/countryService';
+import { useResizeObserver } from '../hooks/useResizeObserver';
 
 const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, displayCategory }) => {
-  const svgRef = useRef(null);
+  // Optimization: Use ResizeObserver to handle window resizing dynamically
+  const [svgRef, dimensions] = useResizeObserver({ debounceTime: 100 });
   const { t, language } = useLanguage();
   const [translatedNames, setTranslatedNames] = useState({});
 
@@ -78,10 +80,10 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
   }, [topData, language, translatedNames]);
 
   useEffect(() => {
-    if (!data || !svgRef.current) return;
+    // Only render if we have dimensions (observer has fired)
+    if (!data || !svgRef.current || dimensions.width === 0) return;
 
-    const width = svgRef.current.clientWidth;
-    const height = svgRef.current.clientHeight || 400;
+    const { width, height } = dimensions;
     const margin = {top: 40, right: 80, bottom: 40, left: 140};
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
@@ -286,13 +288,21 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
         .attr("x", d => x(d[category] || 0) + 8)
         .style("opacity", 1)
         .tween("text", function(d) {
-            const i = d3.interpolateNumber(parseFloat(this.textContent) || 0, d[category] || 0);
+            // Optimization: Store current value on the element to avoid reading DOM (this.textContent)
+            // reading from DOM during animation frame causes layout thrashing.
+            const current = this._currentValue || 0;
+            const target = d[category] || 0;
+            const i = d3.interpolateNumber(current, target);
+
             return function(t) {
-                this.textContent = i(t).toFixed(1);
+                const val = i(t);
+                // Update current value continuously to support smooth interruptions
+                this._currentValue = val;
+                this.textContent = val.toFixed(1);
             };
         });
 
-  }, [data, topData, year, category, t, translatedNames, isPlaying, onCountrySelect, displayCategory]);
+  }, [data, topData, year, category, t, translatedNames, isPlaying, onCountrySelect, displayCategory, dimensions]);
 
   return <svg ref={svgRef} className="w-full h-full rounded-lg" />;
 };

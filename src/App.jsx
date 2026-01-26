@@ -136,13 +136,6 @@ function AppContent() {
     return grouped;
   }, [emissions]);
 
-  // Update displayCountry when selectedCountry changes to a valid value
-  useEffect(() => {
-    if (selectedCountry) {
-      setDisplayCountry(selectedCountry);
-    }
-  }, [selectedCountry]);
-
   // Fetch translated country name when displayCountry changes
   useEffect(() => {
     if (!displayCountry) return;
@@ -155,6 +148,13 @@ function AppContent() {
   // Stable handlers
   const handleCloseOverlay = useCallback(() => {
     setSelectedCountry(null);
+  }, []);
+
+  const handleCountrySelect = useCallback((countryCode) => {
+    setSelectedCountry(countryCode);
+    if (countryCode) {
+      setDisplayCountry(countryCode);
+    }
   }, []);
 
   if (loading) {
@@ -199,7 +199,7 @@ function AppContent() {
                   category={category === 'Per Capita' ? 'Total' : category}
                   displayCategory={category}
                   isPlaying={isPlaying}
-                  onCountrySelect={setSelectedCountry}
+                  onCountrySelect={handleCountrySelect}
                />
              </Suspense>
           </div>
@@ -216,7 +216,7 @@ function AppContent() {
                 category={category === 'Per Capita' ? 'Total' : category}
                 displayCategory={category}
                 maxVal={currentMaxVal}
-                onCountrySelect={setSelectedCountry}
+                onCountrySelect={handleCountrySelect}
              />
 
              <CountryDetailsOverlay
