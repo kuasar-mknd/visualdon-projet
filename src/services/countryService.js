@@ -1,4 +1,4 @@
-import { isValidCountryCode, isValidLanguage } from '../utils/security.js';
+import { isValidCountryCode, isValidLanguage, sanitizeString } from '../utils/security.js';
 
 const CACHE_KEY = 'visualdon_country_cache';
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
@@ -161,8 +161,11 @@ export const fetchCountryDetails = async (code, language) => {
 
 const getNameFromData = (data, language) => {
   if (!data) return null;
+  let name;
   if (language === 'fr' && data.translations && data.translations.fra) {
-    return data.translations.fra.common;
+    name = data.translations.fra.common;
+  } else {
+    name = data.name.common; // Default to common name (English usually)
   }
-  return data.name.common; // Default to common name (English usually)
+  return sanitizeString(name);
 };

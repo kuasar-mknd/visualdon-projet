@@ -9,7 +9,7 @@
  */
 export const isValidCountryCode = (code) => {
   if (!code || typeof code !== 'string') return false;
-  return /^[a-zA-Z0-9]{2,3}$/.test(code);
+  return /^[a-zA-Z]{2,3}$/.test(code);
 };
 
 /**
@@ -52,11 +52,19 @@ export const validateManifest = (manifest) => {
   ];
 
   // Validate presence and type of keys
-  return requiredKeys.every(key =>
+  const hasKeys = requiredKeys.every(key =>
     Object.prototype.hasOwnProperty.call(manifest, key) &&
     typeof manifest[key] === 'string' &&
     manifest[key].length > 0
   );
+
+  if (!hasKeys) return false;
+
+  // Validate hash format (SHA-256 hex string)
+  const hashKeys = ['emissionsHash', 'perCapitaHash', 'geoJsonHash'];
+  const isHashValid = hashKeys.every(key => /^[a-fA-F0-9]{64}$/.test(manifest[key]));
+
+  return isHashValid;
 };
 
 /**
@@ -82,5 +90,26 @@ export const validateGeoJson = (geoJson) => {
   // Check features array
   if (!Array.isArray(geoJson.features)) return false;
 
+  // Check at least one feature structure if not empty
+  if (geoJson.features.length > 0) {
+    const firstFeature = geoJson.features[0];
+    if (!firstFeature || typeof firstFeature !== 'object') return false;
+    if (firstFeature.type !== 'Feature') return false;
+    if (!firstFeature.geometry || typeof firstFeature.geometry !== 'object') return false;
+  }
+
   return true;
+};
+
+/**
+ * Validates if a year is valid.
+ * @param {number|string} year - The year to validate.
+ * @param {number} min - Minimum allowed year.
+ * @param {number} max - Maximum allowed year.
+ * @returns {boolean} - True if valid.
+ */
+export const isValidYear = (year, min = 1750, max = new Date().getFullYear() + 5) => {
+  const y = parseInt(year, 10);
+  if (isNaN(y)) return false;
+  return y >= min && y <= max;
 };

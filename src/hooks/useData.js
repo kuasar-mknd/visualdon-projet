@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { text, json, csvParseRows } from 'd3';
-import { validateManifest, validateGeoJson } from '../utils/security';
+import { validateManifest, validateGeoJson, sanitizeString } from '../utils/security';
 
 // Helper to fetch with timeout
 function fetchWithTimeout(promise, ms = 10000) {
@@ -19,7 +19,12 @@ function fastRowBuilder(row, headers) {
     const val = row[index];
 
     // Skip known string columns (assign directly)
-    if (key === 'Country' || key === 'ISO 3166-1 alpha-3') {
+    if (key === 'Country') {
+        d[key] = sanitizeString(val);
+        continue;
+    }
+
+    if (key === 'ISO 3166-1 alpha-3') {
         d[key] = val;
         continue;
     }

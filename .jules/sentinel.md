@@ -17,3 +17,8 @@
 **Vulnerability:** Downloading datasets from external sources (even trusted ones like Zenodo) without integrity verification leaves the application vulnerable to Man-in-the-Middle (MitM) attacks or compromised servers serving malicious files.
 **Learning:** Supply chain security isn't just about NPM packages; it applies to data pipelines too. A compromised data file could lead to persistent XSS (if content is rendered) or skewed visualization logic.
 **Prevention:** Always verify cryptographic checksums (MD5/SHA) of downloaded assets against a trusted metadata source before processing or storing them.
+
+## 2025-12-21 - Deep Structure Validation
+**Vulnerability:** Shallow validation of complex objects (GeoJSON, Manifest) allowed invalid internal structures (empty features, weak hashes) to bypass checks.
+**Learning:** Checking `typeof obj === 'object'` is insufficient for critical data files. Invalid internal structures can crash visualization libraries (D3) or lead to logic errors.
+**Prevention:** Implement deep structural validation that checks nested properties (e.g., `features[0].geometry`) and strictly enforces string formats (e.g., regex for SHA-256 hashes).

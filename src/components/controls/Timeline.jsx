@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { useLanguage } from '../../context/LanguageContext';
+import { isValidYear } from '../../utils/security';
 
 const Timeline = ({ year, setYear, yearRange }) => {
   const { t } = useLanguage();
@@ -23,6 +24,9 @@ const Timeline = ({ year, setYear, yearRange }) => {
 
   const handleYearChange = useCallback((e) => {
     const val = parseInt(e.target.value, 10);
+
+    if (!isValidYear(val, yearRange.min, yearRange.max)) return;
+
     setLocalYear(val);
 
     // Debounce the global state update to prevent excessive re-renders of heavy charts
