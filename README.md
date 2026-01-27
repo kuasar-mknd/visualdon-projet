@@ -91,6 +91,10 @@ Data updates are also automated via GitHub Actions, running monthly. See [DATA_U
 - **Analytics**: Cloudflare Web Analytics
 - **Data Processing**: Node.js scripts for CSV parsing and optimization (see `scripts/update-data.js`)
 
+## 🏗️ Architecture
+
+For a detailed overview of the application's architecture, including the data flow, component structure, and Clean Architecture mapping, please refer to [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
 ## 📁 Project Structure
 
 ```text
@@ -123,6 +127,7 @@ visualdon-projet/
 Common issues and solutions:
 
 - **Missing dependencies**: If you encounter errors about missing modules, ensure you have run `pnpm install`.
+- **Linting errors**: Run `pnpm lint` to identify and fix code style or potential error issues.
 - **Package Manager**: This project is optimized for `pnpm`. If you use `npm` or `yarn` and face issues, try deleting `node_modules` and installing with `pnpm`.
 - **Node version**: This project requires Node.js 20+. Use `node -v` to check your version.
 - **Port already in use**: If `http://localhost:5173` is taken, Vite will automatically try the next available port (e.g., 5174). Check the console output.

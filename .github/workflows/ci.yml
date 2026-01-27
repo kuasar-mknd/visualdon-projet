@@ -12,7 +12,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  quality:
+    name: Quality Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -32,22 +33,19 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Lint
-        if: ${{ hashFiles('package.json') != '' }}
         run: |
-            if npm run | grep -q "lint"; then
+            if jq -e '.scripts.lint' package.json >/dev/null; then
               pnpm run lint
             fi
 
       - name: Build
-        if: ${{ hashFiles('package.json') != '' }}
         run: |
-            if npm run | grep -q "build"; then
+            if jq -e '.scripts.build' package.json >/dev/null; then
               pnpm run build
             fi
 
       - name: Test
-        if: ${{ hashFiles('package.json') != '' }}
         run: |
-            if npm run | grep -q "test"; then
+            if jq -e '.scripts.test' package.json >/dev/null; then
               pnpm run test
             fi

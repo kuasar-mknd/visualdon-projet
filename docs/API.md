@@ -22,7 +22,10 @@ To support versioned data without requiring code changes, the application uses a
     "emissions": "GCB2025v15_MtCO2_flat.csv",
     "perCapita": "GCB_2025v15_percapita_flat-clean.csv",
     "version": "2025v15",
-    "lastUpdated": "2025-12-27T00:04:57.161Z"
+    "lastUpdated": "2025-12-27T00:04:57.161Z",
+    "emissionsHash": "df0e52bd...",
+    "perCapitaHash": "45a02b31...",
+    "geoJsonHash": "ee878d6f..."
   }
   ```
 - **Emissions Data** (e.g., `GCB2025v15_MtCO2_flat.csv`):
