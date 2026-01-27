@@ -203,6 +203,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
         .append("g")
         .attr("class", "bar-group")
         .attr("transform", d => `translate(0, ${y(d["ISO 3166-1 alpha-3"])})`)
+        .style("will-change", "transform")
         .style("opacity", 0)
         .style("cursor", "pointer")
         .style("outline", "none")
@@ -212,20 +213,38 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
             const name = translatedNames[d["ISO 3166-1 alpha-3"]] || d.Country;
             const val = (d[category] || 0).toFixed(1);
             return `${name}: ${val}`;
-        })
-        .on("mouseover", handleInteractionStart)
-        .on("mouseout", handleInteractionEnd)
-        .on("focus", handleInteractionStart)
-        .on("blur", handleInteractionEnd)
-        .on("click", (event, d) => {
-          if (onCountrySelect) onCountrySelect(d["ISO 3166-1 alpha-3"]);
-        })
-        .on("keydown", (event, d) => {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            if (onCountrySelect) onCountrySelect(d["ISO 3166-1 alpha-3"]);
-          }
         });
+
+    // Optimization: Event delegation for bars
+    g.on("mouseover focusin", function(event) {
+        const target = event.target.closest(".bar-group");
+        if (!target) return;
+        const d = d3.select(target).datum();
+        handleInteractionStart.call(target, event, d);
+    });
+
+    g.on("mouseout focusout", function(event) {
+        const target = event.target.closest(".bar-group");
+        if (!target) return;
+        handleInteractionEnd.call(target, event);
+    });
+
+    g.on("click", function(event) {
+        const target = event.target.closest(".bar-group");
+        if (!target) return;
+        const d = d3.select(target).datum();
+        if (onCountrySelect) onCountrySelect(d["ISO 3166-1 alpha-3"]);
+    });
+
+    g.on("keydown", function(event) {
+        if (event.key === "Enter" || event.key === " ") {
+            const target = event.target.closest(".bar-group");
+            if (!target) return;
+            event.preventDefault();
+            const d = d3.select(target).datum();
+            if (onCountrySelect) onCountrySelect(d["ISO 3166-1 alpha-3"]);
+        }
+    });
 
     // UX: Add a transparent hit area to make the entire row clickable, not just the bar/text
     enter.append("rect")

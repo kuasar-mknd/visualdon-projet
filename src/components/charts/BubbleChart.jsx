@@ -193,11 +193,21 @@ const BubbleChart = ({
         .style("cursor", "pointer")
         .attr("tabindex", "0")
         .attr("role", "button")
-        .attr("aria-label", d => `${t(`sectors.${d.sector}`)}: ${d.value.toFixed(1)} MtCO₂`)
-        .on("mouseover", handleInteractionStart)
-        .on("focus", handleInteractionStart)
-        .on("mouseout", handleInteractionEnd)
-        .on("blur", handleInteractionEnd);
+        .attr("aria-label", d => `${t(`sectors.${d.sector}`)}: ${d.value.toFixed(1)} MtCO₂`);
+
+    // Optimization: Event delegation for bubbles to reduce listener count (1200+ -> 4)
+    bubblesGroup.on("mouseover focusin", function(event) {
+        const target = event.target.closest(".bubble");
+        if (!target) return;
+        const d = select(target).datum();
+        handleInteractionStart.call(target, event, d);
+    });
+
+    bubblesGroup.on("mouseout focusout", function(event) {
+        const target = event.target.closest(".bubble");
+        if (!target) return;
+        handleInteractionEnd.call(target, event);
+    });
 
     // Legend
     const legend = svg.append("g")

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 const GlobePaths = ({ geoJson, onCountrySelect, onHover, onLeave }) => {
   // Optimization: Render static paths once.
+  // Removed event handlers from dependency array as they are now handled via delegation
   const paths = useMemo(() => {
     if (!geoJson) return [];
 
@@ -19,26 +20,42 @@ const GlobePaths = ({ geoJson, onCountrySelect, onHover, onLeave }) => {
                 aria-label={feature.properties.NAME || countryId}
                 data-id={countryId}
                 data-name={feature.properties.NAME}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onCountrySelect(countryId);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      onCountrySelect(countryId);
-                  }
-                }}
-                onFocus={() => onHover(countryId, feature.properties.NAME)}
-                onBlur={onLeave}
-                onMouseEnter={() => onHover(countryId, feature.properties.NAME)}
-                onMouseLeave={onLeave}
             />
         );
     });
-  }, [geoJson, onCountrySelect, onHover, onLeave]);
+  }, [geoJson]);
 
-  return <g>{paths}</g>;
+  const handleInteraction = (e, type) => {
+      const target = e.target.closest('path[data-id]');
+      if (!target) return;
+
+      const { id, name } = target.dataset;
+
+      if (type === 'click') {
+          e.stopPropagation();
+          onCountrySelect(id);
+      } else if (type === 'hover') {
+          onHover(id, name);
+      }
+  };
+
+  return (
+      <g
+        onClick={(e) => handleInteraction(e, 'click')}
+        onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleInteraction(e, 'click');
+            }
+        }}
+        onMouseOver={(e) => handleInteraction(e, 'hover')}
+        onFocus={(e) => handleInteraction(e, 'hover')}
+        onMouseOut={onLeave}
+        onBlur={onLeave}
+      >
+          {paths}
+      </g>
+  );
 };
 
 GlobePaths.propTypes = {
