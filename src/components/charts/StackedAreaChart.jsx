@@ -37,7 +37,12 @@ const StackedAreaChart = ({
     const svg = select(containerRef.current)
       .append("svg")
       .attr("width", width)
-      .attr("height", height);
+      .attr("height", height)
+      .attr("role", "graphics-document")
+      .attr("aria-label", t('chart.stackedTitle'));
+
+    svg.append("title").text(t('chart.stackedTitle'));
+    svg.append("desc").text(t('chart.hoverZones'));
 
     // Prepare stacked data
     const stackData = years.map(year => {
@@ -152,7 +157,8 @@ const StackedAreaChart = ({
       .attr("text-anchor", "middle")
       .style("font-size", "18px")
       .style("font-weight", "600")
-      .style("fill", "#334155");
+      .style("fill", "#334155")
+      .text(t('chart.stackedTitle'));
 
     // Legend
     const legend = svg.append("g")

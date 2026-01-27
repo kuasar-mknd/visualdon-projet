@@ -59,7 +59,9 @@ export const translations = {
       stackedChart: "Stacked Chart",
       splitBySector: "Split by Sector",
       hoverBubbles: "Hover over bubbles or legend",
-      hoverZones: "Hover over zones or legend"
+      hoverZones: "Hover over zones or legend",
+      bubbleTitle: "Emissions by Sector",
+      stackedTitle: "Emissions Evolution"
     }
   },
   fr: {
@@ -116,7 +118,9 @@ export const translations = {
       stackedChart: "Graphique empilé",
       splitBySector: "Séparer par secteur",
       hoverBubbles: "Survolez les bulles ou la légende",
-      hoverZones: "Survolez les zones ou la légende"
+      hoverZones: "Survolez les zones ou la légende",
+      bubbleTitle: "Émissions par Secteur",
+      stackedTitle: "Évolution des Émissions"
     }
   }
 };
