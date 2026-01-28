@@ -75,7 +75,10 @@ const StackedAreaChart = ({
 
     // Shared handlers
     const handleInteractionStart = function(event, d) {
-        select(this).attr('opacity', 1);
+        select(this)
+            .attr('opacity', 1)
+            .attr("stroke", "#3b82f6") // Blue focus ring
+            .attr("stroke-width", 2);
 
         // Highlight in legend
         svg.selectAll('.legend-row')
@@ -83,7 +86,11 @@ const StackedAreaChart = ({
     };
 
     const handleInteractionEnd = function() {
-        select(this).attr('opacity', 0.8);
+        select(this)
+            .attr('opacity', 0.8)
+            .attr("stroke", null)
+            .attr("stroke-width", 0);
+
         svg.selectAll('.legend-row').attr('opacity', 1);
     };
 
@@ -96,6 +103,7 @@ const StackedAreaChart = ({
       .attr('d', areaGen)
       .attr('opacity', 0.8)
       .style('cursor', 'pointer')
+      .style("outline", "none")
       .attr("tabindex", "0")
       .attr("role", "button")
       .attr("aria-label", d => t(`sectors.${d.key}`) || d.key)
@@ -164,18 +172,26 @@ const StackedAreaChart = ({
         .attr("transform", `translate(0, ${i * 28})`)
         .datum(sector)
         .style("cursor", "pointer")
+        .style("outline", "none")
         .attr("tabindex", "0")
         .attr("role", "button")
         .attr("aria-label", t(`sectors.${sector}`) || sector)
         .on("mouseover focus", function(event, hoveredSector) {
-          // Handle both MouseEvent and FocusEvent (where data is attached to element)
+          // Handle both MouseEvent and FocusEvent
           const key = hoveredSector || select(this).datum();
+
+          // Visual feedback for legend item itself
+          select(this).select(".legend-bg").attr("opacity", 1);
+
           svg.selectAll('.area')
             .transition()
             .duration(200)
             .attr('opacity', d => d.key === key ? 1 : 0.2);
         })
         .on("mouseout blur", function() {
+          // Reset legend item visual
+          select(this).select(".legend-bg").attr("opacity", 0);
+
           svg.selectAll('.area')
             .transition()
             .duration(200)
@@ -184,9 +200,21 @@ const StackedAreaChart = ({
         .on("keydown", function(event) {
              if (event.key === "Enter" || event.key === " ") {
                  event.preventDefault();
-                 // Visual feedback is handled by focus
              }
          });
+
+      // Focus background
+      legendRow.append("rect")
+        .attr("class", "legend-bg")
+        .attr("x", -4)
+        .attr("y", -4)
+        .attr("width", 140)
+        .attr("height", 24)
+        .attr("rx", 4)
+        .attr("fill", "#f1f5f9") // Slate-100
+        .attr("stroke", "#3b82f6")
+        .attr("stroke-width", 1)
+        .attr("opacity", 0);
 
       legendRow.append("rect")
         .attr("width", 16)
@@ -223,5 +251,4 @@ StackedAreaChart.propTypes = {
   colorMapping: PropTypes.object.isRequired
 };
 
-// Optimization: Memoize the component to prevent re-renders when parent re-renders but props are same.
 export default React.memo(StackedAreaChart);

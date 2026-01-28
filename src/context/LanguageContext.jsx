@@ -46,6 +46,7 @@ export const translations = {
       closeOverlay: "Close details",
       skipToContent: "Skip to main content",
       globeDescription: "Interactive 3D globe showing CO2 emissions by country",
+      globeControls: "Keyboard shortcuts: Use Arrow keys to rotate the globe. Use Plus and Minus keys to zoom in and out.",
       openInNewTab: "(opens in a new tab)"
     },
     globe: {
@@ -103,6 +104,7 @@ export const translations = {
       closeOverlay: "Fermer les détails",
       skipToContent: "Aller au contenu principal",
       globeDescription: "Globe 3D interactif montrant les émissions de CO2 par pays",
+      globeControls: "Raccourcis clavier : Utilisez les flèches pour faire tourner le globe. Utilisez les touches Plus et Moins pour zoomer.",
       openInNewTab: "(ouvre un nouvel onglet)"
     },
     globe: {

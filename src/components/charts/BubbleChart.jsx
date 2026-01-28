@@ -139,7 +139,7 @@ const BubbleChart = ({
             .transition()
             .duration(200)
             .attr("opacity", 1)
-            .attr("stroke", "#1e293b")
+            .attr("stroke", "#3b82f6") // Blue-500 for visible focus/active state
             .attr("stroke-width", 3);
 
         // Remove existing tooltips to prevent duplicates
@@ -171,11 +171,12 @@ const BubbleChart = ({
             .text(text);
     };
 
-    const handleInteractionEnd = function() {
+    const handleInteractionEnd = function(event, d) {
         select(this)
             .transition()
             .duration(200)
             .attr("opacity", 0.7)
+            .attr("stroke", d.color) // Reset to original color
             .attr("stroke-width", 2);
 
         svg.selectAll(".tooltip").remove();
@@ -191,6 +192,7 @@ const BubbleChart = ({
         .attr("stroke", d => d.color)
         .attr("stroke-width", 2)
         .style("cursor", "pointer")
+        .style("outline", "none")
         .attr("tabindex", "0")
         .attr("role", "button")
         .attr("aria-label", d => `${t(`sectors.${d.sector}`)}: ${d.value.toFixed(1)} MtCO₂`)
@@ -207,16 +209,25 @@ const BubbleChart = ({
         const legendRow = legend.append("g")
             .attr("transform", `translate(0, ${i * 28})`)
             .style("cursor", "pointer")
+            .style("outline", "none")
             .attr("tabindex", "0")
             .attr("role", "button")
             .attr("aria-label", t(`sectors.${sector}`) || sector)
             .on("mouseover focus", function() {
+                // Visual feedback for legend item itself
+                select(this).select(".legend-bg")
+                    .attr("opacity", 1);
+
                 bubbles.selectAll("circle")
                     .transition()
                     .duration(200)
                     .attr("opacity", d => d.sector === sector ? 1 : 0.2);
             })
             .on("mouseout blur", function() {
+                // Reset legend item visual
+                select(this).select(".legend-bg")
+                    .attr("opacity", 0);
+
                 bubbles.selectAll("circle")
                     .transition()
                     .duration(200)
@@ -225,19 +236,31 @@ const BubbleChart = ({
             .on("keydown", function(event) {
                 if (event.key === "Enter" || event.key === " ") {
                     event.preventDefault();
-                    // No persistent state to toggle, but prevents scrolling
                 }
             });
 
+        // Add background rect for focus indication
+        legendRow.append("rect")
+            .attr("class", "legend-bg")
+            .attr("x", -4)
+            .attr("y", -4)
+            .attr("width", 140) // Approximate width
+            .attr("height", 24)
+            .attr("rx", 4)
+            .attr("fill", "#f1f5f9") // Slate-100
+            .attr("stroke", "#3b82f6") // Blue-500
+            .attr("stroke-width", 1)
+            .attr("opacity", 0); // Hidden by default
+
         legendRow.append("circle")
             .attr("cx", 8)
-            .attr("cy", 0)
-            .attr("r", 8)
+            .attr("cy", 8) // Center in the row
+            .attr("r", 6)
             .attr("fill", color);
 
         legendRow.append("text")
             .attr("x", 22)
-            .attr("y", 4)
+            .attr("y", 12)
             .text(t(`sectors.${sector}`) || sector)
             .attr("fill", "#475569")
             .style("font-size", "13px")
@@ -300,5 +323,4 @@ BubbleChart.propTypes = {
   colorMapping: PropTypes.object.isRequired
 };
 
-// Optimization: Memoize the component to prevent re-renders when parent re-renders but props are same.
 export default React.memo(BubbleChart);
