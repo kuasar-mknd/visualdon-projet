@@ -159,6 +159,15 @@ export const fetchCountryDetails = async (code, language) => {
   }
 };
 
+export const getCountryNameSync = (code, language) => {
+  if (!code) return null;
+  const cache = getCache();
+  if (cache[code]) {
+      return getNameFromData(cache[code].data, language);
+  }
+  return null;
+};
+
 const getNameFromData = (data, language) => {
   if (!data) return null;
   if (language === 'fr' && data.translations && data.translations.fra) {
