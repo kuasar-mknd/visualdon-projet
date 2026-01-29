@@ -9,7 +9,8 @@
  */
 export const isValidCountryCode = (code) => {
   if (!code || typeof code !== 'string') return false;
-  return /^[a-zA-Z0-9]{2,3}$/.test(code);
+  // Security Enhancement: Strict validation, alpha only (no numbers)
+  return /^[a-zA-Z]{2,3}$/.test(code);
 };
 
 /**
@@ -66,6 +67,44 @@ export const validateManifest = (manifest) => {
  */
 export const isValidLanguage = (lang) => {
   return ['en', 'fr'].includes(lang);
+};
+
+/**
+ * Validates a year is within a reasonable range.
+ * @param {number|string} year - The year to validate.
+ * @param {number} min - Minimum allowed year (default 1750).
+ * @param {number} max - Maximum allowed year (default 2100).
+ * @returns {boolean} - True if valid.
+ */
+export const isValidYear = (year, min = 1750, max = 2100) => {
+  const y = parseInt(year, 10);
+  if (isNaN(y)) return false;
+  return y >= min && y <= max;
+};
+
+/**
+ * Validates a color string (hex or rgb).
+ * @param {string} color - The color string.
+ * @returns {boolean} - True if valid.
+ */
+export const isValidColor = (color) => {
+  if (!color || typeof color !== 'string') return false;
+  // Hex (3, 4, 6, or 8 digits)
+  if (/^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(color)) return true;
+  // rgb/rgba
+  if (/^rgba?\(\s*(\d{1,3}%?)\s*,\s*(\d{1,3}%?)\s*,\s*(\d{1,3}%?)\s*(,\s*(\d*\.?\d+%?))?\s*\)$/.test(color)) return true;
+  return false;
+};
+
+/**
+ * Validates filename to prevent path traversal (basic check).
+ * @param {string} filename - The filename to validate.
+ * @returns {boolean} - True if valid (no slashes, dots at start).
+ */
+export const isValidFilename = (filename) => {
+  if (!filename || typeof filename !== 'string') return false;
+  // Allow alphanumeric, dashes, underscores, dots (but not at start, and no slashes)
+  return /^[a-zA-Z0-9_-][a-zA-Z0-9_.-]*$/.test(filename) && !filename.includes('/') && !filename.includes('\\');
 };
 
 /**

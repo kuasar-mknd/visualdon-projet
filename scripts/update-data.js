@@ -186,6 +186,12 @@ async function getZenodoData() {
   console.log(`  Version: ${metadata.version || metadata.publication_date.substring(0, 4)}`);
   console.log(`  DOI: ${metadata.doi}`);
   console.log(`  Published: ${metadata.publication_date}\n`);
+
+  // Security: Validate version string format to prevent injection in filenames/manifest
+  const version = metadata.version || metadata.publication_date.substring(0, 4);
+  if (!/^[a-zA-Z0-9.\-_]+$/.test(version)) {
+      throw new Error(`Security: Invalid version string format: ${version}`);
+  }
   
   // Find the CSV files
   const mtCO2File = files.find(f => f.key.includes('MtCO2_flat.csv') && !f.key.includes('metadata'));
@@ -197,7 +203,7 @@ async function getZenodoData() {
   }
   
   return {
-    version: metadata.version || metadata.publication_date.substring(0, 4),
+    version: version,
     mtCO2Url: mtCO2File.links.self,
     populationUrl: populationFile.links.self,
     mtCO2Filename: path.basename(mtCO2File.key),
