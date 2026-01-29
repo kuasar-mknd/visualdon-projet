@@ -53,6 +53,13 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
     languageRef.current = language;
   }, [language]);
 
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    };
+  }, []);
+
   // Sync ref with state
   useEffect(() => {
     hoveredCountryIdRef.current = hoveredCountryId;
