@@ -173,6 +173,10 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
                  select(svgRef.current).select(".highlight-path").attr("d", path(feature));
              }
         }
+
+        // Optimization: Update glow circle radius to match globe scale during zoom
+        // This fixes a visual desync where the glow remained static while the globe zoomed.
+        select(svgRef.current).select(".glow-circle").attr("r", scaleRef.current);
     };
 
     const zm = zoom()
@@ -293,7 +297,7 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
                 stroke="none"
             />
             {/* Center glow - static relative to viewport */}
-            <circle cx={dimensions.width/2} cy={dimensions.height/2} r={scaleRef.current} fill="#60a5fa" opacity="0.1" filter="url(#glow)" />
+            <circle className="glow-circle" cx={dimensions.width/2} cy={dimensions.height/2} r={scaleRef.current} fill="#60a5fa" opacity="0.1" filter="url(#glow)" />
 
             <GlobePaths
                geoJson={geoJson}
