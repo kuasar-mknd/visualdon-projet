@@ -49,6 +49,7 @@ const CountryDetailsOverlay = ({ selectedCountry, selectedCountryName, displayCo
     <div 
       role="dialog"
       aria-modal="true"
+      aria-hidden={!selectedCountry}
       aria-labelledby="overlay-title"
       aria-describedby="overlay-description"
       className={`absolute bottom-0 left-0 right-0 top-0 bg-white/80 backdrop-blur-xl border-t border-white/50 shadow-2xl transition-all duration-500 ease-in-out overflow-hidden flex flex-col will-change-[transform,opacity] ${selectedCountry ? 'translate-y-0 opacity-100 pointer-events-auto' : 'translate-y-[110%] opacity-0 pointer-events-none invisible'}`}

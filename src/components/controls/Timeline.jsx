@@ -37,6 +37,8 @@ const Timeline = ({ year, setYear, yearRange }) => {
       <div className="px-1 group">
         <input
           type="range"
+          step="1"
+          autoComplete="off"
           min={yearRange.min}
           max={yearRange.max}
           value={localYear || yearRange.min}

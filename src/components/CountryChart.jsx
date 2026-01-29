@@ -117,6 +117,7 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
           <label className="flex items-center gap-3 px-4 py-2 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500 shadow-sm">
             <input 
               type="checkbox" 
+              autoComplete="off"
               checked={split} 
               onChange={(e) => setSplit(e.target.checked)}
               className="w-4 h-4 accent-blue-600 cursor-pointer outline-none"
