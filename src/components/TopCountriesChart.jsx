@@ -123,6 +123,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
 
         g = svg.append("g")
             .attr("class", "chart-group")
+            .attr("role", "list")
             .attr("transform", `translate(${margin.left},${margin.top})`);
             
         svg.append("text")

@@ -35,6 +35,7 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
   const rotationRef = useRef([0, 0]);
   const scaleRef = useRef(250);
   const hoveredCountryIdRef = useRef(null); // Ref to access current hover state in drag loop
+  const updateGlobeRef = useRef(null); // Ref to expose the update function
 
   // Optimization: Cache D3 selections to avoid expensive DOM queries during drag/zoom loop
   const countrySelectionRef = useRef(null);
@@ -179,6 +180,9 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
         select(svgRef.current).select(".glow-circle").attr("r", scaleRef.current);
     };
 
+    // Expose updateGlobe to ref for external access (e.g. keyboard navigation)
+    updateGlobeRef.current = updateGlobe;
+
     const zm = zoom()
       .scaleExtent([1, 5])
       .on("zoom", (event) => {
@@ -252,10 +256,67 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
       );
   }, [hoveredCountryId]);
 
+  const handleKeyDown = (e) => {
+    // Rotation sensitivity in degrees
+    const sensitivity = 10;
+    // Zoom sensitivity factor
+    const zoomFactor = 1.1;
+
+    let handled = false;
+
+    switch (e.key) {
+      case 'ArrowLeft':
+        rotationRef.current[0] -= sensitivity;
+        handled = true;
+        break;
+      case 'ArrowRight':
+        rotationRef.current[0] += sensitivity;
+        handled = true;
+        break;
+      case 'ArrowUp':
+        rotationRef.current[1] -= sensitivity;
+        handled = true;
+        break;
+      case 'ArrowDown':
+        rotationRef.current[1] += sensitivity;
+        handled = true;
+        break;
+      case '+':
+      case '=':
+        scaleRef.current = Math.min(scaleRef.current * zoomFactor, 250 * 5); // Max scale 5x
+        handled = true;
+        break;
+      case '-':
+      case '_':
+        scaleRef.current = Math.max(scaleRef.current / zoomFactor, 250); // Min scale 1x
+        handled = true;
+        break;
+      default:
+        break;
+    }
+
+    if (handled) {
+      e.preventDefault();
+      // Clamp latitude to avoid flipping
+      rotationRef.current[1] = Math.max(-90, Math.min(90, rotationRef.current[1]));
+
+      if (updateGlobeRef.current) {
+        updateGlobeRef.current();
+      }
+    }
+  };
+
   if (!data || !geoJson) return <div ref={containerRef} className="w-full h-full bg-slate-100" />;
 
   return (
-    <div ref={containerRef} className="w-full h-full relative bg-slate-50 overflow-hidden cursor-grab active:cursor-grabbing">
+    <div
+      ref={containerRef}
+      className="w-full h-full relative bg-slate-50 overflow-hidden cursor-grab active:cursor-grabbing focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500 outline-none"
+      tabIndex="0"
+      aria-label={t('aria.globeDescription')}
+      role="application"
+      onKeyDown={handleKeyDown}
+    >
        <svg
          ref={svgRef}
          width={dimensions.width}
