@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { geoOrthographic, geoPath, select, zoom, zoomIdentity, drag, scaleSequentialLog, interpolateRgb } from 'd3';
 import { useLanguage } from '../context/LanguageContext';
 import { fetchCountryDetails } from '../services/countryService';
+import { isValidCountryCode } from '../utils/security';
 import { useResizeObserver } from '../hooks/useResizeObserver';
 import GlobeLegend from './globe/GlobeLegend';
 import GlobeTooltip from './globe/GlobeTooltip';
@@ -92,6 +93,9 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
   }, [hoveredCountryId, data, category]);
 
   const handleMouseEnter = useCallback((countryId, featureName) => {
+      // Sentinel Security: Validate countryId before updating state
+      if (!isValidCountryCode(countryId)) return;
+
       setHoveredCountryId(countryId);
       if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
       hoverTimeoutRef.current = setTimeout(async () => {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { text, json, csvParseRows } from 'd3';
-import { validateManifest, validateGeoJson } from '../utils/security';
+import { validateManifest, validateGeoJson, isValidFilename, validateCountryData } from '../utils/security';
 
 // Helper to fetch with timeout
 function fetchWithTimeout(promise, ms = 10000) {
@@ -133,6 +133,16 @@ export function useData() {
           throw new Error('Invalid manifest structure or missing security hashes');
         }
 
+        // Sentinel Security: Validate filenames to prevent path traversal
+        if (!isValidFilename(manifest.emissions) || !isValidFilename(manifest.perCapita)) {
+             throw new Error('Invalid filenames in manifest');
+        }
+
+        // Sentinel Security: Validate version format (alphanumeric, dots, dashes)
+        if (!/^[a-zA-Z0-9.\-_]+$/.test(manifest.version)) {
+             throw new Error('Invalid manifest version format');
+        }
+
         // Parallelize fetching
         // Note: verifyIntegrity uses crypto.subtle which is available in secure contexts (HTTPS/localhost)
         const [emissions, geoJson, perCapita] = await Promise.all([
@@ -144,6 +154,14 @@ export function useData() {
         // Security Enhancement: Validate GeoJSON structure
         if (!validateGeoJson(geoJson)) {
           throw new Error('Invalid GeoJSON data structure');
+        }
+
+        // Sentinel Security: Validate loaded data rows structure (checking first row as sample)
+        if (emissions.length > 0 && !validateCountryData(emissions[0])) {
+           console.warn("Emissions data failed validation check");
+        }
+        if (perCapita.length > 0 && !validateCountryData(perCapita[0])) {
+           console.warn("Per Capita data failed validation check");
         }
 
         setData({

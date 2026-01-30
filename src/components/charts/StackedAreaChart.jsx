@@ -15,6 +15,7 @@ import {
   axisLeft
 } from 'd3';
 import { useLanguage } from '../../context/LanguageContext';
+import { isValidColor } from '../../utils/security';
 
 const StackedAreaChart = ({ 
   years, 
@@ -99,7 +100,7 @@ const StackedAreaChart = ({
       .data(series)
       .join('path')
       .attr('class', 'area')
-      .attr('fill', d => colorMapping[d.key])
+      .attr('fill', d => isValidColor(colorMapping[d.key]) ? colorMapping[d.key] : '#ccc')
       .attr('d', areaGen)
       .attr('opacity', 0.8)
       .style('cursor', 'pointer')
@@ -219,7 +220,7 @@ const StackedAreaChart = ({
       legendRow.append("rect")
         .attr("width", 16)
         .attr("height", 16)
-        .attr("fill", colorMapping[sector])
+        .attr("fill", isValidColor(colorMapping[sector]) ? colorMapping[sector] : '#ccc')
         .attr("rx", 2);
 
       legendRow.append("text")

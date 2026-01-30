@@ -1,4 +1,4 @@
-import { isValidCountryCode, isValidLanguage } from '../utils/security.js';
+import { isValidCountryCode, isValidLanguage, validateCacheStructure } from '../utils/security.js';
 
 const CACHE_KEY = 'visualdon_country_cache';
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
@@ -23,14 +23,22 @@ const getCache = () => {
     }
 
     const parsed = JSON.parse(cache);
-    // Security Enhancement: Validate that parsed cache is actually an object
-    // to prevent crashes if localStorage contains "null" or other non-object JSON values
-    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+
+    // Sentinel Security: Validate comprehensive cache structure to prevent hydration issues or storage poisoning
+    if (!validateCacheStructure(parsed)) {
       console.warn("Invalid cache structure detected, resetting cache");
       memoryCache = {};
+      // Force clean up of invalid cache
+      try {
+        localStorage.removeItem(CACHE_KEY);
+      } catch {
+        // Ignore storage errors
+      }
       return memoryCache;
     }
 
+    // Prototype pollution prevention
+    Object.setPrototypeOf(parsed, null);
     memoryCache = parsed;
     return memoryCache;
   } catch (e) {
@@ -72,10 +80,10 @@ export const fetchCountryDetails = async (code, language) => {
     return null;
   }
 
-  // Security Enhancement: Validate language
-  if (language && !isValidLanguage(language)) {
-      // Treat invalid language as undefined/null so we fallback to default
-      language = null;
+  // Sentinel Security: Validate language strictly
+  // Note: We force language to 'en' or 'fr' if invalid, instead of null, to ensure consistent behavior
+  if (!language || !isValidLanguage(language)) {
+      language = 'en'; // Default fallback
   }
 
   // Normalize code to 2 chars if possible, but API supports 3 chars too.
@@ -91,10 +99,13 @@ export const fetchCountryDetails = async (code, language) => {
     return getNameFromData(data, language);
   }
 
+  // Sentinel Security: Use sanitized key (Defense in Depth)
+  const requestKey = String(code);
+
   // Check for existing in-flight request
-  if (pendingRequests.has(code)) {
+  if (pendingRequests.has(requestKey)) {
     try {
-        const countryData = await pendingRequests.get(code);
+        const countryData = await pendingRequests.get(requestKey);
         return getNameFromData(countryData, language);
     } catch (e) { // eslint-disable-line no-unused-vars
         // If the pending request failed, we'll try again (fall through)
@@ -142,11 +153,11 @@ export const fetchCountryDetails = async (code, language) => {
     } finally {
         clearTimeout(timeoutId);
         // Clean up pending request
-        pendingRequests.delete(code);
+        pendingRequests.delete(requestKey);
     }
   })();
 
-  pendingRequests.set(code, requestPromise);
+  pendingRequests.set(requestKey, requestPromise);
 
   try {
     const countryData = await requestPromise;

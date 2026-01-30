@@ -22,7 +22,12 @@ const Timeline = ({ year, setYear, yearRange }) => {
   }, []);
 
   const handleYearChange = useCallback((e) => {
-    const val = parseInt(e.target.value, 10);
+    let val = parseInt(e.target.value, 10);
+
+    // Sentinel Security: Ensure value is within valid bounds
+    if (yearRange && yearRange.min && val < yearRange.min) val = yearRange.min;
+    if (yearRange && yearRange.max && val > yearRange.max) val = yearRange.max;
+
     setLocalYear(val);
 
     // Debounce the global state update to prevent excessive re-renders of heavy charts

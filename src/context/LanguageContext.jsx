@@ -137,6 +137,10 @@ export const LanguageProvider = ({ children }) => {
 
   const t = (key) => {
     if (typeof key !== 'string') return '';
+
+    // Sentinel Security: Prevent access to arbitrary properties via prototype pollution or weird strings
+    if (!/^[a-zA-Z0-9.]+$/.test(key)) return key;
+
     const keys = key.split('.');
     let value = translations[language];
     for (const k of keys) {

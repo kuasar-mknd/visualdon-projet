@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import * as d3 from 'd3';
 import { useLanguage } from '../context/LanguageContext';
 import { fetchCountryDetails, getCountryNameSync } from '../services/countryService';
+import { sanitizeString } from '../utils/security';
 
 const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, displayCategory }) => {
   const svgRef = useRef(null);
@@ -215,8 +216,9 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
         .attr("role", "listitem")
         .attr("aria-label", d => {
             const name = translatedNames[d["ISO 3166-1 alpha-3"]] || getCountryNameSync(d["ISO 3166-1 alpha-3"], language) || d.Country;
+            const safeName = sanitizeString(name);
             const val = (d[category] || 0).toFixed(1);
-            return `${name}: ${val}`;
+            return `${safeName}: ${val}`;
         })
         .on("mouseover", handleInteractionStart)
         .on("mouseout", handleInteractionEnd)
@@ -254,7 +256,10 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
         .attr("fill", "#475569")
         .style("font-size", "13px")
         .style("font-weight", "600")
-        .text(d => translatedNames[d["ISO 3166-1 alpha-3"]] || getCountryNameSync(d["ISO 3166-1 alpha-3"], language) || d.Country);
+        .text(d => {
+            const name = translatedNames[d["ISO 3166-1 alpha-3"]] || getCountryNameSync(d["ISO 3166-1 alpha-3"], language) || d.Country;
+            return sanitizeString(name);
+        });
 
     enter.append("text")
         .attr("class", "value-label")
@@ -278,12 +283,16 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
         .attr("height", y.bandwidth());
 
     update.select(".country-label")
-        .text(d => translatedNames[d["ISO 3166-1 alpha-3"]] || getCountryNameSync(d["ISO 3166-1 alpha-3"], language) || d.Country);
+        .text(d => {
+             const name = translatedNames[d["ISO 3166-1 alpha-3"]] || getCountryNameSync(d["ISO 3166-1 alpha-3"], language) || d.Country;
+             return sanitizeString(name);
+        });
 
     update.attr("aria-label", d => {
         const name = translatedNames[d["ISO 3166-1 alpha-3"]] || getCountryNameSync(d["ISO 3166-1 alpha-3"], language) || d.Country;
+        const safeName = sanitizeString(name);
         const val = (d[category] || 0).toFixed(1);
-        return `${name}: ${val}`;
+        return `${safeName}: ${val}`;
     });
 
     update.select(".value-label")

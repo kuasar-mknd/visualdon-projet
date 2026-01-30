@@ -7,6 +7,7 @@ import Controls from './components/controls/Controls';
 import { useData } from './hooks/useData';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { fetchCountryDetails } from './services/countryService';
+import { isValidYear } from './utils/security';
 
 // Lazy load heavy visualization components
 const Globe = React.lazy(() => import('./components/Globe'));
@@ -15,8 +16,22 @@ const CountryDetailsOverlay = React.lazy(() => import('./components/overlay/Coun
 
 function AppContent() {
   const { emissions, geoJson, perCapita, loading } = useData();
-  const [year, setYear] = useState(null);
+  const [year, setYearState] = useState(null);
   const [selectedCountry, setSelectedCountry] = useState(null);
+
+  // Sentinel Security: Wrapper to validate year state updates
+  const setYear = useCallback((newYear) => {
+      if (typeof newYear === 'function') {
+          setYearState(prev => {
+              const val = newYear(prev);
+              return (isValidYear(val) || val === null) ? val : prev;
+          });
+      } else {
+          if (isValidYear(newYear) || newYear === null) {
+              setYearState(newYear);
+          }
+      }
+  }, []);
 
   // Optimization: Calculate global stats (max emissions & year range) in a single pass O(N)
   // Replaces separate d3.max and reduce calls (2*O(N))

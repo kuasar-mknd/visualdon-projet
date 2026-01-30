@@ -16,6 +16,7 @@ import {
   forceCollide
 } from 'd3';
 import { useLanguage } from '../../context/LanguageContext';
+import { isValidColor } from '../../utils/security';
 
 const BubbleChart = ({ 
   chartData, 
@@ -159,7 +160,7 @@ const BubbleChart = ({
             .attr("height", bbox.height + 10)
             .attr("fill", "#1e293b")
             .attr("rx", 4)
-            .attr("stroke", d.color)
+            .attr("stroke", isValidColor(d.color) ? d.color : '#ccc')
             .attr("stroke-width", 2);
 
         tooltip.append("text")
@@ -176,7 +177,7 @@ const BubbleChart = ({
             .transition()
             .duration(200)
             .attr("opacity", 0.7)
-            .attr("stroke", d.color) // Reset to original color
+            .attr("stroke", isValidColor(d.color) ? d.color : '#ccc') // Reset to original color
             .attr("stroke-width", 2);
 
         svg.selectAll(".tooltip").remove();
@@ -187,9 +188,9 @@ const BubbleChart = ({
         .attr("cx", d => xScale(d.year))
         .attr("cy", d => yScale(d.value))
         .attr("r", d => sizeScale(d.value))
-        .attr("fill", d => d.color)
+        .attr("fill", d => isValidColor(d.color) ? d.color : '#ccc')
         .attr("opacity", 0.7)
-        .attr("stroke", d => d.color)
+        .attr("stroke", d => isValidColor(d.color) ? d.color : '#ccc')
         .attr("stroke-width", 2)
         .style("cursor", "pointer")
         .style("outline", "none")
@@ -256,7 +257,7 @@ const BubbleChart = ({
             .attr("cx", 8)
             .attr("cy", 8) // Center in the row
             .attr("r", 6)
-            .attr("fill", color);
+            .attr("fill", isValidColor(color) ? color : '#ccc');
 
         legendRow.append("text")
             .attr("x", 22)
