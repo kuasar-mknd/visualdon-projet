@@ -18,21 +18,21 @@ importers:
         specifier: ^15.8.1
         version: 15.8.1
       react:
-        specifier: ^19.2.1
-        version: 19.2.3
+        specifier: ^19.2.4
+        version: 19.2.4
       react-dom:
-        specifier: ^19.2.1
-        version: 19.2.3(react@19.2.3)
+        specifier: ^19.2.4
+        version: 19.2.4(react@19.2.4)
     devDependencies:
       '@eslint/js':
         specifier: ^9.39.1
         version: 9.39.2
       '@types/react':
-        specifier: ^19.2.8
-        version: 19.2.8
+        specifier: ^19.2.10
+        version: 19.2.10
       '@types/react-dom':
         specifier: ^19.2.3
-        version: 19.2.3(@types/react@19.2.8)
+        version: 19.2.3(@types/react@19.2.10)
       '@vitejs/plugin-react':
         specifier: ^5.1.2
         version: 5.1.2(vite@7.3.1(jiti@2.6.1)(lightningcss@1.30.2))
@@ -46,11 +46,11 @@ importers:
         specifier: ^0.4.26
         version: 0.4.26(eslint@9.39.2(jiti@2.6.1))
       globals:
-        specifier: ^17.0.0
-        version: 17.0.0
+        specifier: ^17.2.0
+        version: 17.2.0
       playwright:
-        specifier: ^1.57.0
-        version: 1.57.0
+        specifier: ^1.58.1
+        version: 1.58.1
       tailwindcss:
         specifier: ^4.1.17
         version: 4.1.18
@@ -610,8 +610,8 @@ packages:
     peerDependencies:
       '@types/react': ^19.2.0
 
-  '@types/react@19.2.8':
-    resolution: {integrity: sha512-3MbSL37jEchWZz2p2mjntRZtPt837ij10ApxKfgmXCTuHWagYg7iA5bqPw6C8BMPfwidlvfPI/fxOc42HLhcyg==}
+  '@types/react@19.2.10':
+    resolution: {integrity: sha512-WPigyYuGhgZ/cTPRXB2EwUw+XvsRA3GqHlsP4qteqrnnjDrApbS7MxcGr/hke5iUoeB7E/gQtrs9I37zAJ0Vjw==}
 
   '@vitejs/plugin-react@5.1.2':
     resolution: {integrity: sha512-EcA07pHJouywpzsoTUqNh5NwGayl2PPVEJKUSinGGSxFGYn+shYbqMGBg6FXDqgXum9Ou/ecb+411ssw8HImJQ==}
@@ -1101,8 +1101,8 @@ packages:
     resolution: {integrity: sha512-oahGvuMGQlPw/ivIYBjVSrWAfWLBeku5tpPE2fOPLi+WHffIWbuh2tCjhyQhTBPMf5E9jDEH4FOmTYgYwbKwtQ==}
     engines: {node: '>=18'}
 
-  globals@17.0.0:
-    resolution: {integrity: sha512-gv5BeD2EssA793rlFWVPMMCqefTlpusw6/2TbAVMy0FzcG8wKJn4O+NqJ4+XWmmwrayJgw5TzrmWjFgmz1XPqw==}
+  globals@17.2.0:
+    resolution: {integrity: sha512-tovnCz/fEq+Ripoq+p/gN1u7l6A7wwkoBT9pRCzTHzsD/LvADIzXZdjmRymh5Ztf0DYC3Rwg5cZRYjxzBmzbWg==}
     engines: {node: '>=18'}
 
   globalthis@1.0.4:
@@ -1488,13 +1488,13 @@ packages:
     resolution: {integrity: sha512-5gTmgEY/sqK6gFXLIsQNH19lWb4ebPDLA4SdLP7dsWkIXHWlG66oPuVvXSGFPppYZz8ZDZq0dYYrbHfBCVUb1Q==}
     engines: {node: '>=12'}
 
-  playwright-core@1.57.0:
-    resolution: {integrity: sha512-agTcKlMw/mjBWOnD6kFZttAAGHgi/Nw0CZ2o6JqWSbMlI219lAFLZZCyqByTsvVAJq5XA5H8cA6PrvBRpBWEuQ==}
+  playwright-core@1.58.1:
+    resolution: {integrity: sha512-bcWzOaTxcW+VOOGBCQgnaKToLJ65d6AqfLVKEWvexyS3AS6rbXl+xdpYRMGSRBClPvyj44njOWoxjNdL/H9UNg==}
     engines: {node: '>=18'}
     hasBin: true
 
-  playwright@1.57.0:
-    resolution: {integrity: sha512-ilYQj1s8sr2ppEJ2YVadYBN0Mb3mdo9J0wQ+UuDhzYqURwSoW4n1Xs5vs7ORwgDGmyEh33tRMeS8KhdkMoLXQw==}
+  playwright@1.58.1:
+    resolution: {integrity: sha512-+2uTZHxSCcxjvGc5C891LrS1/NlxglGxzrC4seZiVjcYVQfUa87wBL6rTDqzGjuoWNjnBzRqKmF6zRYGMvQUaQ==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -1517,10 +1517,10 @@ packages:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
     engines: {node: '>=6'}
 
-  react-dom@19.2.3:
-    resolution: {integrity: sha512-yELu4WmLPw5Mr/lmeEpox5rw3RETacE++JgHqQzd2dg+YbJuat3jH4ingc+WPZhxaoFzdv9y33G+F7Nl5O0GBg==}
+  react-dom@19.2.4:
+    resolution: {integrity: sha512-AXJdLo8kgMbimY95O2aKQqsz2iWi9jMgKJhRBAxECE4IFxfcazB2LmzloIoibJI3C12IlY20+KFaLv+71bUJeQ==}
     peerDependencies:
-      react: ^19.2.3
+      react: ^19.2.4
 
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
@@ -1529,8 +1529,8 @@ packages:
     resolution: {integrity: sha512-QgT5//D3jfjJb6Gsjxv0Slpj23ip+HtOpnNgnb2S5zU3CB26G/IDPGoy4RJB42wzFE46DRsstbW6tKHoKbhAxw==}
     engines: {node: '>=0.10.0'}
 
-  react@19.2.3:
-    resolution: {integrity: sha512-Ku/hhYbVjOQnXDZFv2+RibmLFGwFdeeKHFcOTlrt7xplBnya5OGn/hIRDsqDiSUcfORsDC7MPxwork8jBwsIWA==}
+  react@19.2.4:
+    resolution: {integrity: sha512-9nfp2hYpCwOjAN+8TZFGhtWEwgvWHXqESH8qT89AT/lWklpLON22Lc8pEtnpsZz7VmawabSU0gCjnj8aC0euHQ==}
     engines: {node: '>=0.10.0'}
 
   reflect.getprototypeof@1.0.10:
@@ -2211,11 +2211,11 @@ snapshots:
 
   '@types/json-schema@7.0.15': {}
 
-  '@types/react-dom@19.2.3(@types/react@19.2.8)':
+  '@types/react-dom@19.2.3(@types/react@19.2.10)':
     dependencies:
-      '@types/react': 19.2.8
+      '@types/react': 19.2.10
 
-  '@types/react@19.2.8':
+  '@types/react@19.2.10':
     dependencies:
       csstype: 3.2.3
 
@@ -2898,7 +2898,7 @@ snapshots:
 
   globals@14.0.0: {}
 
-  globals@17.0.0: {}
+  globals@17.2.0: {}
 
   globalthis@1.0.4:
     dependencies:
@@ -3259,11 +3259,11 @@ snapshots:
 
   picomatch@4.0.3: {}
 
-  playwright-core@1.57.0: {}
+  playwright-core@1.58.1: {}
 
-  playwright@1.57.0:
+  playwright@1.58.1:
     dependencies:
-      playwright-core: 1.57.0
+      playwright-core: 1.58.1
     optionalDependencies:
       fsevents: 2.3.2
 
@@ -3285,16 +3285,16 @@ snapshots:
 
   punycode@2.3.1: {}
 
-  react-dom@19.2.3(react@19.2.3):
+  react-dom@19.2.4(react@19.2.4):
     dependencies:
-      react: 19.2.3
+      react: 19.2.4
       scheduler: 0.27.0
 
   react-is@16.13.1: {}
 
   react-refresh@0.18.0: {}
 
-  react@19.2.3: {}
+  react@19.2.4: {}
 
   reflect.getprototypeof@1.0.10:
     dependencies:
