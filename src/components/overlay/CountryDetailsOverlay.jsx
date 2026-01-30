@@ -7,6 +7,7 @@ import { sanitizeString } from '../../utils/security';
 const CountryDetailsOverlay = ({ selectedCountry, selectedCountryName, displayCountry, onClose, countryData }) => {
   const { t } = useLanguage();
 
+  const overlayRef = useRef(null);
   const closeButtonRef = useRef(null);
   const previousFocusRef = useRef(null);
 
@@ -14,8 +15,11 @@ const CountryDetailsOverlay = ({ selectedCountry, selectedCountryName, displayCo
   useEffect(() => {
     let timer;
     if (selectedCountry) {
-      // Store current focus
-      previousFocusRef.current = document.activeElement;
+      // Store current focus ONLY if we are opening (previousFocus is null)
+      // This prevents overwriting the trigger element reference during internal updates
+      if (!previousFocusRef.current) {
+         previousFocusRef.current = document.activeElement;
+      }
 
       // Move focus to close button
       // Use setTimeout to ensure visibility transition has started (removing 'invisible' class)
@@ -33,6 +37,39 @@ const CountryDetailsOverlay = ({ selectedCountry, selectedCountryName, displayCo
     return () => clearTimeout(timer);
   }, [selectedCountry]);
 
+  // Trap focus inside overlay
+  useEffect(() => {
+      if (!selectedCountry) return;
+
+      const handleTab = (e) => {
+          if (e.key === 'Tab') {
+              const focusableElements = overlayRef.current?.querySelectorAll(
+                  'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+              );
+
+              if (!focusableElements || focusableElements.length === 0) return;
+
+              const firstElement = focusableElements[0];
+              const lastElement = focusableElements[focusableElements.length - 1];
+
+              if (e.shiftKey) {
+                  if (document.activeElement === firstElement) {
+                      e.preventDefault();
+                      lastElement.focus();
+                  }
+              } else {
+                  if (document.activeElement === lastElement) {
+                      e.preventDefault();
+                      firstElement.focus();
+                  }
+              }
+          }
+      };
+
+      window.addEventListener('keydown', handleTab);
+      return () => window.removeEventListener('keydown', handleTab);
+  }, [selectedCountry]);
+
   // Close overlay on Escape key press
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -47,6 +84,7 @@ const CountryDetailsOverlay = ({ selectedCountry, selectedCountryName, displayCo
 
   return (
     <div 
+      ref={overlayRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby="overlay-title"

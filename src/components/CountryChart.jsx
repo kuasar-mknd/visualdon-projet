@@ -88,10 +88,12 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
     <div className="w-full h-full flex flex-col">
       {/* View Mode Toggle */}
       <div className="flex items-center gap-3 mb-4 flex-wrap">
-        <div role="group" aria-label={t('chart.selectViewMode')} className="flex gap-2">
+        <div role="radiogroup" aria-label={t('chart.selectViewMode')} className="flex gap-2">
           <button
             onClick={() => setViewMode('bubbles')}
-            aria-pressed={viewMode === 'bubbles'}
+            aria-checked={viewMode === 'bubbles'}
+            role="radio"
+            aria-controls="chart-container"
             className={`px-4 py-2 rounded-lg font-semibold transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none cursor-pointer ${
               viewMode === 'bubbles'
                 ? 'bg-blue-50 text-blue-600 border border-blue-200 shadow-sm'
@@ -102,7 +104,9 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
           </button>
           <button
             onClick={() => setViewMode('lines')}
-            aria-pressed={viewMode === 'lines'}
+            aria-checked={viewMode === 'lines'}
+            role="radio"
+            aria-controls="chart-container"
             className={`px-4 py-2 rounded-lg font-semibold transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none cursor-pointer ${
               viewMode === 'lines'
                 ? 'bg-blue-50 text-blue-600 border border-blue-200 shadow-sm'
@@ -131,7 +135,7 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
       </div>
       
       {/* Chart Container */}
-      <div className="flex-1 bg-transparent rounded-lg overflow-hidden relative">
+      <div id="chart-container" className="flex-1 bg-transparent rounded-lg overflow-hidden relative">
         <div ref={containerRef} className="w-full h-full absolute inset-0">
            {dimensions.width > 0 && dimensions.height > 0 && emissionData.length > 0 && (
              <Suspense fallback={<LoadingPlaceholder />}>
