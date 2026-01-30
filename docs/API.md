@@ -22,7 +22,10 @@ To support versioned data without requiring code changes, the application uses a
     "emissions": "GCB2025v15_MtCO2_flat.csv",
     "perCapita": "GCB_2025v15_percapita_flat-clean.csv",
     "version": "2025v15",
-    "lastUpdated": "2025-12-27T00:04:57.161Z"
+    "lastUpdated": "2025-12-27T00:04:57.161Z",
+    "emissionsHash": "df0e52bd0c19062882957f572e13faec6d4e0a3ce6f2e86b5dbaa96f8105844e",
+    "perCapitaHash": "45a02b31ef760ab50018e301824b1167ec5c460adb4734bc78e15403e981a3af",
+    "geoJsonHash": "ee878d6f8e23932e5c20d06a3272218a22d341b1211daa225f0299759f4a7428"
   }
   ```
 - **Emissions Data** (e.g., `GCB2025v15_MtCO2_flat.csv`):
@@ -31,6 +34,9 @@ To support versioned data without requiring code changes, the application uses a
 - **Per Capita Data** (e.g., `GCB_2025v15_percapita_flat-clean.csv`):
   - **Source**: Calculated during the update process.
   - **Columns**: `Country`, `Year`, `Per Capita`.
+- **GeoJSON Data** (e.g., `countries-coastline-10km.geo.json`):
+  - **Source**: Natural Earth (processed).
+  - **Content**: Simplified country boundaries for the 3D Globe visualization.
 
 ### API Access Example
 You can inspect the current data manifest using curl:
