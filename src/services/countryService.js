@@ -18,7 +18,7 @@ const getCache = () => {
   try {
     const cache = localStorage.getItem(CACHE_KEY);
     if (!cache) {
-      memoryCache = {};
+      memoryCache = Object.create(null);
       return memoryCache;
     }
 
@@ -27,15 +27,18 @@ const getCache = () => {
     // to prevent crashes if localStorage contains "null" or other non-object JSON values
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
       console.warn("Invalid cache structure detected, resetting cache");
-      memoryCache = {};
+      memoryCache = Object.create(null);
       return memoryCache;
     }
+
+    // Optimization: Ensure prototype is null for security and performance
+    Object.setPrototypeOf(parsed, null);
 
     memoryCache = parsed;
     return memoryCache;
   } catch (e) {
     console.error("Error reading cache:", e.message);
-    memoryCache = {};
+    memoryCache = Object.create(null);
     return memoryCache;
   }
 };
