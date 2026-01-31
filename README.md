@@ -27,7 +27,7 @@ An interactive 3D globe visualization exploring global CO₂ emissions from 1750
 ### Prerequisites
 
 - Node.js 20.x or higher
-- pnpm (or npm/yarn)
+- pnpm
 
 ### Installation
 
@@ -36,7 +36,7 @@ An interactive 3D globe visualization exploring global CO₂ emissions from 1750
 git clone https://github.com/kuasar-mknd/visualdon-projet.git
 cd visualdon-projet
 
-# Install dependencies (auto-detects pnpm/npm/yarn)
+# Install dependencies
 pnpm install
 
 # Start development server
