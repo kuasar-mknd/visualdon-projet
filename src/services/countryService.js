@@ -1,4 +1,4 @@
-import { isValidCountryCode, isValidLanguage } from '../utils/security.js';
+import { isValidCountryCode, isValidLanguage, isValidCountryName } from '../utils/security.js';
 
 const CACHE_KEY = 'visualdon_country_cache';
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
@@ -129,6 +129,11 @@ export const fetchCountryDetails = async (code, language) => {
         // Validate country data shape
         if (!countryData || !countryData.name) {
           throw new Error('Missing country name data in response');
+        }
+
+        // Security Enhancement: Validate country name content
+        if (!isValidCountryName(countryData.name.common)) {
+           throw new Error(`Invalid country name content: ${countryData.name.common}`);
         }
 
         // Update cache

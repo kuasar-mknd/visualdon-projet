@@ -13,6 +13,20 @@ export const isValidCountryCode = (code) => {
 };
 
 /**
+ * Validates if a string is a safe country name.
+ * Allows letters, spaces, hyphens, periods, parentheses, and apostrophes.
+ * Rejects control characters and excessive length.
+ * @param {string} name - The country name to validate.
+ * @returns {boolean} - True if valid, false otherwise.
+ */
+export const isValidCountryName = (name) => {
+  if (!name || typeof name !== 'string') return false;
+  if (name.length > 100) return false;
+  // Allow letters (including common accents), spaces, hyphens, periods, parentheses, apostrophes, and commas
+  return /^[a-zA-Z\u00C0-\u00FF\s\-,.()']+$/.test(name);
+};
+
+/**
  * Sanitizes a string to prevent XSS.
  * Removes HTML tags and unsafe characters.
  * @param {string} str - The string to sanitize.

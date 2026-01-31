@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { text, json, csvParseRows } from 'd3';
-import { validateManifest, validateGeoJson } from '../utils/security';
+import { validateManifest, validateGeoJson, sanitizeString } from '../utils/security';
 
 // Helper to fetch with timeout
 function fetchWithTimeout(promise, ms = 10000) {
@@ -20,7 +20,8 @@ function fastRowBuilder(row, headers) {
 
     // Skip known string columns (assign directly)
     if (key === 'Country' || key === 'ISO 3166-1 alpha-3') {
-        d[key] = val;
+        // Security: Sanitize string fields
+        d[key] = sanitizeString(val);
         continue;
     }
 
@@ -95,19 +96,26 @@ async function safeCsv(url, rowBuilder, expectedHash) {
     .filter(({ key }) => key !== '__proto__' && key !== 'constructor' && key !== 'prototype');
 
   // Optimization: Use rowBuilder to combine object creation and value conversion
-  const data = body.map(row => {
-    if (rowBuilder) {
-        return rowBuilder(row, safeHeaders);
+  const data = [];
+
+  for (const row of body) {
+    // Security: Validate row length to prevent misalignment or parsing errors
+    if (row.length !== header.length) {
+        continue;
     }
 
-    // Fallback if no builder provided (should not happen in current usage)
-    const obj = {};
-    for (let j = 0; j < safeHeaders.length; j++) {
-      const { key, index } = safeHeaders[j];
-      obj[key] = row[index];
+    if (rowBuilder) {
+        data.push(rowBuilder(row, safeHeaders));
+    } else {
+        // Fallback if no builder provided (should not happen in current usage)
+        const obj = {};
+        for (let j = 0; j < safeHeaders.length; j++) {
+            const { key, index } = safeHeaders[j];
+            obj[key] = row[index];
+        }
+        data.push(obj);
     }
-    return obj;
-  });
+  }
 
   // Attach columns property as d3.csv does, in case it's used
   data.columns = header;
