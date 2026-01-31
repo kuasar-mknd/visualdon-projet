@@ -1,7 +1,10 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
+import { useReducedMotion } from '../../hooks/useReducedMotion';
 
 const GlobePaths = ({ geoJson, onCountrySelect, onHover, onLeave }) => {
+  const reducedMotion = useReducedMotion();
+
   // Optimization: Render static paths once.
   const paths = useMemo(() => {
     if (!geoJson) return [];
@@ -13,7 +16,7 @@ const GlobePaths = ({ geoJson, onCountrySelect, onHover, onLeave }) => {
                 key={countryId || i}
                 stroke="#0f172a"
                 strokeWidth="0.5"
-                className="country-path transition-colors duration-300 hover:opacity-80 cursor-pointer outline-none focus:outline-none focus:opacity-100 focus:stroke-white focus:stroke-[1.5px]"
+                className={`country-path transition-colors ${reducedMotion ? 'duration-0' : 'duration-300'} hover:opacity-80 cursor-pointer outline-none focus:outline-none focus:opacity-100 focus:stroke-white focus:stroke-[1.5px]`}
                 role="button"
                 tabIndex="0"
                 aria-label={feature.properties.NAME || countryId}
@@ -36,7 +39,7 @@ const GlobePaths = ({ geoJson, onCountrySelect, onHover, onLeave }) => {
             />
         );
     });
-  }, [geoJson, onCountrySelect, onHover, onLeave]);
+  }, [geoJson, onCountrySelect, onHover, onLeave, reducedMotion]);
 
   return <g>{paths}</g>;
 };

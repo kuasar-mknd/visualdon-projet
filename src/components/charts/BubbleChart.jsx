@@ -16,6 +16,7 @@ import {
   forceCollide
 } from 'd3';
 import { useLanguage } from '../../context/LanguageContext';
+import { useReducedMotion } from '../../hooks/useReducedMotion';
 
 const BubbleChart = ({ 
   chartData, 
@@ -27,6 +28,8 @@ const BubbleChart = ({
 }) => {
   const containerRef = useRef(null);
   const { t } = useLanguage();
+  const reducedMotion = useReducedMotion();
+  const transitionDuration = reducedMotion ? 0 : 200;
 
   useEffect(() => {
     if (!containerRef.current || !chartData || chartData.length === 0) return;
@@ -127,17 +130,22 @@ const BubbleChart = ({
       .attr("clip-path", "url(#chart-clip)");
 
     // Bubbles
-    const bubbles = bubblesGroup.selectAll(".bubble")
+    const bubbles = bubblesGroup.selectAll(".bubble-group")
         .data(chartData)
         .enter()
         .append("g")
-        .attr("class", "bubble-group");
+        .attr("class", "bubble-group")
+        .classed("cursor-pointer", true)
+        .style("outline", "none")
+        .attr("tabindex", "0")
+        .attr("role", "button")
+        .attr("aria-label", d => `${t(`sectors.${d.sector}`)}: ${d.value.toFixed(1)} MtCO₂`);
 
     // Shared handlers for mouse and keyboard interactions
     const handleInteractionStart = function(event, d) {
-        select(this)
+        select(this).select(".bubble-visible")
             .transition()
-            .duration(200)
+            .duration(transitionDuration)
             .attr("opacity", 1)
             .attr("stroke", "#3b82f6") // Blue-500 for visible focus/active state
             .attr("stroke-width", 3);
@@ -147,7 +155,7 @@ const BubbleChart = ({
 
         const tooltip = svg.append("g")
             .attr("class", "tooltip")
-            .attr("transform", `translate(${xScale(d.year)}, ${yScale(d.value) - sizeScale(d.value) - 10})`);
+            .attr("transform", `translate(${d.x}, ${d.y - sizeScale(d.value) - 10})`);
 
         const text = `${t(`sectors.${d.sector}`)}: ${d.value.toFixed(1)} MtCO₂`;
         const bbox = {width: text.length * 7, height: 20};
@@ -172,9 +180,9 @@ const BubbleChart = ({
     };
 
     const handleInteractionEnd = function(event, d) {
-        select(this)
+        select(this).select(".bubble-visible")
             .transition()
-            .duration(200)
+            .duration(transitionDuration)
             .attr("opacity", 0.7)
             .attr("stroke", d.color) // Reset to original color
             .attr("stroke-width", 2);
@@ -182,24 +190,28 @@ const BubbleChart = ({
         svg.selectAll(".tooltip").remove();
     };
 
+    // Attach listeners to group
+    bubbles
+        .on("mouseover", handleInteractionStart)
+        .on("focus", handleInteractionStart)
+        .on("mouseout", handleInteractionEnd)
+        .on("blur", handleInteractionEnd);
+
+    // Hit area (invisible, large target)
     bubbles.append("circle")
-        .attr("class", "bubble")
-        .attr("cx", d => xScale(d.year))
-        .attr("cy", d => yScale(d.value))
+        .attr("class", "bubble-hit-area")
+        .attr("r", d => Math.max(sizeScale(d.value), 12)) // Min 12px radius = 24px diameter
+        .attr("fill", "transparent");
+
+    // Visible bubble
+    bubbles.append("circle")
+        .attr("class", "bubble-visible")
         .attr("r", d => sizeScale(d.value))
         .attr("fill", d => d.color)
         .attr("opacity", 0.7)
         .attr("stroke", d => d.color)
         .attr("stroke-width", 2)
-        .style("cursor", "pointer")
-        .style("outline", "none")
-        .attr("tabindex", "0")
-        .attr("role", "button")
-        .attr("aria-label", d => `${t(`sectors.${d.sector}`)}: ${d.value.toFixed(1)} MtCO₂`)
-        .on("mouseover", handleInteractionStart)
-        .on("focus", handleInteractionStart)
-        .on("mouseout", handleInteractionEnd)
-        .on("blur", handleInteractionEnd);
+        .style("pointer-events", "none");
 
     // Legend
     const legend = svg.append("g")
@@ -208,7 +220,7 @@ const BubbleChart = ({
     Object.entries(colorMapping).forEach(([sector, color], i) => {
         const legendRow = legend.append("g")
             .attr("transform", `translate(0, ${i * 28})`)
-            .style("cursor", "pointer")
+            .classed("cursor-pointer", true)
             .style("outline", "none")
             .attr("tabindex", "0")
             .attr("role", "button")
@@ -218,9 +230,9 @@ const BubbleChart = ({
                 select(this).select(".legend-bg")
                     .attr("opacity", 1);
 
-                bubbles.selectAll("circle")
+                bubbles.selectAll(".bubble-visible")
                     .transition()
-                    .duration(200)
+                    .duration(transitionDuration)
                     .attr("opacity", d => d.sector === sector ? 1 : 0.2);
             })
             .on("mouseout blur", function() {
@@ -228,9 +240,9 @@ const BubbleChart = ({
                 select(this).select(".legend-bg")
                     .attr("opacity", 0);
 
-                bubbles.selectAll("circle")
+                bubbles.selectAll(".bubble-visible")
                     .transition()
-                    .duration(200)
+                    .duration(transitionDuration)
                     .attr("opacity", 0.7);
             })
             .on("keydown", function(event) {
@@ -274,14 +286,12 @@ const BubbleChart = ({
         .force("y", forceY(split ? d => yScaleSplit(d.sector) : centerY).strength(split ? 0.5 : 0.1))
         .force("collide", forceCollide(d => sizeScale(d.value) + 1.5).strength(0.95))
         .on("tick", () => {
-             bubbles.selectAll("circle")
-                .attr("cx", d => {
+             bubbles
+                .attr("transform", d => {
                   const r = sizeScale(d.value);
-                  return Math.max(padding.left + r, Math.min(width - padding.right - r, d.x));
-                })
-                .attr("cy", d => {
-                  const r = sizeScale(d.value);
-                  return Math.max(padding.top + r, Math.min(height - padding.bottom - r, d.y));
+                  const cx = Math.max(padding.left + r, Math.min(width - padding.right - r, d.x));
+                  const cy = Math.max(padding.top + r, Math.min(height - padding.bottom - r, d.y));
+                  return `translate(${cx}, ${cy})`;
                 });
         });
 
@@ -299,7 +309,7 @@ const BubbleChart = ({
 
     return () => simulation.stop();
 
-  }, [chartData, width, height, padding, split, colorMapping, t]);
+  }, [chartData, width, height, padding, split, colorMapping, t, transitionDuration]);
 
   return <div ref={containerRef} className="w-full h-full" />;
 };

@@ -3,10 +3,12 @@ import PropTypes from 'prop-types';
 import * as d3 from 'd3';
 import { useLanguage } from '../context/LanguageContext';
 import { fetchCountryDetails, getCountryNameSync } from '../services/countryService';
+import { useReducedMotion } from '../hooks/useReducedMotion';
 
 const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, displayCategory }) => {
   const svgRef = useRef(null);
   const { t, language } = useLanguage();
+  const reducedMotion = useReducedMotion();
   const [translatedNames, setTranslatedNames] = useState({});
 
   // Reset translations when language changes to force re-fetch in new language
@@ -166,7 +168,8 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
     // Optimization: Adjust transition duration based on playback state
     // When playing, we need faster transitions (200ms) to match the tick rate and avoid "lag"
     // When paused, we use a smoother, longer transition (750ms)
-    const transitionDuration = isPlaying ? 200 : 750;
+    const baseDuration = isPlaying ? 200 : 750;
+    const transitionDuration = reducedMotion ? 0 : baseDuration;
     const tTransition = svg.transition().duration(transitionDuration).ease(d3.easeCubicOut);
 
     const bars = g.selectAll(".bar-group")
@@ -179,24 +182,26 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
         .remove();
 
     const handleInteractionStart = function() {
+        const duration = reducedMotion ? 0 : 200;
         g.selectAll(".bar-group")
          .transition()
-         .duration(200)
+         .duration(duration)
          .style("opacity", 0.5);
 
         d3.select(this)
           .transition()
-          .duration(200)
+          .duration(duration)
           .style("opacity", 1)
           .select(".bar-rect")
-          .attr("stroke", "#1e293b")
+          .attr("stroke", "#3b82f6") // Brand blue
           .attr("stroke-width", 2);
     };
 
     const handleInteractionEnd = function() {
+        const duration = reducedMotion ? 0 : 200;
         g.selectAll(".bar-group")
          .transition()
-         .duration(200)
+         .duration(duration)
          .style("opacity", 1);
 
         d3.select(this)
@@ -209,7 +214,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
         .attr("class", "bar-group")
         .attr("transform", d => `translate(0, ${y(d["ISO 3166-1 alpha-3"])})`)
         .style("opacity", 0)
-        .style("cursor", "pointer")
+        .classed("cursor-pointer", true)
         .style("outline", "none")
         .attr("tabindex", "0")
         .attr("role", "listitem")
@@ -297,7 +302,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
             };
         });
 
-  }, [data, topData, year, category, t, translatedNames, isPlaying, onCountrySelect, displayCategory]);
+  }, [data, topData, year, category, t, translatedNames, isPlaying, onCountrySelect, displayCategory, reducedMotion]);
 
   return <svg ref={svgRef} className="w-full h-full rounded-lg" />;
 };

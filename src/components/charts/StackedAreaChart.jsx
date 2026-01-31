@@ -15,6 +15,7 @@ import {
   axisLeft
 } from 'd3';
 import { useLanguage } from '../../context/LanguageContext';
+import { useReducedMotion } from '../../hooks/useReducedMotion';
 
 const StackedAreaChart = ({ 
   years, 
@@ -27,6 +28,8 @@ const StackedAreaChart = ({
 }) => {
   const containerRef = useRef(null);
   const { t } = useLanguage();
+  const reducedMotion = useReducedMotion();
+  const transitionDuration = reducedMotion ? 0 : 200;
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -102,7 +105,7 @@ const StackedAreaChart = ({
       .attr('fill', d => colorMapping[d.key])
       .attr('d', areaGen)
       .attr('opacity', 0.8)
-      .style('cursor', 'pointer')
+      .classed("cursor-pointer", true)
       .style("outline", "none")
       .attr("tabindex", "0")
       .attr("role", "button")
@@ -171,7 +174,7 @@ const StackedAreaChart = ({
         .attr("class", "legend-row")
         .attr("transform", `translate(0, ${i * 28})`)
         .datum(sector)
-        .style("cursor", "pointer")
+        .classed("cursor-pointer", true)
         .style("outline", "none")
         .attr("tabindex", "0")
         .attr("role", "button")
@@ -185,7 +188,7 @@ const StackedAreaChart = ({
 
           svg.selectAll('.area')
             .transition()
-            .duration(200)
+            .duration(transitionDuration)
             .attr('opacity', d => d.key === key ? 1 : 0.2);
         })
         .on("mouseout blur", function() {
@@ -194,7 +197,7 @@ const StackedAreaChart = ({
 
           svg.selectAll('.area')
             .transition()
-            .duration(200)
+            .duration(transitionDuration)
             .attr('opacity', 0.8);
         })
         .on("keydown", function(event) {
@@ -231,7 +234,7 @@ const StackedAreaChart = ({
         .style("font-weight", "500");
     });
 
-  }, [years, emissionData, sectors, width, height, padding, colorMapping, t]);
+  }, [years, emissionData, sectors, width, height, padding, colorMapping, t, transitionDuration]);
 
   return <div ref={containerRef} className="w-full h-full" />;
 };
