@@ -40,6 +40,8 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
   // Optimization: Cache D3 selections to avoid expensive DOM queries during drag/zoom loop
   const countrySelectionRef = useRef(null);
   const sphereSelectionRef = useRef(null);
+  const glowSelectionRef = useRef(null);
+  const highlightSelectionRef = useRef(null);
 
   const [hoveredCountryName, setHoveredCountryName] = useState(null);
   const [hoveredCountryId, setHoveredCountryId] = useState(null);
@@ -114,6 +116,8 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
     const svg = select(svgRef.current);
     countrySelectionRef.current = svg.selectAll("path.country-path");
     sphereSelectionRef.current = svg.selectAll("path.sphere-path");
+    glowSelectionRef.current = svg.select(".glow-circle");
+    highlightSelectionRef.current = svg.select(".highlight-path");
   }, [geoJson]); // Update when geoJson changes (which implies paths change)
 
   // Update projection setup (rotation/scale) and paths
@@ -171,13 +175,18 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
         if (currentHoverId) {
              const feature = featureMap.get(currentHoverId);
              if (feature) {
-                 select(svgRef.current).select(".highlight-path").attr("d", path(feature));
+                 // Optimization: Use cached selection if available
+                 const selection = highlightSelectionRef.current || select(svgRef.current).select(".highlight-path");
+                 if (!selection.empty()) {
+                    selection.attr("d", path(feature));
+                 }
              }
         }
 
         // Optimization: Update glow circle radius to match globe scale during zoom
         // This fixes a visual desync where the glow remained static while the globe zoomed.
-        select(svgRef.current).select(".glow-circle").attr("r", scaleRef.current);
+        const glow = glowSelectionRef.current || select(svgRef.current).select(".glow-circle");
+        glow.attr("r", scaleRef.current);
     };
 
     // Expose updateGlobe to ref for external access (e.g. keyboard navigation)
@@ -235,10 +244,14 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
       const feature = featureMap.get(hoveredCountryId);
       if (!feature) return;
 
+      // Update cached selection
+      const selection = select(svgRef.current).select(".highlight-path");
+      highlightSelectionRef.current = selection;
+
       // We need to update the highlight path's 'd' attribute using the current projection
       // which is stored in projectionRef.current (up to date with drag)
       const d = pathGeneratorRef.current(feature);
-      select(svgRef.current).select(".highlight-path").attr("d", d);
+      selection.attr("d", d);
 
   }, [hoveredCountryId, featureMap, dimensions]); // Trigger when hovered country changes
 
