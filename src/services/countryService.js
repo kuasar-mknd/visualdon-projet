@@ -33,8 +33,8 @@ const getCache = () => {
 
     memoryCache = parsed;
     return memoryCache;
-  } catch (e) {
-    console.error("Error reading cache:", e.message);
+  } catch {
+    console.error("Error reading cache");
     memoryCache = {};
     return memoryCache;
   }
@@ -56,8 +56,8 @@ const setCache = (cache) => {
   memoryCache = cache;
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
-  } catch (e) {
-    console.error("Error writing cache:", e.message);
+  } catch {
+    console.error("Error writing cache");
   }
 };
 
@@ -68,7 +68,8 @@ export const fetchCountryDetails = async (code, language) => {
   // Expected: ISO 3166-1 alpha-2 or alpha-3 code (2-3 letters/digits)
   // This prevents URL injection and cache pollution with garbage keys
   if (!isValidCountryCode(code)) {
-    console.warn(`Security: Invalid country code format rejected: ${code}`);
+    const safeLog = typeof code === 'string' ? code.slice(0, 20) : String(code).slice(0, 20);
+    console.warn(`Security: Invalid country code format rejected: ${safeLog}`);
     return null;
   }
 

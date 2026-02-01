@@ -152,9 +152,9 @@ export function useData() {
           perCapita,
           loading: false,
         });
-      } catch (err) {
-        // Log only the message to avoid leaking potential data structure details in the error object
-        console.error("Error loading data:", err.message);
+      } catch {
+        // Log generic error to avoid leaking details
+        console.error("Error loading data");
         setData(prev => ({ ...prev, loading: false }));
       }
     }
