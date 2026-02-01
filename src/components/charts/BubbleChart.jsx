@@ -134,8 +134,16 @@ const BubbleChart = ({
         .attr("class", "bubble-group");
 
     // Shared handlers for mouse and keyboard interactions
-    const handleInteractionStart = function(event, d) {
-        select(this)
+    // Optimization: Event delegation for better performance
+    const handleInteractionStart = function(event) {
+        const target = event.target;
+        // Filter out non-bubble elements (like the group or other SVGs)
+        if (target.tagName !== 'circle' || !target.classList.contains('bubble')) return;
+
+        const d = select(target).datum();
+        if (!d) return;
+
+        select(target)
             .transition()
             .duration(200)
             .attr("opacity", 1)
@@ -171,8 +179,14 @@ const BubbleChart = ({
             .text(text);
     };
 
-    const handleInteractionEnd = function(event, d) {
-        select(this)
+    const handleInteractionEnd = function(event) {
+        const target = event.target;
+        if (target.tagName !== 'circle' || !target.classList.contains('bubble')) return;
+
+        const d = select(target).datum();
+        if (!d) return;
+
+        select(target)
             .transition()
             .duration(200)
             .attr("opacity", 0.7)
@@ -181,6 +195,14 @@ const BubbleChart = ({
 
         svg.selectAll(".tooltip").remove();
     };
+
+    // Optimization: Attach delegated listeners to the group
+    // mouseover/mouseout bubble up. focusin/focusout bubble up (replacing focus/blur).
+    bubblesGroup
+        .on("mouseover", handleInteractionStart)
+        .on("mouseout", handleInteractionEnd)
+        .on("focusin", handleInteractionStart)
+        .on("focusout", handleInteractionEnd);
 
     bubbles.append("circle")
         .attr("class", "bubble")
@@ -195,11 +217,8 @@ const BubbleChart = ({
         .style("outline", "none")
         .attr("tabindex", "0")
         .attr("role", "button")
-        .attr("aria-label", d => `${t(`sectors.${d.sector}`)}: ${d.value.toFixed(1)} MtCO₂`)
-        .on("mouseover", handleInteractionStart)
-        .on("focus", handleInteractionStart)
-        .on("mouseout", handleInteractionEnd)
-        .on("blur", handleInteractionEnd);
+        .attr("aria-label", d => `${t(`sectors.${d.sector}`)}: ${d.value.toFixed(1)} MtCO₂`);
+        // Event listeners removed from individual circles
 
     // Legend
     const legend = svg.append("g")

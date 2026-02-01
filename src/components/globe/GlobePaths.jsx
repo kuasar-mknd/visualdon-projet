@@ -1,8 +1,45 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 
 const GlobePaths = ({ geoJson, onCountrySelect, onHover, onLeave }) => {
+
+  const handleInteraction = useCallback((e, type) => {
+    // Optimization: Event delegation
+    const target = e.target.closest('path');
+    if (!target) return;
+
+    const countryId = target.getAttribute('data-id');
+    const name = target.getAttribute('data-name');
+
+    if (!countryId) return;
+
+    switch (type) {
+        case 'click':
+            e.stopPropagation();
+            onCountrySelect(countryId);
+            break;
+        case 'keydown':
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onCountrySelect(countryId);
+            }
+            break;
+        case 'enter':
+        case 'focus':
+            onHover(countryId, name);
+            break;
+        case 'leave':
+        case 'blur':
+            onLeave();
+            break;
+        default:
+            break;
+    }
+  }, [onCountrySelect, onHover, onLeave]);
+
   // Optimization: Render static paths once.
+  // We removed individual event listeners, so this useMemo now only depends on geoJson.
+  // This significantly reduces re-renders and memory usage (no closure creation per path).
   const paths = useMemo(() => {
     if (!geoJson) return [];
 
@@ -19,26 +56,23 @@ const GlobePaths = ({ geoJson, onCountrySelect, onHover, onLeave }) => {
                 aria-label={feature.properties.NAME || countryId}
                 data-id={countryId}
                 data-name={feature.properties.NAME}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onCountrySelect(countryId);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      onCountrySelect(countryId);
-                  }
-                }}
-                onFocus={() => onHover(countryId, feature.properties.NAME)}
-                onBlur={onLeave}
-                onMouseEnter={() => onHover(countryId, feature.properties.NAME)}
-                onMouseLeave={onLeave}
             />
         );
     });
-  }, [geoJson, onCountrySelect, onHover, onLeave]);
+  }, [geoJson]);
 
-  return <g>{paths}</g>;
+  return (
+    <g
+        onClick={(e) => handleInteraction(e, 'click')}
+        onKeyDown={(e) => handleInteraction(e, 'keydown')}
+        onMouseOver={(e) => handleInteraction(e, 'enter')}
+        onMouseOut={(e) => handleInteraction(e, 'leave')}
+        onFocus={(e) => handleInteraction(e, 'focus')}
+        onBlur={(e) => handleInteraction(e, 'blur')}
+    >
+        {paths}
+    </g>
+  );
 };
 
 GlobePaths.propTypes = {
