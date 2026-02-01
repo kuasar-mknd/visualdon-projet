@@ -62,7 +62,7 @@ Unsure where to start? Look for issues labeled:
 ### Prerequisites
 
 - Node.js 20.x or higher
-- npm 10.x or higher
+- pnpm 9.x or higher
 - Git
 
 ### Setup Steps
@@ -76,19 +76,19 @@ cd visualdon-projet
 git remote add upstream https://github.com/kuasar-mknd/visualdon-projet.git
 
 # Install dependencies
-npm install
+pnpm install
 
 # Start development server
-npm run dev
+pnpm run dev
 ```
 
 ### Available Scripts
 
-- `npm run dev` - Start development server with hot reload
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build locally
-- `npm run lint` - Run ESLint to check code quality
-- `npm run update-data` - Fetch latest CO₂ emissions data
+- `pnpm run dev` - Start development server with hot reload
+- `pnpm run build` - Build for production
+- `pnpm run preview` - Preview production build locally
+- `pnpm run lint` - Run ESLint to check code quality
+- `pnpm run update-data` - Fetch latest CO₂ emissions data
 
 ## 📏 Coding Standards
 
@@ -102,7 +102,7 @@ npm run dev
 
 ### Code Style
 
-We use ESLint to enforce code style. Run `npm run lint` before committing.
+We use ESLint to enforce code style. Run `pnpm run lint` before committing.
 
 **Key conventions:**
 
@@ -218,9 +218,23 @@ src/
 
 ## 🧪 Testing
 
-Currently, this project relies on manual testing. Contributions to add automated tests are highly welcome!
+This project uses automated integrity checks and linting to ensure code quality and data consistency.
 
-**Manual testing checklist:**
+### Automated Tests
+
+Run the following commands before submitting a PR:
+
+```bash
+# Run data integrity and manifest checks
+pnpm test
+
+# Run code quality checks (ESLint)
+pnpm lint
+```
+
+### Manual Testing
+
+In addition to automated checks, please perform manual verification for UI changes:
 
 - [ ] Globe renders correctly and is interactive
 - [ ] Year slider updates visualizations
