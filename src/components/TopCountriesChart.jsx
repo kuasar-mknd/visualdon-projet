@@ -209,7 +209,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
         .attr("class", "bar-group")
         .attr("transform", d => `translate(0, ${y(d["ISO 3166-1 alpha-3"])})`)
         .style("opacity", 0)
-        .style("cursor", "pointer")
+        .classed("cursor-pointer", true)
         .style("outline", "none")
         .attr("tabindex", "0")
         .attr("role", "listitem")

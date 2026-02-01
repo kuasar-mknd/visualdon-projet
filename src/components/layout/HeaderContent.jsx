@@ -20,8 +20,9 @@ const HeaderContent = () => {
             className="flex p-1 bg-slate-100/50 hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors"
           >
               <button
+                  lang="en"
                   onClick={() => language !== 'en' && toggleLanguage()}
-                  aria-pressed={language === 'en'}
+                  aria-current={language === 'en' ? 'true' : undefined}
                   aria-label={t('aria.switchToEnglish')}
                   title="English"
                   className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 outline-none cursor-pointer ${
@@ -33,8 +34,9 @@ const HeaderContent = () => {
                   EN
               </button>
               <button
+                  lang="fr"
                   onClick={() => language !== 'fr' && toggleLanguage()}
-                  aria-pressed={language === 'fr'}
+                  aria-current={language === 'fr' ? 'true' : undefined}
                   aria-label={t('aria.switchToFrench')}
                   title="Français"
                   className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 outline-none cursor-pointer ${

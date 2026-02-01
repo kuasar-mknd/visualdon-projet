@@ -191,7 +191,7 @@ const BubbleChart = ({
         .attr("opacity", 0.7)
         .attr("stroke", d => d.color)
         .attr("stroke-width", 2)
-        .style("cursor", "pointer")
+        .classed("cursor-pointer", true)
         .style("outline", "none")
         .attr("tabindex", "0")
         .attr("role", "button")
@@ -208,7 +208,7 @@ const BubbleChart = ({
     Object.entries(colorMapping).forEach(([sector, color], i) => {
         const legendRow = legend.append("g")
             .attr("transform", `translate(0, ${i * 28})`)
-            .style("cursor", "pointer")
+            .classed("cursor-pointer", true)
             .style("outline", "none")
             .attr("tabindex", "0")
             .attr("role", "button")
