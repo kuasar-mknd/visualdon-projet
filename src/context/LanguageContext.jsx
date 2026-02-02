@@ -137,10 +137,21 @@ export const LanguageProvider = ({ children }) => {
 
   const t = (key) => {
     if (typeof key !== 'string') return '';
+
+    // Security: Prevent prototype pollution and suspicious keys
+    if (key.includes('__proto__') || key.includes('constructor') || key.includes('prototype')) {
+        console.warn(`Security: Suspicious translation key rejected: ${key}`);
+        return key;
+    }
+
     const keys = key.split('.');
     let value = translations[language];
     for (const k of keys) {
-      value = value?.[k];
+      // Security: Ensure we don't access properties on non-objects
+      if (!value || typeof value !== 'object') {
+          return key;
+      }
+      value = value[k];
     }
     // Security: Ensure we only return strings or numbers (safe primitives)
     if (typeof value !== 'string' && typeof value !== 'number') {

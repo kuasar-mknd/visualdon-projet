@@ -60,6 +60,42 @@ export const validateManifest = (manifest) => {
 };
 
 /**
+ * Validates a year.
+ * @param {number|string} year - The year to validate.
+ * @param {number} min - Minimum allowed year (default 1750).
+ * @param {number} max - Maximum allowed year (default current year + 1).
+ * @returns {boolean} - True if valid.
+ */
+export const isValidYear = (year, min = 1750, max = new Date().getFullYear() + 1) => {
+  const y = Number(year);
+  return !isNaN(y) && Number.isInteger(y) && y >= min && y <= max;
+};
+
+/**
+ * Validates a hex color code.
+ * @param {string} color - The color string.
+ * @returns {boolean} - True if valid hex color.
+ */
+export const isValidColor = (color) => {
+  if (!color || typeof color !== 'string') return false;
+  return /^#([0-9A-Fa-f]{3}){1,2}$/.test(color);
+};
+
+/**
+ * Validates if a string contains only safe characters (letters, numbers, spaces, common punctuation).
+ * Supports international characters (Unicode).
+ * Useful for validating names, titles, etc.
+ * @param {string} str - The string to validate.
+ * @returns {boolean} - True if valid.
+ */
+export const isValidCountryName = (str) => {
+  if (!str || typeof str !== 'string') return false;
+  // Allow letters (unicode), numbers, spaces, hyphens, periods, parentheses, apostrophes, commas
+  // Rejects scripts, control characters, etc.
+  return /^[\p{L}\p{N}\s\-.,'()]+$/u.test(str);
+};
+
+/**
  * Validates language code (whitelist).
  * @param {string} lang - The language code.
  * @returns {boolean} - True if valid.

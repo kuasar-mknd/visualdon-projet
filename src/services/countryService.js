@@ -161,6 +161,14 @@ export const fetchCountryDetails = async (code, language) => {
 
 export const getCountryNameSync = (code, language) => {
   if (!code) return null;
+
+  // Security Enhancement: Validate inputs
+  if (!isValidCountryCode(code)) return null;
+  if (language && !isValidLanguage(language)) {
+      // Treat invalid language as undefined/null so we fallback to default
+      language = null;
+  }
+
   const cache = getCache();
   if (cache[code]) {
       return getNameFromData(cache[code].data, language);

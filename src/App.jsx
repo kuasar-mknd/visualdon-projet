@@ -7,6 +7,7 @@ import Controls from './components/controls/Controls';
 import { useData } from './hooks/useData';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { fetchCountryDetails } from './services/countryService';
+import { isValidYear } from './utils/security';
 
 // Lazy load heavy visualization components
 const Globe = React.lazy(() => import('./components/Globe'));
@@ -78,7 +79,7 @@ function AppContent() {
 
   // Update year to max available when data loads (if currently at default or old max)
   useEffect(() => {
-    if (yearRange.max > 0 && (year === null || year > yearRange.max || year < yearRange.min)) {
+    if (yearRange.max > 0 && !isValidYear(year, yearRange.min, yearRange.max)) {
        setYear(yearRange.max);
     }
   }, [yearRange, year]);
