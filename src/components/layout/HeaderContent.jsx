@@ -15,14 +15,16 @@ const HeaderContent = () => {
 
       <div className="flex items-center gap-4">
           <div
-            role="group"
+            role="radiogroup"
             aria-label={t('aria.toggleLanguage')}
             className="flex p-1 bg-slate-100/50 hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors"
           >
               <button
+                  role="radio"
                   onClick={() => language !== 'en' && toggleLanguage()}
-                  aria-pressed={language === 'en'}
+                  aria-checked={language === 'en'}
                   aria-label={t('aria.switchToEnglish')}
+                  lang="en"
                   title="English"
                   className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 outline-none cursor-pointer ${
                     language === 'en'
@@ -33,9 +35,11 @@ const HeaderContent = () => {
                   EN
               </button>
               <button
+                  role="radio"
                   onClick={() => language !== 'fr' && toggleLanguage()}
-                  aria-pressed={language === 'fr'}
+                  aria-checked={language === 'fr'}
                   aria-label={t('aria.switchToFrench')}
+                  lang="fr"
                   title="Français"
                   className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 outline-none cursor-pointer ${
                     language === 'fr'

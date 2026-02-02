@@ -88,10 +88,11 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
     <div className="w-full h-full flex flex-col">
       {/* View Mode Toggle */}
       <div className="flex items-center gap-3 mb-4 flex-wrap">
-        <div role="group" aria-label={t('chart.selectViewMode')} className="flex gap-2">
+        <div role="radiogroup" aria-label={t('chart.selectViewMode')} className="flex gap-2">
           <button
+            role="radio"
             onClick={() => setViewMode('bubbles')}
-            aria-pressed={viewMode === 'bubbles'}
+            aria-checked={viewMode === 'bubbles'}
             className={`px-4 py-2 rounded-lg font-semibold transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none cursor-pointer ${
               viewMode === 'bubbles'
                 ? 'bg-blue-50 text-blue-600 border border-blue-200 shadow-sm'
@@ -101,8 +102,9 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
             <span aria-hidden="true" className="mr-2">🫧</span>{t('chart.bubbles')}
           </button>
           <button
+            role="radio"
             onClick={() => setViewMode('lines')}
-            aria-pressed={viewMode === 'lines'}
+            aria-checked={viewMode === 'lines'}
             className={`px-4 py-2 rounded-lg font-semibold transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none cursor-pointer ${
               viewMode === 'lines'
                 ? 'bg-blue-50 text-blue-600 border border-blue-200 shadow-sm'

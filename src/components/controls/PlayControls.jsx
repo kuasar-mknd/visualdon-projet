@@ -21,6 +21,7 @@ const PlayControls = ({ isPlaying, setIsPlaying, category, setCategory }) => {
       <div className="flex gap-3 mb-4">
         <button
           onClick={() => setIsPlaying(!isPlaying)}
+          aria-pressed={isPlaying}
           aria-label={isPlaying ? t('aria.pause') : t('aria.play')}
           aria-keyshortcuts="Space"
           title={`${isPlaying ? t('pause') : t('play')} (Space)`}
