@@ -183,6 +183,7 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
     // Expose updateGlobe to ref for external access (e.g. keyboard navigation)
     updateGlobeRef.current = updateGlobe;
 
+    // D3 Zoom behavior
     const zm = zoom()
       .scaleExtent([1, 5])
       .on("zoom", (event) => {
