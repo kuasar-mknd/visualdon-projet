@@ -145,6 +145,12 @@ To ensure code quality and prevent regressions, run the linter:
 pnpm lint
 ```
 
+### Continuous Integration
+The project employs GitHub Actions for automated verification:
+- **CI**: Runs tests, linting, and build checks on every push.
+- **CodeQL**: Performs static security analysis.
+- **Dependency Review**: Scans for vulnerable dependencies in Pull Requests.
+
 ## 🤝 Contributing
 
 We welcome contributions from the community! Whether you're fixing bugs, improving documentation, or proposing new features, your help is appreciated.

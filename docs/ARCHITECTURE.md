@@ -3,6 +3,8 @@
 ## Overview
 This project is a client-side Single Page Application (SPA) built with React 19 and Vite. It visualizes global CO₂ emissions data using D3.js for charts and Three.js (via React components) for 3D globe elements. The application is designed to be performant, accessible, and responsive.
 
+> **Note:** This application is **Frontend-Only** and does not currently rely on a traditional backend API or database (e.g., Hono, Prisma, Postgres) for runtime operations. Data is served as static CSV files.
+
 ## Core Technologies
 - **React 19**: UI library for building component-based user interfaces.
 - **Vite**: Next-generation frontend tooling for fast builds and hot module replacement.
