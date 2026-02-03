@@ -18,8 +18,13 @@ export const isValidCountryCode = (code) => {
  * @param {string} str - The string to sanitize.
  * @returns {string} - The sanitized string.
  */
-export const sanitizeString = (str) => {
+export const sanitizeString = (str, maxLength = 255) => {
   if (typeof str !== 'string') return '';
+
+  if (str.length > maxLength) {
+    str = str.slice(0, maxLength);
+  }
+
   return str.replace(/[<>"'&]/g, (char) => {
     switch (char) {
       case '<': return '&lt;';
@@ -30,6 +35,26 @@ export const sanitizeString = (str) => {
       default: return char;
     }
   });
+};
+
+/**
+ * Sanitizes a value for safe logging.
+ * Truncates long strings and removes control characters to prevent log forging.
+ * @param {any} value - The value to log.
+ * @param {number} maxLength - Maximum length of the log string (default: 100).
+ * @returns {string} - The sanitized log string.
+ */
+export const sanitizeLog = (value, maxLength = 100) => {
+  if (value === null || value === undefined) return '';
+
+  let str = String(value);
+
+  if (str.length > maxLength) {
+    str = str.slice(0, maxLength) + '...';
+  }
+
+  // Remove control characters (newlines, tabs, etc.) to prevent log forging
+  return str.replace(/[\n\r\t]/g, ' ');
 };
 
 /**

@@ -1,4 +1,4 @@
-import { isValidCountryCode, isValidLanguage } from '../utils/security.js';
+import { isValidCountryCode, isValidLanguage, sanitizeLog } from '../utils/security.js';
 
 const CACHE_KEY = 'visualdon_country_cache';
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
@@ -34,7 +34,7 @@ const getCache = () => {
     memoryCache = parsed;
     return memoryCache;
   } catch (e) {
-    console.error("Error reading cache:", e.message);
+    console.error("Error reading cache:", sanitizeLog(e.message));
     memoryCache = {};
     return memoryCache;
   }
@@ -57,7 +57,7 @@ const setCache = (cache) => {
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
   } catch (e) {
-    console.error("Error writing cache:", e.message);
+    console.error("Error writing cache:", sanitizeLog(e.message));
   }
 };
 
@@ -68,7 +68,7 @@ export const fetchCountryDetails = async (code, language) => {
   // Expected: ISO 3166-1 alpha-2 or alpha-3 code (2-3 letters/digits)
   // This prevents URL injection and cache pollution with garbage keys
   if (!isValidCountryCode(code)) {
-    console.warn(`Security: Invalid country code format rejected: ${code}`);
+    console.warn(`Security: Invalid country code format rejected: ${sanitizeLog(code)}`);
     return null;
   }
 
@@ -153,8 +153,9 @@ export const fetchCountryDetails = async (code, language) => {
     return getNameFromData(countryData, language);
   } catch (error) {
     // Sanitize code for logging to prevent log injection
+    // Use sanitizeLog for the error message as well
     const safeLogCode = encodeURIComponent(code);
-    console.warn(`Failed to fetch data for ${safeLogCode}:`, error.message);
+    console.warn(`Failed to fetch data for ${safeLogCode}:`, sanitizeLog(error.message));
     return null;
   }
 };

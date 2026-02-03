@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { text, json, csvParseRows } from 'd3';
-import { validateManifest, validateGeoJson } from '../utils/security';
+import { validateManifest, validateGeoJson, sanitizeLog } from '../utils/security';
 
 // Helper to fetch with timeout
 function fetchWithTimeout(promise, ms = 10000) {
@@ -154,7 +154,7 @@ export function useData() {
         });
       } catch (err) {
         // Log only the message to avoid leaking potential data structure details in the error object
-        console.error("Error loading data:", err.message);
+        console.error("Error loading data:", sanitizeLog(err.message));
         setData(prev => ({ ...prev, loading: false }));
       }
     }
