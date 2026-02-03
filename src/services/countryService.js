@@ -61,6 +61,82 @@ const setCache = (cache) => {
   }
 };
 
+/**
+ * Fetches details for multiple countries in a single batch request.
+ * @param {string[]} codes Array of ISO country codes
+ * @param {string} language Language code
+ * @returns {Promise<Object>} Map of country code to name
+ */
+export const fetchCountriesDetails = async (codes, language) => {
+  if (!codes || !Array.isArray(codes) || codes.length === 0) return {};
+
+  const cache = getCache();
+  const now = Date.now();
+  const results = {};
+  const missingCodes = [];
+
+  // 1. Check cache and filter invalid codes
+  codes.forEach(code => {
+    if (!isValidCountryCode(code)) return;
+
+    if (cache[code] && (now - cache[code].timestamp < CACHE_EXPIRY)) {
+      results[code] = getNameFromData(cache[code].data, language);
+    } else {
+      missingCodes.push(code);
+    }
+  });
+
+  if (missingCodes.length === 0) {
+    return results;
+  }
+
+  // 2. Batch fetch missing codes
+  try {
+    const codesParam = missingCodes.map(c => encodeURIComponent(c)).join(',');
+    // Note: The API allows up to a certain length. 10 codes is well within limits.
+    const response = await fetch(`https://restcountries.com/v3.1/alpha?codes=${codesParam}`);
+
+    if (!response.ok) {
+        // If batch fails, we might want to log it but still return what we have
+        console.warn(`Batch fetch failed for codes: ${codesParam}`);
+        return results;
+    }
+
+    const data = await response.json();
+
+    if (!Array.isArray(data)) {
+         throw new Error('Invalid API response format (expected array)');
+    }
+
+    // 3. Update cache and results
+    data.forEach(countryData => {
+       // API returns 'cca3' for alpha-3 code which matches our usage
+       const code = countryData.cca3;
+       if (!code) return;
+
+       // Update cache
+       cache[code] = {
+         data: countryData,
+         timestamp: now
+       };
+
+       // Update results
+       // We iterate over missingCodes to ensure we map back to the *exact* string the user requested
+       // (though typically it's the same, casing might differ if not normalized)
+       if (missingCodes.includes(code)) {
+            results[code] = getNameFromData(countryData, language);
+       }
+    });
+
+    setCache(cache);
+
+  } catch (error) {
+     console.error("Error in batch fetch:", error.message);
+  }
+
+  return results;
+};
+
 export const fetchCountryDetails = async (code, language) => {
   if (!code) return null;
   
