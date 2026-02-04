@@ -84,3 +84,36 @@ export const validateGeoJson = (geoJson) => {
 
   return true;
 };
+
+/**
+ * Sanitizes input for logging to prevent log injection and data leakage.
+ * Truncates long strings and escapes control characters.
+ * @param {any} input - The input to log.
+ * @param {number} maxLength - Max length of the log string (default 100).
+ * @returns {string} - The sanitized log string.
+ */
+export const sanitizeLog = (input, maxLength = 100) => {
+  let str;
+  try {
+    if (input instanceof Error) {
+      str = input.message;
+    } else if (typeof input === 'object' && input !== null) {
+      str = JSON.stringify(input);
+    } else {
+      str = String(input);
+    }
+  } catch {
+    str = '[Circular/Unserializable]';
+  }
+
+  // Remove control characters (ASCII 0-31 and 127) to prevent log forging
+  // eslint-disable-next-line no-control-regex
+  str = str.replace(/[\x00-\x1F\x7F]/g, '');
+
+  // Truncate to prevent log flooding/DoS
+  if (str.length > maxLength) {
+    str = str.substring(0, maxLength) + '...';
+  }
+
+  return str;
+};
