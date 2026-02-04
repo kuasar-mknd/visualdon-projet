@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import * as d3 from 'd3';
 import { useLanguage } from '../context/LanguageContext';
-import { fetchCountryDetails, getCountryNameSync } from '../services/countryService';
+import { fetchCountriesDetails, getCountryNameSync } from '../services/countryService';
 
 const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, displayCategory }) => {
   const svgRef = useRef(null);
@@ -57,23 +57,14 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
     if (neededCodes.length === 0) return;
 
     const fetchTranslations = async () => {
-      const newTranslations = {};
-      let hasNewData = false;
+      // Optimization: Batch fetch all missing translations in a single network request
+      // instead of firing N+1 parallel requests.
+      const namesMap = await fetchCountriesDetails(neededCodes, language);
 
-      await Promise.all(
-        neededCodes.map(async (code) => {
-          const name = await fetchCountryDetails(code, language);
-          if (name) {
-            newTranslations[code] = name;
-            hasNewData = true;
-          }
-        })
-      );
-
-      if (hasNewData) {
+      if (Object.keys(namesMap).length > 0) {
         setTranslatedNames(prev => ({
           ...prev,
-          ...newTranslations
+          ...namesMap
         }));
       }
     };
@@ -286,16 +277,23 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
         return `${name}: ${val}`;
     });
 
-    update.select(".value-label")
+    const valueLabelUpdate = update.select(".value-label")
         .transition(tTransition)
         .attr("x", d => x(d[category] || 0) + 8)
-        .style("opacity", 1)
-        .tween("text", function(d) {
+        .style("opacity", 1);
+
+    if (isPlaying) {
+        // Optimization: Skip text tweening during playback to prevent per-frame layout thrashing
+        // and improve FPS during rapid updates.
+        valueLabelUpdate.text(d => (d[category] || 0).toFixed(1));
+    } else {
+        valueLabelUpdate.tween("text", function(d) {
             const i = d3.interpolateNumber(parseFloat(this.textContent) || 0, d[category] || 0);
             return function(t) {
                 this.textContent = i(t).toFixed(1);
             };
         });
+    }
 
   }, [data, topData, year, category, t, translatedNames, isPlaying, onCountrySelect, displayCategory]);
 

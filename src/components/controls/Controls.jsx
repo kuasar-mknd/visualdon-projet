@@ -18,6 +18,12 @@ const Controls = ({ isPlaying, setIsPlaying, category, setCategory, year, setYea
         return;
       }
 
+      // Optimization: Ignore if user is interacting with Globe (which has role="application")
+      // to avoid conflicting keyboard shortcuts (Globe rotates, Controls change year)
+      if (e.target.closest && e.target.closest('[role="application"]')) {
+        return;
+      }
+
       switch (e.code) {
         case 'Space':
           // Prevent default scroll behavior, but only if not on a button (native behavior)

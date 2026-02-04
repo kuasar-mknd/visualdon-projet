@@ -9,6 +9,12 @@
 - **Fix:** Replaced `import * as d3` with named imports (e.g., `import { select } from 'd3'`) to enable tree-shaking.
 - **Pattern:** Missing `will-change` on complex animations.
 - **Fix:** Added `will-change-transform` to heavy overlay transitions.
+- **Pattern:** N+1 API Requests for country details.
+- **Fix:** Implemented `fetchCountriesDetails` (batch fetch) in `countryService.js` using `?codes=` endpoint.
+- **Pattern:** Layout thrashing during D3 animations.
+- **Fix:** Disabled `d3.interpolateNumber` text tweening when `isPlaying` is true in `TopCountriesChart.jsx`.
+- **Pattern:** Conflicting keyboard event handlers.
+- **Fix:** Added `e.target.closest` check in global keyboard listeners to ignore events from specialized components (Globe).
 
 ## Failed Experiments
 - **Experiment:** Decreasing `d3.geoOrthographic().precision()` to `0.1`.

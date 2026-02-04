@@ -159,6 +159,72 @@ export const fetchCountryDetails = async (code, language) => {
   }
 };
 
+export const fetchCountriesDetails = async (codes, language) => {
+  if (!codes || codes.length === 0) return {};
+
+  // Dedup and validate
+  const uniqueCodes = [...new Set(codes)].filter(code => isValidCountryCode(code));
+  if (uniqueCodes.length === 0) return {};
+
+  // Security Enhancement: Validate language
+  if (language && !isValidLanguage(language)) {
+    language = null;
+  }
+
+  const cache = getCache();
+  const now = Date.now();
+  const result = {};
+  const missingCodes = [];
+
+  // Check cache
+  uniqueCodes.forEach(code => {
+    if (cache[code] && (now - cache[code].timestamp < CACHE_EXPIRY)) {
+      result[code] = getNameFromData(cache[code].data, language);
+    } else {
+      missingCodes.push(code);
+    }
+  });
+
+  if (missingCodes.length === 0) {
+    return result;
+  }
+
+  // Fetch missing batch
+  try {
+    const codesParam = missingCodes.map(c => encodeURIComponent(c)).join(',');
+    const response = await fetch(`https://restcountries.com/v3.1/alpha?codes=${codesParam}`);
+
+    if (!response.ok) throw new Error('Network response was not ok');
+
+    const data = await response.json();
+
+    if (!Array.isArray(data)) throw new Error('Invalid API response format');
+
+    data.forEach(countryData => {
+      // API returns cca3 (ISO 3166-1 alpha-3). Matches our codes.
+      const code = countryData.cca3;
+
+      if (code) {
+        // Update cache
+        cache[code] = {
+          data: countryData,
+          timestamp: now
+        };
+        // Update result
+        result[code] = getNameFromData(countryData, language);
+      }
+    });
+
+    setCache(cache);
+
+  } catch (error) {
+    console.warn('Failed to fetch batch countries:', error.message);
+    // Fallback: result will only contain cached items
+  }
+
+  return result;
+};
+
 export const getCountryNameSync = (code, language) => {
   if (!code) return null;
   const cache = getCache();
