@@ -9,3 +9,4 @@
 | 2026-03-22 | Docs + Workflows | README.md, docs/*, .github/workflows/*, .env.example | Updated docs to reflect Frontend stack (Vite/React/D3). Added CI, CodeQL, Dependency Review workflows. |
 | 2026-03-22 | Docs + Automation | README.md, docs/AI.md, docs/API.md, docs/ENV.md, .github/workflows/*, verification/verify-integrity.js | Standardized AI/ENV/API docs for frontend; added CI, CodeQL, Dependency Review; added integrity check script. |
 | 2026-03-22 | DocOps Refinement | README.md, docs/ENV.md, docs/AI.md, docs/ARCHITECTURE.md | Refined ENV docs (Cloudflare token), added AI standards/schemas, clarified Architecture, polished README. Verified with lint/test. |
+| 2026-03-22 | Workflows + Docs | .github/workflows/*, docs/API.md, docs/ARCHITECTURE.md, .github/dependabot.yml | Fixed workflow versions (v6->v4), upgraded pnpm to v10, refined API/Architecture docs, added dependabot actions updates. |

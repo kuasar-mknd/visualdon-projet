@@ -83,3 +83,19 @@ To integrate a new dataset:
 1.  **Update Script**: Modify `scripts/update-data.js` to fetch and clean the new data.
 2.  **Manifest**: Ensure the new file is added to `manifest.json`.
 3.  **Hook**: Update `src/hooks/useData.js` to fetch the new file key from the manifest.
+
+## Verification Strategy
+
+To ensure data integrity and application stability, the project employs a lightweight verification strategy suited for a data-heavy frontend application.
+
+### Integrity Checks (`verification/verify-integrity.js`)
+Run via `pnpm test`. This script performs static checks without requiring a browser environment:
+- **Manifest Validation**: Ensures `manifest.json` exists and contains required keys.
+- **File Existence**: Verifies that CSV files referenced in the manifest actually exist on disk.
+- **Environment Safety**: Scans `.env.example` to ensure no secrets are accidentally committed.
+
+### Linting
+Run via `pnpm lint`. Uses ESLint with React and Refresh plugins to ensure code quality and catch common React patterns errors.
+
+### CI/CD Checks
+The GitHub Actions pipeline (`.github/workflows/ci.yml`) enforces these checks on every Pull Request and Push to `main`, ensuring no broken builds or invalid data references are merged.

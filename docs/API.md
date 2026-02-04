@@ -29,8 +29,9 @@ To support versioned data without requiring code changes, the application uses a
   - **Source**: Directly from Global Carbon Budget (Zenodo).
   - **Columns**: `Country`, `ISO 3166-1 alpha-3`, `Year`, `Total`, `Coal`, `Oil`, `Gas`, `Cement`, `Flaring`, `Other`, `Per Capita`.
 - **Per Capita Data** (e.g., `GCB_2025v15_percapita_flat-clean.csv`):
-  - **Source**: Calculated during the update process.
-  - **Columns**: `Country`, `Year`, `Per Capita`.
+  - **Source**: Calculated during the update process by combining Total Emissions with Population data.
+  - **Columns**: Same structure as Emissions Data, but with the `Per Capita` column populated (metric tons of CO₂ per person).
+  - **Full Schema**: `Country`, `ISO 3166-1 alpha-3`, `UN M49`, `Year`, `Total`, `Coal`, `Oil`, `Gas`, `Cement`, `Flaring`, `Other`, `Per Capita`.
 
 ### API Access Example
 You can inspect the current data manifest using curl:
