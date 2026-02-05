@@ -315,6 +315,7 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
       tabIndex="0"
       aria-label={t('aria.globeDescription')}
       role="application"
+      aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight + -"
       onKeyDown={handleKeyDown}
     >
        <svg

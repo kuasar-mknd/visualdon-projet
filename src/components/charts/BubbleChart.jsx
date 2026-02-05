@@ -139,7 +139,7 @@ const BubbleChart = ({
             .transition()
             .duration(200)
             .attr("opacity", 1)
-            .attr("stroke", "#3b82f6") // Blue-500 for visible focus/active state
+            .attr("stroke", "#1e293b") // Slate-800 for high-contrast focus state
             .attr("stroke-width", 3);
 
         // Remove existing tooltips to prevent duplicates
