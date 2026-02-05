@@ -84,3 +84,60 @@ export const validateGeoJson = (geoJson) => {
 
   return true;
 };
+
+/**
+ * Sanitizes a message for logging.
+ * Truncates long strings and escapes control characters.
+ * @param {string|Error} message - The message or error to log.
+ * @returns {string} - The sanitized message.
+ */
+export const sanitizeLog = (message) => {
+  let str = '';
+  if (message instanceof Error) {
+    str = message.message; // Only log the message, not the stack trace
+  } else if (typeof message === 'object') {
+    try {
+      str = JSON.stringify(message);
+    } catch {
+      str = '[Circular]';
+    }
+  } else {
+    str = String(message);
+  }
+
+  // Truncate to 100 characters
+  if (str.length > 100) {
+    str = str.substring(0, 100) + '...';
+  }
+
+  // Remove control characters (ASCII 0-31) except newline/tab
+  // Also remove potential ANSI escape codes
+  // eslint-disable-next-line no-control-regex
+  return str.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+};
+
+/**
+ * Validates a country name.
+ * Allows letters (including unicode), spaces, hyphens, parentheses, apostrophes, and commas.
+ * @param {string} name - The country name to validate.
+ * @returns {boolean} - True if valid.
+ */
+export const isValidCountryName = (name) => {
+  if (!name || typeof name !== 'string') return false;
+  // Unicode property escapes \p{L} matches any letter from any language
+  return /^[\p{L}\s\-()',.]+$/u.test(name);
+};
+
+/**
+ * Validates a filename to prevent path traversal.
+ * Allows alphanumeric, dots, hyphens, and underscores.
+ * @param {string} name - The filename to validate.
+ * @returns {boolean} - True if valid.
+ */
+export const isValidFilename = (name) => {
+  if (!name || typeof name !== 'string') return false;
+  // Prevent directory traversal
+  if (name.includes('..') || name.includes('/') || name.includes('\\')) return false;
+
+  return /^[a-zA-Z0-9.\-_]+$/.test(name);
+};

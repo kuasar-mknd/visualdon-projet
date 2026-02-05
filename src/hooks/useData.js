@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { text, json, csvParseRows } from 'd3';
-import { validateManifest, validateGeoJson } from '../utils/security';
+import { validateManifest, validateGeoJson, isValidFilename, sanitizeLog } from '../utils/security';
 
 // Helper to fetch with timeout
 function fetchWithTimeout(promise, ms = 10000) {
@@ -133,6 +133,11 @@ export function useData() {
           throw new Error('Invalid manifest structure or missing security hashes');
         }
 
+        // Security Enhancement: Validate filenames to prevent path traversal
+        if (!isValidFilename(manifest.emissions) || !isValidFilename(manifest.perCapita)) {
+             throw new Error('Invalid filenames in manifest');
+        }
+
         // Parallelize fetching
         // Note: verifyIntegrity uses crypto.subtle which is available in secure contexts (HTTPS/localhost)
         const [emissions, geoJson, perCapita] = await Promise.all([
@@ -154,7 +159,7 @@ export function useData() {
         });
       } catch (err) {
         // Log only the message to avoid leaking potential data structure details in the error object
-        console.error("Error loading data:", err.message);
+        console.error("Error loading data:", sanitizeLog(err));
         setData(prev => ({ ...prev, loading: false }));
       }
     }

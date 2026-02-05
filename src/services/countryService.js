@@ -1,4 +1,4 @@
-import { isValidCountryCode, isValidLanguage } from '../utils/security.js';
+import { isValidCountryCode, isValidLanguage, isValidCountryName, sanitizeLog } from '../utils/security.js';
 
 const CACHE_KEY = 'visualdon_country_cache';
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
@@ -34,7 +34,7 @@ const getCache = () => {
     memoryCache = parsed;
     return memoryCache;
   } catch (e) {
-    console.error("Error reading cache:", e.message);
+    console.error("Error reading cache:", sanitizeLog(e));
     memoryCache = {};
     return memoryCache;
   }
@@ -57,7 +57,7 @@ const setCache = (cache) => {
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
   } catch (e) {
-    console.error("Error writing cache:", e.message);
+    console.error("Error writing cache:", sanitizeLog(e));
   }
 };
 
@@ -131,6 +131,11 @@ export const fetchCountryDetails = async (code, language) => {
           throw new Error('Missing country name data in response');
         }
 
+        // Security Enhancement: Validate country name to prevent injection
+        if (!isValidCountryName(countryData.name.common)) {
+             throw new Error('Invalid country name received');
+        }
+
         // Update cache
         cache[code] = {
           data: countryData,
@@ -154,7 +159,7 @@ export const fetchCountryDetails = async (code, language) => {
   } catch (error) {
     // Sanitize code for logging to prevent log injection
     const safeLogCode = encodeURIComponent(code);
-    console.warn(`Failed to fetch data for ${safeLogCode}:`, error.message);
+    console.warn(`Failed to fetch data for ${safeLogCode}:`, sanitizeLog(error));
     return null;
   }
 };
