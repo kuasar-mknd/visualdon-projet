@@ -31,23 +31,26 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Lint
-        if: ${{ hashFiles('package.json') != '' }}
+      - name: Build
         run: |
-            if npm run | grep -q "lint"; then
-              pnpm run lint
+            if node -e "const pkg=require('./package.json'); if(!pkg.scripts?.build) process.exit(1)"; then
+              pnpm run build
+            else
+              echo "Skipping build: script not found"
             fi
 
-      - name: Build
-        if: ${{ hashFiles('package.json') != '' }}
+      - name: Lint
         run: |
-            if npm run | grep -q "build"; then
-              pnpm run build
+            if node -e "const pkg=require('./package.json'); if(!pkg.scripts?.lint) process.exit(1)"; then
+              pnpm run lint
+            else
+              echo "Skipping lint: script not found"
             fi
 
       - name: Test
-        if: ${{ hashFiles('package.json') != '' }}
         run: |
-            if npm run | grep -q "test"; then
+            if node -e "const pkg=require('./package.json'); if(!pkg.scripts?.test) process.exit(1)"; then
               pnpm run test
+            else
+              echo "Skipping test: script not found"
             fi

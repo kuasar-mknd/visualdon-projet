@@ -62,15 +62,26 @@ This project uses authoritative emissions data from the [Global Carbon Budget](h
 - **Per Capita Emissions**: Population-adjusted emissions data
 - **Coverage**: 1750–2024 (updated annually)
 
-### API Access
+## 🔌 API Usage
 
-The application exposes its data via a static API. You can retrieve the current dataset manifest using curl:
+The application exposes its data via a static API, allowing direct access to the datasets used by the visualization.
 
-```bash
-curl -s https://visualdon-projet.pages.dev/data/manifest.json
-```
+### Main Endpoints
 
-For full documentation on available data endpoints and schemas, see [docs/API.md](docs/API.md).
+1. **Get the Dataset Manifest** (JSON)
+   Returns the current version and filenames for emissions and per-capita data.
+   ```bash
+   curl -s https://visualdon-projet.pages.dev/data/manifest.json
+   ```
+
+2. **Get Emissions Data** (CSV)
+   Use the filename obtained from the manifest to fetch the full dataset.
+   ```bash
+   # Example: Fetch the emissions CSV identified in the manifest
+   curl -s https://visualdon-projet.pages.dev/data/GCB2025v15_MtCO2_flat.csv | head -n 5
+   ```
+
+For full documentation on schemas and data structure, see [docs/API.md](docs/API.md).
 
 ### Updating Data
 
