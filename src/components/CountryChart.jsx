@@ -132,7 +132,7 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
       
       {/* Chart Container */}
       <div className="flex-1 bg-transparent rounded-lg overflow-hidden relative">
-        <div ref={containerRef} className="w-full h-full absolute inset-0">
+        <div ref={containerRef} className="w-full h-full absolute inset-0" style={{ contain: 'layout paint' }}>
            {dimensions.width > 0 && dimensions.height > 0 && emissionData.length > 0 && (
              <Suspense fallback={<LoadingPlaceholder />}>
                 {viewMode === 'bubbles' ? (

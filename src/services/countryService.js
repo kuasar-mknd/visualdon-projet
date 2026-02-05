@@ -61,6 +61,79 @@ const setCache = (cache) => {
   }
 };
 
+export const fetchCountriesDetails = async (codes, language) => {
+  if (!codes || !Array.isArray(codes) || codes.length === 0) return {};
+
+  // Filter valid codes and remove duplicates
+  const uniqueCodes = [...new Set(codes.filter(c => isValidCountryCode(c)))];
+  if (uniqueCodes.length === 0) return {};
+
+  const cache = getCache();
+  const now = Date.now();
+  const result = {};
+  const missingCodes = [];
+
+  // Check cache first
+  uniqueCodes.forEach(code => {
+    if (cache[code] && (now - cache[code].timestamp < CACHE_EXPIRY)) {
+      result[code] = getNameFromData(cache[code].data, language);
+    } else {
+      missingCodes.push(code);
+    }
+  });
+
+  if (missingCodes.length === 0) {
+    return result;
+  }
+
+  // Fetch missing codes in batch
+  // API limitation: RestCountries might have a URL length limit.
+  // With 10-20 codes it's fine. If hundreds, we'd need to chunk.
+  // Our use case is Top 10 chart, so it's safe.
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+  try {
+    const codesParam = missingCodes.map(c => encodeURIComponent(c)).join(',');
+    const response = await fetch(`https://restcountries.com/v3.1/alpha?codes=${codesParam}`, {
+      signal: controller.signal
+    });
+
+    if (!response.ok) throw new Error('Network response was not ok');
+
+    const data = await response.json();
+
+    if (!Array.isArray(data)) {
+        throw new Error('Invalid API response format');
+    }
+
+    // Process response and update cache
+    data.forEach(countryData => {
+        if (!countryData || !countryData.cca3) return;
+
+        const code = countryData.cca3;
+
+        // Only update if this was one of the requested codes (or relevant to us)
+        // We use cca3 as the key in our app.
+        cache[code] = {
+            data: countryData,
+            timestamp: now
+        };
+        result[code] = getNameFromData(countryData, language);
+    });
+
+    setCache(cache);
+
+  } catch (error) {
+    console.warn(`Failed to fetch batch data:`, error.message);
+    // Return what we have from cache (partial result)
+  } finally {
+    clearTimeout(timeoutId);
+  }
+
+  return result;
+};
+
 export const fetchCountryDetails = async (code, language) => {
   if (!code) return null;
   

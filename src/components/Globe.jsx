@@ -312,6 +312,7 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
     <div
       ref={containerRef}
       className="w-full h-full relative bg-slate-50 overflow-hidden cursor-grab active:cursor-grabbing focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500 outline-none"
+      style={{ contain: 'layout paint' }}
       tabIndex="0"
       aria-label={t('aria.globeDescription')}
       role="application"
