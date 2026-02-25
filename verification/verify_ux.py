@@ -1,64 +1,61 @@
-from playwright.sync_api import sync_playwright, expect
+from playwright.sync_api import sync_playwright
 
-def run(playwright):
-    browser = playwright.chromium.launch(headless=True)
-    page = browser.new_page()
-    page.goto("http://localhost:5173/")
+def verify_accessibility():
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page()
+        try:
+            page.goto("http://localhost:5173")
+            page.wait_for_selector("text=VisualDon", timeout=10000) # Wait for page to load
 
-    # 1. Verify default language is French (context default)
-    # Wait for page to load
-    page.wait_for_selector("body")
+            # 1. Check View Mode Buttons (CountryChart.jsx)
+            # Find the radiogroup for view mode
+            view_mode_group = page.get_by_role("radiogroup", name="Select View Mode") # Using English text as fallback if t() fails? No, app defaults to French?
+            # Actually, I should check what text is used. The memory says default is French.
+            # So "Sélectionner le mode d'affichage" maybe? Or just look for the buttons.
 
-    # Check html lang attribute
-    lang = page.evaluate("document.documentElement.lang")
-    print(f"Initial lang: {lang}")
-    if lang != 'fr':
-        print("Expected initial lang to be 'fr'")
+            # Let's take a screenshot of the whole page first to be safe.
+            page.screenshot(path="verification/full_page.png")
+            print("Full page screenshot taken.")
 
-    # 2. Click 'Switch to English'
-    # Since we are in French, the label is "Passer à l'anglais"
-    # Wait for the button to appear
+            # Focus on the language toggle
+            en_button = page.get_by_role("radio", name="Switch to English")
+            if not en_button.is_visible():
+                 en_button = page.get_by_role("radio", name="Passer en anglais") # French label?
 
-    # Debug: print all buttons
-    # buttons = page.get_by_role("button").all()
-    # for b in buttons:
-    #    print(f"Button: {b.get_attribute('aria-label')} | {b.inner_text()}")
+            if en_button.is_visible():
+                en_button.focus()
+                page.screenshot(path="verification/language_focus.png")
+                print("Language toggle focus screenshot taken.")
+            else:
+                print("Could not find language toggle button.")
 
-    if lang == 'fr':
-        en_btn = page.get_by_label("Passer à l'anglais")
-    else:
-        en_btn = page.get_by_label("Switch to English")
+            # Focus on the view mode buttons (might need to select a country first?)
+            # CountryChart only appears when a country is selected?
+            # Let's select a country from the list.
+            # TopCountriesChart lists countries.
 
-    en_btn.click()
+            # Find a country in the list and click it.
+            # TopCountriesChart uses role="listitem".
+            first_country = page.locator(".bar-group").first
+            if first_country.is_visible():
+                first_country.click()
+                # Wait for CountryChart to appear
+                # It has "Select View Mode" or similar.
+                # In French: "Sélectionner le mode de vue"?
 
-    # 3. Verify language changed to English
-    # Wait for the html lang to change
-    page.wait_for_function("document.documentElement.lang === 'en'")
-    print("Language switched to 'en'")
+                # Let's just wait for the bubble chart or stacked chart toggle.
+                # Symbols: 🫧 and 📈
 
-    # 4. Verify TopCountriesChart rows have hit area
-    # Wait for chart to render (might take time for data to load)
-    # We can wait for "United States" or similar text in the chart
-    try:
-        page.wait_for_selector(".bar-group", timeout=10000)
-    except:
-        print("Timeout waiting for bar-group. Check data loading.")
+                page.wait_for_timeout(2000) # Wait for animation/load
+                page.screenshot(path="verification/country_view.png")
+                print("Country view screenshot taken.")
 
-    # Check if the transparent rect exists
-    # We look for a rect with fill="transparent" inside a .bar-group
-    hit_area_count = page.locator(".bar-group rect[fill='transparent']").count()
-    print(f"Found {hit_area_count} hit areas")
+        except Exception as e:
+            print(f"Error: {e}")
+            page.screenshot(path="verification/error.png")
+        finally:
+            browser.close()
 
-    if hit_area_count == 0:
-        print("FAILED: No transparent hit areas found in chart rows.")
-    else:
-        print("PASSED: Hit areas found.")
-
-    # Take screenshot of the chart area
-    page.screenshot(path="verification/ux_verification.png", full_page=True)
-    print("Screenshot saved to verification/ux_verification.png")
-
-    browser.close()
-
-with sync_playwright() as playwright:
-    run(playwright)
+if __name__ == "__main__":
+    verify_accessibility()

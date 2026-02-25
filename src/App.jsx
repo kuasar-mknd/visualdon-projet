@@ -176,7 +176,7 @@ function AppContent() {
 
       <Header year={year} />
 
-      <div id="main-content" tabIndex="-1" className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-[calc(100vh-140px)] outline-none">
+      <div id="main-content" role="main" tabIndex="-1" className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-[calc(100vh-140px)] outline-none">
         {/* Left Column: Controls & Charts */}
         <div className="lg:col-span-4 space-y-4 flex flex-col h-full">
           
@@ -191,7 +191,7 @@ function AppContent() {
           />
 
           {/* Top Countries Chart */}
-          <div className="glass-panel-light p-4 rounded-2xl flex-1 min-h-0 relative overflow-hidden">
+          <div role="region" aria-label={t('chart.topCountries')} className="glass-panel-light p-4 rounded-2xl flex-1 min-h-0 relative overflow-hidden">
              <Suspense fallback={<LoadingPlaceholder />}>
                <TopCountriesChart
                   data={currentYearList}
