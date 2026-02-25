@@ -7,6 +7,7 @@ import { sanitizeString } from '../../utils/security';
 const CountryDetailsOverlay = ({ selectedCountry, selectedCountryName, displayCountry, onClose, countryData }) => {
   const { t } = useLanguage();
 
+  const overlayRef = useRef(null);
   const closeButtonRef = useRef(null);
   const previousFocusRef = useRef(null);
 
@@ -33,11 +34,38 @@ const CountryDetailsOverlay = ({ selectedCountry, selectedCountryName, displayCo
     return () => clearTimeout(timer);
   }, [selectedCountry]);
 
-  // Close overlay on Escape key press
+  // Close overlay on Escape key press and Focus Trap
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && selectedCountry) {
+      if (!selectedCountry || !overlayRef.current) return;
+
+      if (e.key === 'Escape') {
         onClose();
+        return;
+      }
+
+      if (e.key === 'Tab') {
+        // Find all focusable elements inside the overlay
+        const focusableElements = overlayRef.current.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+
+        if (focusableElements.length === 0) return;
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey) { // Shift + Tab
+          if (document.activeElement === firstElement) {
+            e.preventDefault();
+            lastElement.focus();
+          }
+        } else { // Tab
+          if (document.activeElement === lastElement) {
+            e.preventDefault();
+            firstElement.focus();
+          }
+        }
       }
     };
 
@@ -47,6 +75,7 @@ const CountryDetailsOverlay = ({ selectedCountry, selectedCountryName, displayCo
 
   return (
     <div 
+      ref={overlayRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby="overlay-title"

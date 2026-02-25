@@ -189,8 +189,8 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
           .duration(200)
           .style("opacity", 1)
           .select(".bar-rect")
-          .attr("stroke", "#1e293b")
-          .attr("stroke-width", 2);
+          .attr("stroke", "#3b82f6")
+          .attr("stroke-width", 3);
     };
 
     const handleInteractionEnd = function() {
