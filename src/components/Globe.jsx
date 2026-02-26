@@ -314,9 +314,13 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
       className="w-full h-full relative bg-slate-50 overflow-hidden cursor-grab active:cursor-grabbing focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500 outline-none"
       tabIndex="0"
       aria-label={t('aria.globeDescription')}
+      aria-describedby="globe-controls-desc"
       role="application"
       onKeyDown={handleKeyDown}
     >
+      <span id="globe-controls-desc" className="sr-only">
+        {t('aria.globeControls') || "Use arrow keys to rotate, + and - to zoom."}
+      </span>
        <svg
          ref={svgRef}
          width={dimensions.width}

@@ -110,7 +110,9 @@ const StackedAreaChart = ({
       .on('mouseover', handleInteractionStart)
       .on('focus', handleInteractionStart)
       .on('mouseout', handleInteractionEnd)
-      .on('blur', handleInteractionEnd);
+      .on('blur', handleInteractionEnd)
+      .append("title") // Native tooltip fallback
+      .text(d => t(`sectors.${d.key}`) || d.key);
 
     // Axes
     const xAxis = axisBottom(xScale).tickFormat(format("d")).ticks(10);

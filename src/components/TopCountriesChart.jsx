@@ -225,7 +225,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
         .on("click", (event, d) => {
           if (onCountrySelect) onCountrySelect(d["ISO 3166-1 alpha-3"]);
         })
-        .on("keydown", (event, d) => {
+        .on("keydown", function(event, d) {
           if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
             if (onCountrySelect) onCountrySelect(d["ISO 3166-1 alpha-3"]);

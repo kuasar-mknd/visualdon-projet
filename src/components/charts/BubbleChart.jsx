@@ -196,6 +196,10 @@ const BubbleChart = ({
         .attr("tabindex", "0")
         .attr("role", "button")
         .attr("aria-label", d => `${t(`sectors.${d.sector}`)}: ${d.value.toFixed(1)} MtCO₂`)
+        .append("title") // Native tooltip fallback
+        .text(d => `${t(`sectors.${d.sector}`)}: ${d.value.toFixed(1)} MtCO₂`);
+
+    bubbles.selectAll("circle")
         .on("mouseover", handleInteractionStart)
         .on("focus", handleInteractionStart)
         .on("mouseout", handleInteractionEnd)

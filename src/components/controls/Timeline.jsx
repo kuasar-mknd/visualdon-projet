@@ -50,7 +50,7 @@ const Timeline = ({ year, setYear, yearRange }) => {
         />
         <div className="flex justify-between items-center text-xs font-mono text-slate-600 mt-2">
           <span>{yearRange.min}</span>
-          <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100 transition-all duration-200 opacity-60 grayscale group-hover:opacity-100 group-hover:grayscale-0 group-hover:scale-110 group-focus-within:opacity-100 group-focus-within:grayscale-0 group-focus-within:scale-110">
+          <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100 transition-all duration-200 opacity-60 grayscale group-hover:opacity-100 group-hover:grayscale-0 group-hover:scale-110 group-focus-within:opacity-100 group-focus-within:grayscale-0 group-focus-within:scale-110" aria-hidden="true">
             {localYear || yearRange.min}
           </span>
           <span>{yearRange.max}</span>
