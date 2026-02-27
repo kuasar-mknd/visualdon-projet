@@ -17,3 +17,8 @@
 **Vulnerability:** Downloading datasets from external sources (even trusted ones like Zenodo) without integrity verification leaves the application vulnerable to Man-in-the-Middle (MitM) attacks or compromised servers serving malicious files.
 **Learning:** Supply chain security isn't just about NPM packages; it applies to data pipelines too. A compromised data file could lead to persistent XSS (if content is rendered) or skewed visualization logic.
 **Prevention:** Always verify cryptographic checksums (MD5/SHA) of downloaded assets against a trusted metadata source before processing or storing them.
+
+## 2025-02-27 - Information Leakage via Console Logs & Missing Error Boundary
+**Vulnerability:** Use of raw `console.error` and `console.warn` in the React frontend leaks application state, stack traces, and potentially sensitive details to end-users and browser extensions. Unhandled exceptions crash the React tree, potentially displaying white screens or exposing raw error boundaries.
+**Learning:** Console methods should be intercepted or replaced by a centralized logger (`logger.js`) that sanitizes messages and suppresses stack traces in production environments (`import.meta.env.DEV`). React needs a root `ErrorBoundary` to gracefully handle runtime errors without exposing implementation details.
+**Prevention:** Implement and enforce usage of a centralized logger. Ensure `ErrorBoundary` is wrapped around the root component in `main.jsx` and uses the secure logger.
