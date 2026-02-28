@@ -508,10 +508,8 @@ async function updateData() {
     
   } catch (error) {
     console.error('\n❌ Error:', error.message);
-    // Don't log stack trace in production/CI logs if unnecessary, or keep it for debugging but ensure no sensitive data is there.
-    // Here we are in a dev/maintenance script, so stack is useful, but we ensure the error message is what we rely on.
-    // To comply with strict "fail safe" (errors shouldn't leak system details), we'll reduce verbosity unless needed.
-    // console.error(error.stack);
+    // Don't log stack trace in production/CI logs if unnecessary.
+    // To comply with strict "fail safe" (errors shouldn't leak system details), we only log the message.
     process.exit(1);
   }
 }
