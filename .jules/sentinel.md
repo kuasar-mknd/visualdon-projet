@@ -17,3 +17,8 @@
 **Vulnerability:** Downloading datasets from external sources (even trusted ones like Zenodo) without integrity verification leaves the application vulnerable to Man-in-the-Middle (MitM) attacks or compromised servers serving malicious files.
 **Learning:** Supply chain security isn't just about NPM packages; it applies to data pipelines too. A compromised data file could lead to persistent XSS (if content is rendered) or skewed visualization logic.
 **Prevention:** Always verify cryptographic checksums (MD5/SHA) of downloaded assets against a trusted metadata source before processing or storing them.
+
+## 2025-05-23 - Console Information Leakage
+**Vulnerability:** Use of raw `console.log`, `console.warn`, and `console.error` methods in production code can lead to unintentional information disclosure (e.g., API keys, system paths, or detailed error stacks).
+**Learning:** Even innocuous log messages can become attack vectors if an attacker gains access to the client console or server logs.
+**Prevention:** Implement a centralized logging utility that sanitizes inputs and suppresses detailed stack traces in production environments. Replace all raw `console` calls with the centralized logger.
