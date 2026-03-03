@@ -42,7 +42,7 @@ const Timeline = ({ year, setYear, yearRange }) => {
           value={localYear || yearRange.min}
           disabled={!year}
           onChange={handleYearChange}
-          aria-label={t('aria.selectYear')}
+          aria-label={`${t('aria.selectYear')} (←/→)`}
           aria-valuetext={`${t('aria.yearLabel')} ${localYear || yearRange.min}`}
           aria-keyshortcuts="ArrowLeft ArrowRight"
           title={`${t('aria.selectYear')} (←/→)`}
