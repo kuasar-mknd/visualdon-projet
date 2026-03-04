@@ -17,3 +17,8 @@
 **Vulnerability:** Downloading datasets from external sources (even trusted ones like Zenodo) without integrity verification leaves the application vulnerable to Man-in-the-Middle (MitM) attacks or compromised servers serving malicious files.
 **Learning:** Supply chain security isn't just about NPM packages; it applies to data pipelines too. A compromised data file could lead to persistent XSS (if content is rendered) or skewed visualization logic.
 **Prevention:** Always verify cryptographic checksums (MD5/SHA) of downloaded assets against a trusted metadata source before processing or storing them.
+
+## 2025-05-23 - Stack Trace Leaks & Sanitized Logging
+**Vulnerability:** Raw `console.error` and `console.warn` calls across the codebase exposed detailed stack traces and potentially sensitive data structures in production environments.
+**Learning:** Security logs should be sanitized and stack traces suppressed when not in development mode to prevent information leakage that could aid an attacker.
+**Prevention:** Use a centralized logger utility (`src/utils/logger.js`) that checks `import.meta.env.DEV` to suppress stack traces and sanitize log arguments (e.g., removing control characters and truncating long strings).
