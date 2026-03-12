@@ -1,4 +1,5 @@
 import { isValidCountryCode, isValidLanguage } from '../utils/security.js';
+import { logger } from '../utils/logger.js';
 
 const CACHE_KEY = 'visualdon_country_cache';
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
@@ -26,7 +27,7 @@ const getCache = () => {
     // Security Enhancement: Validate that parsed cache is actually an object
     // to prevent crashes if localStorage contains "null" or other non-object JSON values
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-      console.warn("Invalid cache structure detected, resetting cache");
+      logger.warn("Invalid cache structure detected, resetting cache");
       memoryCache = {};
       return memoryCache;
     }
@@ -34,7 +35,7 @@ const getCache = () => {
     memoryCache = parsed;
     return memoryCache;
   } catch (e) {
-    console.error("Error reading cache:", e.message);
+    logger.error("Error reading cache:", e.message);
     memoryCache = {};
     return memoryCache;
   }
@@ -57,7 +58,7 @@ const setCache = (cache) => {
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
   } catch (e) {
-    console.error("Error writing cache:", e.message);
+    logger.error("Error writing cache:", e.message);
   }
 };
 
@@ -68,7 +69,7 @@ export const fetchCountryDetails = async (code, language) => {
   // Expected: ISO 3166-1 alpha-2 or alpha-3 code (2-3 letters/digits)
   // This prevents URL injection and cache pollution with garbage keys
   if (!isValidCountryCode(code)) {
-    console.warn(`Security: Invalid country code format rejected: ${code}`);
+    logger.warn(`Security: Invalid country code format rejected: ${code}`);
     return null;
   }
 
@@ -154,7 +155,7 @@ export const fetchCountryDetails = async (code, language) => {
   } catch (error) {
     // Sanitize code for logging to prevent log injection
     const safeLogCode = encodeURIComponent(code);
-    console.warn(`Failed to fetch data for ${safeLogCode}:`, error.message);
+    logger.warn(`Failed to fetch data for ${safeLogCode}:`, error.message);
     return null;
   }
 };
