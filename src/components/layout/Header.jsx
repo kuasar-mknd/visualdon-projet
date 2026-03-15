@@ -5,7 +5,7 @@ import HeaderContent from './HeaderContent';
 
 const Header = ({ year }) => {
   return (
-    <header className="mb-4 flex flex-col md:flex-row justify-between items-center gap-4 glass-panel-light p-4 rounded-2xl">
+    <header role="banner" className="mb-4 flex flex-col md:flex-row justify-between items-center gap-4 glass-panel-light p-4 rounded-2xl">
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 w-full">
          <div className="flex-1 flex flex-col md:flex-row justify-between items-center gap-4 w-full">
             <HeaderContent />

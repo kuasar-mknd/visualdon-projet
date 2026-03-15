@@ -85,7 +85,7 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
   }
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div role="region" aria-label={t('chart.title')} className="w-full h-full flex flex-col">
       {/* View Mode Toggle */}
       <div className="flex items-center gap-3 mb-4 flex-wrap">
         <div role="group" aria-label={t('chart.selectViewMode')} className="flex gap-2">

@@ -47,13 +47,17 @@ export const translations = {
       skipToContent: "Skip to main content",
       globeDescription: "Interactive 3D globe showing CO2 emissions by country",
       globeControls: "Keyboard shortcuts: Use Arrow keys to rotate the globe. Use Plus and Minus keys to zoom in and out.",
-      openInNewTab: "(opens in a new tab)"
+      openInNewTab: "(opens in a new tab)",
+      controlsRegion: "Controls and Top Countries",
+      chartContainer: "Chart Container",
+      globeRegion: "Interactive Globe"
     },
     globe: {
       drag: "Drag to rotate",
       zoom: "Scroll to zoom"
     },
     chart: {
+      title: "Country Details Chart",
       selectCountryPrompt: "Select a country to view details",
       selectViewMode: "Select view mode",
       bubbles: "Bubbles",
@@ -105,13 +109,17 @@ export const translations = {
       skipToContent: "Aller au contenu principal",
       globeDescription: "Globe 3D interactif montrant les émissions de CO2 par pays",
       globeControls: "Raccourcis clavier : Utilisez les flèches pour faire tourner le globe. Utilisez les touches Plus et Moins pour zoomer.",
-      openInNewTab: "(ouvre un nouvel onglet)"
+      openInNewTab: "(ouvre un nouvel onglet)",
+      controlsRegion: "Contrôles et Pays Principaux",
+      chartContainer: "Conteneur de Graphique",
+      globeRegion: "Globe Interactif"
     },
     globe: {
       drag: "Glisser pour tourner",
       zoom: "Défiler pour zoomer"
     },
     chart: {
+      title: "Graphique des Détails du Pays",
       selectCountryPrompt: "Sélectionnez un pays pour voir les détails",
       selectViewMode: "Sélectionner le mode d'affichage",
       bubbles: "Bulles",
