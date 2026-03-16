@@ -17,3 +17,8 @@
 **Vulnerability:** Downloading datasets from external sources (even trusted ones like Zenodo) without integrity verification leaves the application vulnerable to Man-in-the-Middle (MitM) attacks or compromised servers serving malicious files.
 **Learning:** Supply chain security isn't just about NPM packages; it applies to data pipelines too. A compromised data file could lead to persistent XSS (if content is rendered) or skewed visualization logic.
 **Prevention:** Always verify cryptographic checksums (MD5/SHA) of downloaded assets against a trusted metadata source before processing or storing them.
+
+## 2025-12-22 - Frontend Log Sanitization & Stack Trace Leaks
+**Vulnerability:** Direct usage of `console.warn` and `console.error` in the frontend can inadvertently leak sensitive application state, PII, or full stack traces which may expose implementation details to users or attackers observing the developer console.
+**Learning:** Even client-side code should treat logging with care. Unsanitized strings may lead to log injection, and unserializable objects or Error instances might dump excessive contextual data.
+**Prevention:** Always route frontend logs through a centralized utility (e.g., `src/utils/logger.js`). This utility should sanitize strings (removing control characters), truncate excessively long logs, handle unserializable objects defensively, and extract only the `.message` from `Error` instances to suppress full stack traces. Also, wrap application roots in React `ErrorBoundary` components to catch lifecycle errors and log them securely.
