@@ -77,7 +77,7 @@ const StackedAreaChart = ({
     const handleInteractionStart = function(event, d) {
         select(this)
             .attr('opacity', 1)
-            .attr("stroke", "#3b82f6") // Blue focus ring
+            .attr("stroke", "#1e293b") // Slate-800 focus ring
             .attr("stroke-width", 2);
 
         // Highlight in legend
@@ -212,7 +212,7 @@ const StackedAreaChart = ({
         .attr("height", 24)
         .attr("rx", 4)
         .attr("fill", "#f1f5f9") // Slate-100
-        .attr("stroke", "#3b82f6")
+        .attr("stroke", "#1e293b")
         .attr("stroke-width", 1)
         .attr("opacity", 0);
 

@@ -212,7 +212,7 @@ const TopCountriesChart = ({ data, year, category, isPlaying, onCountrySelect, d
         .style("cursor", "pointer")
         .style("outline", "none")
         .attr("tabindex", "0")
-        .attr("role", "listitem")
+        .attr("role", "button")
         .attr("aria-label", d => {
             const name = translatedNames[d["ISO 3166-1 alpha-3"]] || getCountryNameSync(d["ISO 3166-1 alpha-3"], language) || d.Country;
             const val = (d[category] || 0).toFixed(1);

@@ -139,7 +139,7 @@ const BubbleChart = ({
             .transition()
             .duration(200)
             .attr("opacity", 1)
-            .attr("stroke", "#3b82f6") // Blue-500 for visible focus/active state
+            .attr("stroke", "#1e293b") // Slate-800 for visible focus/active state
             .attr("stroke-width", 3);
 
         // Remove existing tooltips to prevent duplicates
@@ -248,7 +248,7 @@ const BubbleChart = ({
             .attr("height", 24)
             .attr("rx", 4)
             .attr("fill", "#f1f5f9") // Slate-100
-            .attr("stroke", "#3b82f6") // Blue-500
+            .attr("stroke", "#1e293b") // Slate-800
             .attr("stroke-width", 1)
             .attr("opacity", 0); // Hidden by default
 
