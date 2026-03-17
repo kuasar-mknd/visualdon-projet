@@ -17,3 +17,8 @@
 **Vulnerability:** Downloading datasets from external sources (even trusted ones like Zenodo) without integrity verification leaves the application vulnerable to Man-in-the-Middle (MitM) attacks or compromised servers serving malicious files.
 **Learning:** Supply chain security isn't just about NPM packages; it applies to data pipelines too. A compromised data file could lead to persistent XSS (if content is rendered) or skewed visualization logic.
 **Prevention:** Always verify cryptographic checksums (MD5/SHA) of downloaded assets against a trusted metadata source before processing or storing them.
+
+## 2025-12-22 - Global Error Boundary & Secure Logger
+**Vulnerability:** Default error handling in React, along with unverified `console` outputs, leaked sensitive information including trace stacks. Unsanitized strings in logs presented a risk for log injection.
+**Learning:** Security fixes involving logs must avoid crashing production tools. A dedicated logging utility suppresses full stack traces, limits sizes, and safely formats parameters. A global React Error Boundary uses this tool for component lifecycle failures to fail safely without disclosing unhandled exceptions to users.
+**Prevention:** Employ `logger.info`, `logger.warn`, and `logger.error` globally instead of the default console. Wrap the root React app node in `<ErrorBoundary>` to sanitize client-side panics.
