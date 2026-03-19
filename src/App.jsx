@@ -169,7 +169,7 @@ function AppContent() {
     <div className="min-h-screen text-slate-800 p-2 md:p-4 font-sans selection:bg-blue-100 selection:text-blue-900 overflow-hidden">
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only absolute top-4 left-4 z-[100] px-4 py-2 bg-blue-600 text-white font-bold rounded-lg shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-300 transition-transform"
+        className="sr-only focus:not-sr-only absolute top-4 left-4 z-[100] px-4 py-2 bg-blue-600 text-white font-bold rounded-lg shadow-lg outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 transition-transform"
       >
         {t('aria.skipToContent')}
       </a>
