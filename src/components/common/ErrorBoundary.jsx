@@ -13,11 +13,9 @@ class ErrorBoundary extends React.Component {
     return { hasError: true };
   }
 
-  componentDidCatch(error, errorInfo) {
+  componentDidCatch(error) {
     // Log the error using our secure logger to prevent stack trace leaks
     logger.error('React Lifecycle Error:', error);
-    // Optionally log errorInfo if you want component stack traces in a sanitized way
-    // logger.error('Error Info:', errorInfo);
   }
 
   render() {
