@@ -17,3 +17,10 @@
 **Vulnerability:** Downloading datasets from external sources (even trusted ones like Zenodo) without integrity verification leaves the application vulnerable to Man-in-the-Middle (MitM) attacks or compromised servers serving malicious files.
 **Learning:** Supply chain security isn't just about NPM packages; it applies to data pipelines too. A compromised data file could lead to persistent XSS (if content is rendered) or skewed visualization logic.
 **Prevention:** Always verify cryptographic checksums (MD5/SHA) of downloaded assets against a trusted metadata source before processing or storing them.
+
+## 2025-12-22 - Stack Trace Leak & Insecure Logging (React & Services)
+**Vulnerability:** Raw `console.warn` and `console.error` calls were used in React components (`useData.js`) and services (`countryService.js`). Unhandled React component errors or service layer exceptions could leak sensitive internal states and full stack traces to the browser console.
+**Learning:** Default error objects can be massive, exposing underlying application structure or even user/data inputs if directly stringified. Any unhandled lifecycle error in React could crash the app without a graceful fallback, exacerbating the exposure.
+**Prevention:**
+1.  Implemented a centralized secure logger (`src/utils/logger.js`) that sanitizes inputs, safely truncates messages, strips control characters via regex, and extracts only the `.message` property from `Error` objects.
+2.  Created a generic `ErrorBoundary` component (`src/components/common/ErrorBoundary.jsx`) wrapped around `<App />` in `src/main.jsx` to catch any unhandled frontend lifecycle errors securely.
