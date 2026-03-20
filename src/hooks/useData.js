@@ -1,3 +1,4 @@
+import { logger } from "../utils/logger.js";
 import { useState, useEffect } from 'react';
 import { text, json, csvParseRows } from 'd3';
 import { validateManifest, validateGeoJson } from '../utils/security';
@@ -154,7 +155,7 @@ export function useData() {
         });
       } catch (err) {
         // Log only the message to avoid leaking potential data structure details in the error object
-        console.error("Error loading data:", err.message);
+        logger.error("Error loading data:", err.message);
         setData(prev => ({ ...prev, loading: false }));
       }
     }
