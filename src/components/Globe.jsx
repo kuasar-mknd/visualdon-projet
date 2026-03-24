@@ -313,7 +313,9 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
       ref={containerRef}
       className="w-full h-full relative bg-slate-50 overflow-hidden cursor-grab active:cursor-grabbing focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500 outline-none"
       tabIndex="0"
-      aria-label={t('aria.globeDescription')}
+      aria-label={`${t('aria.globeDescription')} - ${displayCategory || category}`}
+      aria-describedby="globe-controls-description"
+      aria-keyshortcuts="ArrowLeft ArrowRight ArrowUp ArrowDown + - = _"
       role="application"
       onKeyDown={handleKeyDown}
     >
@@ -323,7 +325,7 @@ const Globe = ({ data, geoJson, category, maxVal, onCountrySelect, displayCatego
          height={dimensions.height}
          style={{background: 'radial-gradient(circle at 50% 50%, #f8fafc 0%, #e2e8f0 100%)'}}
          role="img"
-         aria-label={t('aria.globeDescription')}
+         aria-label={`${t('aria.globeDescription')} - ${displayCategory || category}`}
        >
           <title>{t('aria.globeDescription')}</title>
           <defs>
