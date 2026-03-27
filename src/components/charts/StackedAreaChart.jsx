@@ -229,6 +229,9 @@ const StackedAreaChart = ({
         .attr("fill", "#475569")
         .style("font-size", "13px")
         .style("font-weight", "500");
+
+      legendRow.append("title")
+        .text(t(`sectors.${sector}`) || sector);
     });
 
   }, [years, emissionData, sectors, width, height, padding, colorMapping, t]);

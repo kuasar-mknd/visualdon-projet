@@ -265,6 +265,9 @@ const BubbleChart = ({
             .attr("fill", "#475569")
             .style("font-size", "13px")
             .style("font-weight", "500");
+
+        legendRow.append("title")
+            .text(t(`sectors.${sector}`) || sector);
     });
 
     // Simulation
