@@ -17,6 +17,7 @@ const HeaderContent = () => {
           <div
             role="group"
             aria-label={t('aria.toggleLanguage')}
+            title={t('aria.toggleLanguage')}
             className="flex p-1 bg-slate-100/50 hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors"
           >
               <button

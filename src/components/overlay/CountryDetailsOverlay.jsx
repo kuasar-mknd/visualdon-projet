@@ -67,6 +67,7 @@ const CountryDetailsOverlay = ({ selectedCountry, selectedCountryName, displayCo
                 onClick={onClose}
                 className="flex items-center gap-2 px-4 py-2 bg-white/50 hover:bg-white text-slate-600 hover:text-slate-800 border border-slate-200/50 rounded-xl transition-all font-semibold shrink-0 whitespace-nowrap text-sm shadow-sm hover:shadow focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 outline-none cursor-pointer"
                 aria-label={t('aria.closeOverlay')}
+                title={t('aria.closeOverlay')}
             >
                 <span aria-hidden="true">✕</span>
                 <span>{t('close')}</span>

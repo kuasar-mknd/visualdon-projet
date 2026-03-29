@@ -88,7 +88,7 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
     <div className="w-full h-full flex flex-col">
       {/* View Mode Toggle */}
       <div className="flex items-center gap-3 mb-4 flex-wrap">
-        <div role="group" aria-label={t('chart.selectViewMode')} className="flex gap-2">
+        <div role="group" aria-label={t('chart.selectViewMode')} title={t('chart.selectViewMode')} className="flex gap-2">
           <button
             onClick={() => setViewMode('bubbles')}
             aria-pressed={viewMode === 'bubbles'}
@@ -114,12 +114,12 @@ const CountryChart = ({ countryCode, data: emissionData }) => {
         </div>
 
         {viewMode === 'bubbles' && (
-          <label className="flex items-center gap-3 px-4 py-2 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500 shadow-sm">
+          <label className="flex items-center gap-3 px-4 py-2 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors shadow-sm">
             <input 
               type="checkbox" 
               checked={split} 
               onChange={(e) => setSplit(e.target.checked)}
-              className="w-4 h-4 accent-blue-600 cursor-pointer outline-none"
+              className="w-4 h-4 accent-blue-600 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
             />
             <span className="text-slate-700 font-medium">{t('chart.splitBySector')}</span>
           </label>
