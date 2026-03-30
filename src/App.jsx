@@ -3,6 +3,7 @@ import { max } from 'd3';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import LoadingPlaceholder from './components/common/LoadingPlaceholder';
+import ErrorBoundary from './components/common/ErrorBoundary';
 import Controls from './components/controls/Controls';
 import { useData } from './hooks/useData';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
@@ -238,9 +239,11 @@ function AppContent() {
 
 function App() {
   return (
-    <LanguageProvider>
-      <AppContent />
-    </LanguageProvider>
+    <ErrorBoundary>
+      <LanguageProvider>
+        <AppContent />
+      </LanguageProvider>
+    </ErrorBoundary>
   );
 }
 
