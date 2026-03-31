@@ -23,7 +23,7 @@ const HeaderContent = () => {
                   onClick={() => language !== 'en' && toggleLanguage()}
                   aria-pressed={language === 'en'}
                   aria-label={t('aria.switchToEnglish')}
-                  title="English"
+                  title={t('aria.switchToEnglish')}
                   className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 outline-none cursor-pointer ${
                     language === 'en'
                       ? 'bg-white text-blue-600 shadow-sm ring-1 ring-black/5'
@@ -36,7 +36,7 @@ const HeaderContent = () => {
                   onClick={() => language !== 'fr' && toggleLanguage()}
                   aria-pressed={language === 'fr'}
                   aria-label={t('aria.switchToFrench')}
-                  title="Français"
+                  title={t('aria.switchToFrench')}
                   className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 outline-none cursor-pointer ${
                     language === 'fr'
                       ? 'bg-white text-blue-600 shadow-sm ring-1 ring-black/5'
